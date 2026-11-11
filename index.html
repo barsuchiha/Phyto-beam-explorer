@@ -6,19 +6,19 @@
 <meta name="description" content="Как высота, угол и яркость лампы меняют свет на растении: PPFD, суточная доза DLI и цветовая оценка для 10 комнатных растений.">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/charts/; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Свет для растений — интерактивный калькулятор</title>
+<title>Свет для растений — модули и драйверы</title>
 <style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit;max-width:1072px;margin:0 auto}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
 
 </head>
 <body>
-<iframe id="codex-visualization" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Свет для растений — интерактивный калькулятор" data-srcdoc="&lt;!doctype html&gt;
+<iframe id="codex-visualization" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Свет для растений — модули и драйверы" data-srcdoc="&lt;!doctype html&gt;
 &lt;html lang=&quot;ru&quot; data-visualize-standalone&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
 &lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
 &lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/charts/; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;title&gt;Свет для растений — интерактивный калькулятор&lt;/title&gt;
+&lt;title&gt;Свет для растений — модули и драйверы&lt;/title&gt;
 &lt;style&gt;:root {
   color-scheme: light dark;
   background-color: var(
@@ -1848,6 +1848,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;style&gt;
     #phyto-beam-explorer { color:var(--foreground); display:flex; flex-direction:column; gap:calc(var(--font-size-base) * 1); --pbe-blue:light-dark(#2563eb,#60a5fa); --pbe-yellow:light-dark(#eab308,#facc15); --pbe-green:light-dark(#16a34a,#4ade80); --pbe-red:light-dark(#ef4444,#f87171); --pbe-burgundy:light-dark(#781c3b,#a52b50); }
     #phyto-beam-explorer .beam-field { display:flex; flex-direction:column; gap:calc(var(--font-size-base) * .35); min-width:0; }
+    #phyto-beam-explorer [hidden] { display:none !important; }
     #phyto-beam-explorer .beam-label { display:flex; justify-content:space-between; flex-wrap:wrap; gap:calc(var(--font-size-base) * .5); }
     #phyto-beam-explorer .beam-columns { display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--font-size-base) * 1.5); }
     #phyto-beam-explorer .beam-svg { display:block; width:100%; height:300px; overflow:hidden; }
@@ -1867,7 +1868,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;/style&gt;
   &lt;div&gt;
     &lt;h2&gt;Источник, пучок и две полезные зоны&lt;/h2&gt;
-    &lt;div class=&quot;text-small&quot;&gt;PPFD и суточная доза · 10 растений · сценарий без окна&lt;/div&gt;
+    &lt;div class=&quot;text-small&quot;&gt;Модули Samsung · драйверы и диммирование · 10 растений&lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&quot;viz-controls&quot;&gt;
     &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-plant&quot;&gt;Растение
@@ -1895,6 +1896,12 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;div class=&quot;viz-controls&quot;&gt;
     &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-source&quot;&gt;Источник
       &lt;select class=&quot;form-select&quot; id=&quot;pbe-source&quot;&gt;
+        &lt;optgroup label=&quot;PPF платы + диаграмма диода Samsung&quot;&gt;
+          &lt;option value=&quot;square50&quot; selected&gt;Square 50 · LM301B · 4000 K&lt;/option&gt;
+          &lt;option value=&quot;compact21&quot;&gt;COMPACT 21 · LM301B · 4000 K&lt;/option&gt;
+          &lt;option value=&quot;linear98&quot;&gt;Линейка 98 · LM301B · 3500 K&lt;/option&gt;
+        &lt;/optgroup&gt;
+        &lt;optgroup label=&quot;Условные сценарии · PPF вручную&quot;&gt;
         &lt;option value=&quot;mini&quot;&gt;Quantum Board Mini · 120 × 120 мм&lt;/option&gt;
         &lt;option value=&quot;qb30&quot;&gt;Quantum Board 30 Вт · 390 × 120 мм&lt;/option&gt;
         &lt;option value=&quot;qb60&quot;&gt;Quantum Board 60 Вт · 390 × 180 мм&lt;/option&gt;
@@ -1906,18 +1913,33 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;option value=&quot;petal2&quot;&gt;«Лепесток ×2» · условная компоновка&lt;/option&gt;
         &lt;option value=&quot;petal3&quot;&gt;«Лепесток ×3» · условная компоновка&lt;/option&gt;
         &lt;option value=&quot;petal4&quot;&gt;«Лепесток ×4» · условная компоновка&lt;/option&gt;
-        &lt;option value=&quot;b3&quot; selected&gt;Б3 · два модуля, без расчёта купола&lt;/option&gt;
+        &lt;option value=&quot;b3&quot;&gt;Б3 · два модуля, без расчёта купола&lt;/option&gt;
+        &lt;/optgroup&gt;
       &lt;/select&gt;
     &lt;/label&gt;
     &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-ppf&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;PPF всех модулей при 100%&lt;/span&gt;&lt;output id=&quot;pbe-ppf-value&quot; class=&quot;tabular-nums&quot;&gt;50 мкмоль/с&lt;/output&gt;&lt;/span&gt;
       &lt;input class=&quot;form-range&quot; id=&quot;pbe-ppf&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;400&quot; step=&quot;5&quot; value=&quot;50&quot;&gt;
     &lt;/label&gt;
   &lt;/div&gt;
+  &lt;div id=&quot;pbe-hardware&quot; class=&quot;viz-controls&quot;&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-count&quot;&gt;Количество плат
+      &lt;select id=&quot;pbe-count&quot; class=&quot;form-select&quot;&gt;&lt;option value=&quot;1&quot;&gt;1 плата&lt;/option&gt;&lt;option value=&quot;2&quot; selected&gt;2 платы&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;4 платы&lt;/option&gt;&lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-driver&quot;&gt;Питание и управление
+      &lt;select id=&quot;pbe-driver&quot; class=&quot;form-select&quot;&gt;&lt;option value=&quot;lcm25&quot;&gt;Mean Well LCM-25 · общий DIM&lt;/option&gt;&lt;option value=&quot;lcm40&quot;&gt;Mean Well LCM-40 · общий DIM&lt;/option&gt;&lt;option value=&quot;ldd&quot; selected&gt;24 В + LDD-H · наш контроллер&lt;/option&gt;&lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-current&quot;&gt;Ток при 100% / модель драйвера
+      &lt;select id=&quot;pbe-current&quot; class=&quot;form-select&quot;&gt;&lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-dim2&quot; id=&quot;pbe-channel2&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-dim2-label&quot;&gt;Вторая группа · PWM&lt;/span&gt;&lt;output id=&quot;pbe-dim2-value&quot; class=&quot;tabular-nums&quot;&gt;70%&lt;/output&gt;&lt;/span&gt;
+      &lt;input id=&quot;pbe-dim2&quot; class=&quot;form-range&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;70&quot;&gt;
+    &lt;/label&gt;
+  &lt;/div&gt;
   &lt;div class=&quot;viz-controls&quot;&gt;
     &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-height&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Высота над плоскостью&lt;/span&gt;&lt;output id=&quot;pbe-height-value&quot; class=&quot;tabular-nums&quot;&gt;40 см&lt;/output&gt;&lt;/span&gt;
       &lt;input class=&quot;form-range&quot; id=&quot;pbe-height&quot; type=&quot;range&quot; min=&quot;20&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;40&quot;&gt;
     &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-angle&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Условный полный угол пучка&lt;/span&gt;&lt;output id=&quot;pbe-angle-value&quot; class=&quot;tabular-nums&quot;&gt;60°&lt;/output&gt;&lt;/span&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-angle&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-angle-label&quot;&gt;Полный угол пучка&lt;/span&gt;&lt;output id=&quot;pbe-angle-value&quot; class=&quot;tabular-nums&quot;&gt;60°&lt;/output&gt;&lt;/span&gt;
       &lt;input class=&quot;form-range&quot; id=&quot;pbe-angle&quot; type=&quot;range&quot; min=&quot;30&quot; max=&quot;120&quot; step=&quot;5&quot; value=&quot;60&quot;&gt;
     &lt;/label&gt;
   &lt;/div&gt;
@@ -1925,10 +1947,12 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-tilt&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Наклон вправо, к столу&lt;/span&gt;&lt;output id=&quot;pbe-tilt-value&quot; class=&quot;tabular-nums&quot;&gt;0°&lt;/output&gt;&lt;/span&gt;
       &lt;input class=&quot;form-range&quot; id=&quot;pbe-tilt&quot; type=&quot;range&quot; min=&quot;-20&quot; max=&quot;20&quot; step=&quot;5&quot; value=&quot;0&quot;&gt;
     &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-dim&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Яркость источника&lt;/span&gt;&lt;output id=&quot;pbe-dim-value&quot; class=&quot;tabular-nums&quot;&gt;70%&lt;/output&gt;&lt;/span&gt;
+    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-dim&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-dim-label&quot;&gt;Яркость источника&lt;/span&gt;&lt;output id=&quot;pbe-dim-value&quot; class=&quot;tabular-nums&quot;&gt;70%&lt;/output&gt;&lt;/span&gt;
       &lt;input class=&quot;form-range&quot; id=&quot;pbe-dim&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;70&quot;&gt;
     &lt;/label&gt;
   &lt;/div&gt;
+  &lt;div id=&quot;pbe-validation&quot; class=&quot;text-small text-destructive&quot; role=&quot;alert&quot; hidden&gt;&lt;/div&gt;
+  &lt;div id=&quot;pbe-operating&quot; class=&quot;text-small&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
   &lt;div class=&quot;viz-grid&quot; aria-live=&quot;polite&quot;&gt;
     &lt;div class=&quot;card viz-stat&quot;&gt;
       &lt;div&gt;Средний PPFD в зоне кроны&lt;/div&gt;
@@ -1950,6 +1974,20 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;div class=&quot;text-small&quot; id=&quot;pbe-target&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
   &lt;div class=&quot;text-small&quot; id=&quot;pbe-flow&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
   &lt;div class=&quot;text-small&quot; id=&quot;pbe-capability&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+  &lt;details id=&quot;pbe-data-details&quot;&gt;
+    &lt;summary class=&quot;cursor-interaction&quot;&gt;Плата, драйверы и наш контроллер&lt;/summary&gt;
+    &lt;div class=&quot;beam-field&quot;&gt;
+      &lt;div class=&quot;text-small&quot; id=&quot;pbe-module-description&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;text-small&quot; id=&quot;pbe-evidence&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;text-small&quot; id=&quot;pbe-circuit&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;text-small&quot; id=&quot;pbe-controller&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;text-small&quot;&gt;Сравнение при выбранном токе и 100% яркости · типичные напряжения&lt;/div&gt;
+      &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Драйвер&lt;/th&gt;&lt;th&gt;Габариты, мм&lt;/th&gt;&lt;th&gt;Предварительная проверка&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-driver-comparison&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
+      &lt;div class=&quot;text-small&quot;&gt;PPF одной платы · данные производителя&lt;/div&gt;
+      &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Ток, мА&lt;/th&gt;&lt;th&gt;Напряжение, В&lt;/th&gt;&lt;th&gt;PPF, мкмоль/с&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-ppf-table&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
+      &lt;div class=&quot;text-small&quot;&gt;&lt;a id=&quot;pbe-module-link&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Плата и PPF · LED-TECH&lt;/a&gt; · &lt;a href=&quot;https://uploadcdn.oneyac.com/attachments/files/brand_pdf/samsungsemiconductor/B4/C9/Data_Sheet_LM301B_CRI80_Rev.10.1.pdf&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Диаграмма Samsung · стр. 15&lt;/a&gt; · &lt;a id=&quot;pbe-driver-link&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Паспорт драйвера&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/details&gt;
   &lt;div class=&quot;beam-columns&quot;&gt;
     &lt;div&gt;
       &lt;h3&gt;Сбоку&lt;/h3&gt;
@@ -1982,15 +2020,18 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;span&gt;Человек: люксы на поверхности + цвет + блики&lt;/span&gt;
   &lt;/div&gt;
   &lt;div class=&quot;text-small&quot; id=&quot;pbe-geometric-value&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot;&gt;PPF (400–700 нм) задан вручную и сохраняется при смене источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. Купол, отражения и затенение листьями не учтены. Цветная карта — расчёт на плоскости, не измерения листьев.&lt;/div&gt;
+  &lt;div class=&quot;text-small&quot; id=&quot;pbe-method&quot;&gt;Купол, отражения и затенение листьями не учтены. Цветная карта — расчёт на плоскости, не измерения листьев.&lt;/div&gt;
 &lt;/div&gt;
 &lt;script&gt;
 (() =&gt; {
   const root = document.getElementById(&#x27;phyto-beam-explorer&#x27;);
   const q = id =&gt; root.querySelector(&#x27;#&#x27; + id);
-  const controls = { source:q(&#x27;pbe-source&#x27;), angle:q(&#x27;pbe-angle&#x27;), height:q(&#x27;pbe-height&#x27;), tilt:q(&#x27;pbe-tilt&#x27;), dim:q(&#x27;pbe-dim&#x27;), ppf:q(&#x27;pbe-ppf&#x27;), plant:q(&#x27;pbe-plant&#x27;), hours:q(&#x27;pbe-hours&#x27;) };
+  const controls = { source:q(&#x27;pbe-source&#x27;), angle:q(&#x27;pbe-angle&#x27;), height:q(&#x27;pbe-height&#x27;), tilt:q(&#x27;pbe-tilt&#x27;), dim:q(&#x27;pbe-dim&#x27;), dim2:q(&#x27;pbe-dim2&#x27;), ppf:q(&#x27;pbe-ppf&#x27;), plant:q(&#x27;pbe-plant&#x27;), hours:q(&#x27;pbe-hours&#x27;),count:q(&#x27;pbe-count&#x27;),driver:q(&#x27;pbe-driver&#x27;),current:q(&#x27;pbe-current&#x27;) };
   const side = q(&#x27;pbe-side&#x27;), plan = q(&#x27;pbe-plan&#x27;);
   const profiles = {
+    square50:{w:.05,d:.05,kind:&#x27;catalog&#x27;,cap:&#x27;Square 50: компактная плата для головки Б3. Купол и радиатор проектируются отдельно.&#x27;},
+    compact21:{w:.149,d:.024,kind:&#x27;catalog&#x27;,cap:&#x27;COMPACT 21: вытянутая головка. Плата 149 мм не помещается в прежнее окно Б3 длиной 104 мм.&#x27;},
+    linear98:{w:.4999,d:.016,kind:&#x27;catalog&#x27;,cap:&#x27;Линейка 98: длинный источник для полки или подвеса. Несколько плат расположены параллельными рядами.&#x27;},
     mini:{w:.12,d:.12,kind:&#x27;rect&#x27;,cap:&#x27;Mini: высота, поворот, разнос модулей; диммирование с отдельным драйвером. Линзы — по совместимости.&#x27;},
     qb30:{w:.39,d:.12,kind:&#x27;rect&#x27;,cap:&#x27;30 Вт: высота, поворот, диммер; штатные линзы MiniFermer для этой раскладки не подходят.&#x27;},
     qb60:{w:.39,d:.18,kind:&#x27;rect&#x27;,cap:&#x27;60 Вт: высота, поворот, диммер. Линзы доступны для части LM301B/Sunlike; для LM281B+Pro — нет.&#x27;},
@@ -2004,6 +2045,55 @@ html&gt;body{padding:0}&lt;/style&gt;
     petal4:{w:.24,d:.24,kind:&#x27;petal&#x27;,n:4,fixed:true,cap:&#x27;«Лепесток»: размеры и положения площадок здесь условные. Регулировка яркости и ход шарниров не подтверждены.&#x27;},
     b3:{w:.104,d:.064,kind:&#x27;pair&#x27;,cap:&#x27;Б3: два условных окна 104 × 64 мм. Показаны прямые пучки; отражение и поглощение купола требуют отдельного расчёта.&#x27;}
   };
+  // HARDWARE MODEL START: manufacturer-declared module PPF; no low-current extrapolation.
+  const hardware = (() =&gt; {
+    const modules={
+      square50:{name:&#x27;Square 50 · LT-3238&#x27;,size:&#x27;50 × 50 × 4,08 мм&#x27;,cct:4000,price:&#x27;12,90 €&#x27;,url:&#x27;https://www.led-tech.de/de/49x-Samsung-LM301B-Square-50-4000k&#x27;,rows:[[100,18.08,5.59],[350,18.62,19.15],[700,19.09,36.98],[1050,19.46,53.79],[1400,19.73,69.73]]},
+      compact21:{name:&#x27;COMPACT 21 · LT-6469&#x27;,size:&#x27;149 × 24 × 4,08 мм&#x27;,cct:4000,price:&#x27;6,49 €&#x27;,url:&#x27;https://www.led-tech.de/en/21x-Samsung-COMPACT-LM301-stripe-4000k&#x27;,rows:[[100,7.76,2.63],[350,8,9.01],[700,8.21,17.45],[1050,8.38,25.45],[1400,8.54,33.13]]},
+      linear98:{name:&#x27;Линейка 98 · LT-4015&#x27;,size:&#x27;499,9 × 16 × 5,4 мм&#x27;,cct:3500,price:&#x27;19,90 €&#x27;,url:&#x27;https://www.led-tech.de/de/50cm-Alustreifen-mit-98x-Samsung-LM301B-LEDs-3500k-und-Steckerbuchsen&#x27;,rows:[[350,18.59,19.21],[700,18.99,37.63],[1050,19.32,55.36],[1400,19.6,72.59],[1750,19.87,89],[2100,20.1,105.2]]}
+    };
+    const drivers={
+      lcm25:{name:&#x27;LCM-25&#x27;,size:&#x27;105 × 68 × 23&#x27;,currents:[350,500,600,700,900,1050],maxV:[54,50,42,36,28,24],minV:6,power:25.2,url:&#x27;https://www.meanwell.com/Upload/PDF/LCM-25/LCM-25-SPEC.PDF&#x27;},
+      lcm40:{name:&#x27;LCM-40&#x27;,size:&#x27;123,5 × 81,5 × 23&#x27;,currents:[350,500,600,700,900,1050],maxV:[100,80,67,57,45,40],minV:2,power:42,url:&#x27;https://www.mean-well.ru/uploads/files/datasheets/LCM-40.pdf&#x27;},
+      ldd:{name:&#x27;LDD-H + 24 В&#x27;,size:&#x27;31,8 × 20,3 × 12,2 / канал&#x27;,currents:[350,500,600,700,1000],minV:2,power:60,url:&#x27;https://www.meanwell.com/Upload/PDF/LDD-H/LDD-H-SPEC.PDF&#x27;}
+    };
+    function point(id,current){
+      const rows=modules[id].rows;
+      if(current&lt;rows[0][0]-1e-8 || current&gt;rows.at(-1)[0]+1e-8)return null;
+      const hi=rows.findIndex(r=&gt;r[0]&gt;=current-1e-8),r=rows[hi];
+      if(hi===0 || Math.abs(current-r[0])&lt;1e-8)return {voltage:r[1],ppf:r[2],exact:true};
+      const l=rows[hi-1],f=(current-l[0])/(r[0]-l[0]);
+      return {voltage:l[1]+f*(r[1]-l[1]),ppf:l[2]+f*(r[2]-l[2]),exact:false};
+    }
+    function fit(id,driver,current,count){
+      const d=drivers[driver],i=d.currents.indexOf(current),p=point(id,current);
+      if(i&lt;0)return {ok:false,reason:&#x27;Такой номинальный ток не поддерживается&#x27;};
+      if(!p)return {ok:false,reason:&#x27;Нет данных платы для этого тока&#x27;};
+      const ldd=driver===&#x27;ldd&#x27;,voltage=p.voltage*(ldd?1:count),maxV=ldd?24*.97-3:d.maxV[i];
+      const watts=p.voltage*current/1000*count;
+      if(voltage&lt;d.minV || voltage&gt;maxV)return {ok:false,reason:`Нужно ${voltage.toFixed(2)} В; диапазон ${d.minV}–${maxV.toFixed(2)} В`,voltage,watts};
+      // LDD PSU budget is a declared design allowance, not measured efficiency.
+      const budget=ldd?watts/.85+2:watts;
+      if(budget&gt;d.power+1e-8)return {ok:false,reason:ldd?&#x27;Нужен более мощный БП: бюджет с запасом &gt;60 Вт&#x27;:&#x27;Превышена мощность драйвера&#x27;,voltage,watts,budget};
+      return {ok:true,voltage,watts,budget,headroom:maxV-voltage,reason:`По тип. Vf: ${voltage.toFixed(2)} В · запас сверху ${(maxV-voltage).toFixed(2)} В`};
+    }
+    function operate(s){
+      const m=modules[s.source],d=drivers[s.driver],base=point(s.source,s.current),check=fit(s.source,s.driver,s.current,s.count);
+      if(!check.ok)return {ok:false,reason:check.reason,check};
+      const pwm=s.driver===&#x27;ldd&#x27;,current=pwm?s.current:s.current*s.dim/100;
+      if(!pwm &amp;&amp; s.dim&gt;0 &amp;&amp; s.dim&lt;6)return {ok:false,reason:&#x27;LCM: ток при DIM между 0 и 6% не определён паспортом&#x27;,check};
+      const actual=current===0?{ppf:0,voltage:0,exact:true}:point(s.source,current);
+      if(!actual)return {ok:false,reason:`Нет PPF при ${current.toFixed(0)} мА. Для этой платы расчёт от ${m.rows[0][0]} мА; увеличь DIM или выбери LDD.`,check};
+      const totalV=actual.voltage*s.count;
+      if(!pwm &amp;&amp; current&gt;0 &amp;&amp; (totalV&lt;d.minV || totalV&gt;d.maxV[d.currents.indexOf(s.current)]))return {ok:false,reason:&#x27;Напряжение при уменьшенном токе вне диапазона LCM&#x27;,check};
+      const duties=Array.from({length:s.count},(_,i)=&gt;pwm?(i%2===0?s.dim:s.dim2)/100:1);
+      const fluxes=duties.map(duty=&gt;actual.ppf*duty),flux=fluxes.reduce((a,b)=&gt;a+b,0);
+      const watts=actual.voltage*current/1000*duties.reduce((a,b)=&gt;a+b,0);
+      return {ok:true,flux,fluxes,watts,current,voltage:pwm?actual.voltage:totalV,basePPF:base.ppf*s.count,exact:actual.exact,pwm,check};
+    }
+    return {modules,drivers,point,fit,operate};
+  })();
+  // HARDWARE MODEL END
   // PLANT MODEL START: broad light groups, explicit scenario thresholds (not injury limits).
   const plantModel = (() =&gt; {
     const groups={low:{L:3,U:6},medium:{L:6,U:10},high:{L:12,U:16}};
@@ -2032,11 +2122,12 @@ html&gt;body{padding:0}&lt;/style&gt;
     return {groups,plants,categories,dli,classify,evaluate};
   })();
   // PLANT MODEL END
-  let state = {source:&#x27;b3&#x27;,angle:60,height:40,tilt:0,dim:70,ppf:50,plant:&#x27;monstera&#x27;,hours:12};
+  let state = {source:&#x27;square50&#x27;,angle:60,height:40,tilt:0,dim:70,dim2:70,ppf:50,plant:&#x27;monstera&#x27;,hours:12,count:2,driver:&#x27;ldd&#x27;,current:700};
   const bounded=(v,a,b,f)=&gt;Number.isFinite(Number(v))?Math.min(b,Math.max(a,Number(v))):f;
   function restore(saved) {
-    if (!saved || ![&#x27;phyto-beams-v1&#x27;,&#x27;phyto-beams-v2&#x27;,&#x27;phyto-beams-v3&#x27;].includes(saved.schema)) return;
-    state={source:profiles[saved.source]?saved.source:&#x27;b3&#x27;,angle:bounded(saved.angle,30,120,60),height:bounded(saved.height,20,100,40),tilt:bounded(saved.tilt,-20,20,0),dim:bounded(saved.dim,0,100,70),ppf:bounded(saved.ppf,0,400,50),plant:plantModel.plants[saved.plant]?saved.plant:&#x27;monstera&#x27;,hours:bounded(saved.hours,6,16,12)};
+    if (!saved || ![&#x27;phyto-beams-v1&#x27;,&#x27;phyto-beams-v2&#x27;,&#x27;phyto-beams-v3&#x27;,&#x27;phyto-beams-v4&#x27;].includes(saved.schema)) return;
+    const driver=hardware.drivers[saved.driver]?saved.driver:&#x27;ldd&#x27;;
+    state={source:profiles[saved.source]?saved.source:&#x27;square50&#x27;,angle:bounded(saved.angle,30,120,60),height:bounded(saved.height,20,100,40),tilt:bounded(saved.tilt,-20,20,0),dim:bounded(saved.dim,0,100,70),dim2:bounded(saved.dim2,0,100,70),ppf:bounded(saved.ppf,0,400,50),plant:plantModel.plants[saved.plant]?saved.plant:&#x27;monstera&#x27;,hours:bounded(saved.hours,6,16,12),count:[1,2,4].includes(Number(saved.count))?Number(saved.count):2,driver,current:hardware.drivers[driver].currents.includes(Number(saved.current))?Number(saved.current):700};
   }
   restore(window.openai?.widgetState?.modelContent ?? window.openai?.widgetState);
   const ns=&#x27;http://www.w3.org/2000/svg&#x27;;
@@ -2047,12 +2138,24 @@ html&gt;body{padding:0}&lt;/style&gt;
     svg.appendChild(n);return n;
   }
   function groups(p) {
+    if(p.kind===&#x27;catalog&#x27;){
+      if(state.source===&#x27;linear98&#x27;)return Array.from({length:state.count},(_,i)=&gt;({x:0,y:(i-(state.count-1)/2)*.12,w:p.w,d:p.d}));
+      if(state.count===1)return [{x:0,y:0,w:p.w,d:p.d}];
+      return Array.from({length:state.count},(_,i)=&gt;({x:i%2===0?-.18:.18,y:state.count===4?(i&lt;2?-.06:.06):0,w:p.w,d:p.d}));
+    }
     if(p.kind===&#x27;pair&#x27;)return [{x:-.18,y:0,w:p.w,d:p.d},{x:.18,y:0,w:p.w,d:p.d}];
     if(p.kind===&#x27;petal&#x27;)return Array.from({length:p.n},(_,i)=&gt;{const a=i*2*Math.PI/p.n;return{x:.085*Math.cos(a),y:.085*Math.sin(a),w:.075,d:.06};});
     return [{x:0,y:0,w:p.w,d:p.d,disc:p.kind===&#x27;disc&#x27;}];
   }
   // PHOTOMETRY START: normalized photon intensity, finite emitters, horizontal receiver.
   const photometry = (() =&gt; {
+    // Digitized Samsung LM301B CRI80 Rev.10.1, p.15, Ts25C/If65mA.
+    // Average of left/right graph samples; rotational symmetry and angular spectral invariance assumed.
+    const lm301b=[1,.995,.985,.965,.941,.908,.869,.826,.774,.711,.642,.566,.484,.397,.306,.211,.126,.055,0];
+    function relative(theta){const x=Math.max(0,Math.min(18,theta*180/Math.PI/5)),i=Math.min(17,Math.floor(x));return lm301b[i]+(lm301b[i+1]-lm301b[i])*(x-i);}
+    let integral=0;const da=Math.PI/2/1800;
+    for(let i=0;i&lt;1800;i++){const a=(i+.5)*da;integral+=relative(a)*Math.sin(a)*da;}
+    const curveNorm=1/(2*Math.PI*integral),nativeAngle=2*(55+5*(.566-.5)/(.566-.484));
     function sampleEmitters(groups,h,t,density=1) {
       const result=[];
       for(const a of groups) {
@@ -2067,7 +2170,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           const nx=Math.max(4,Math.ceil(a.w/.01))*density,ny=Math.max(3,Math.ceil(a.d/.01))*density;
           for(let i=0;i&lt;nx;i++)for(let j=0;j&lt;ny;j++)local.push([a.w*((i+.5)/nx-.5),a.d*((j+.5)/ny-.5)]);
         }
-        for(const [u,v] of local)result.push({x:a.x+u*Math.cos(t),y:a.y+v,z:h+u*Math.sin(t),weight:1/(groups.length*local.length)});
+        for(const [u,v] of local)result.push({x:a.x+u*Math.cos(t),y:a.y+v,z:h+u*Math.sin(t),weight:(a.weight??(1/groups.length))/local.length});
       }
       return result;
     }
@@ -2079,7 +2182,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       for(const a of emitters) {
         const dx=x-a.x,dy=y-a.y,r2=dx*dx+dy*dy+a.z*a.z,r=Math.sqrt(r2);
         const c=(st*dx+ct*a.z)/r;
-        if(c&gt;0 &amp;&amp; a.z&gt;0)value+=norm*a.weight*Math.pow(Math.min(1,c),n)*a.z/(r2*r);
+        if(c&gt;0 &amp;&amp; a.z&gt;0){const intensity=angle===&#x27;lm301b&#x27;?flux*curveNorm*relative(Math.acos(Math.min(1,c))):norm*Math.pow(Math.min(1,c),n);value+=intensity*a.weight*a.z/(r2*r);}
       }
       return value;
     }
@@ -2093,7 +2196,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       }
       return {mean:sum/(nr*na),center:fieldAt(0,0,emitters,angle,t,flux),samples,nr,na};
     }
-    return {sampleEmitters,fieldAt,summarize};
+    return {sampleEmitters,fieldAt,summarize,relative,curveNorm,nativeAngle};
   })();
   // PHOTOMETRY END
   let metricKey=&#x27;&#x27;,metrics={mean:0,center:0,samples:[],nr:12,na:48};
@@ -2116,21 +2219,61 @@ html&gt;body{padding:0}&lt;/style&gt;
     const defs=el(svg,&#x27;defs&#x27;);const cp=el(defs,&#x27;clipPath&#x27;,{id:svg.id+&#x27;-clip&#x27;});el(cp,&#x27;rect&#x27;,{x:8,y:12,width:w-16,height:265});
     return el(svg,&#x27;g&#x27;,{&#x27;clip-path&#x27;:`url(#${svg.id}-clip)`});
   }
+  function hardwareDetails(op){
+    const m=hardware.modules[state.source],d=hardware.drivers[state.driver],pwm=state.driver===&#x27;ldd&#x27;;
+    q(&#x27;pbe-module-description&#x27;).textContent=`${m.name} · ${m.size} · ${m.cct} K · белые LED без отдельных УФ/ИК. ${m.price} за плату на 12.11.2026; заказ у LED-TECH, доставка в РФ не проверена.`;
+    q(&#x27;pbe-evidence&#x27;).textContent=&#x27;PPF: таблица изготовителя платы. Пучок: оцифрованная диаграмма отдельного LM301B, не измерение готового светильника. Плата заменена равномерно светящейся поверхностью; спектр по углам считается неизменным.&#x27;;
+    q(&#x27;pbe-circuit&#x27;).textContent=pwm?`Питание: 230 В → GST60A24-P1J (24 В, 60 Вт) → ${state.count} × LDD-${state.current}H → по одной плате на канал. Бюджет БП: P_LED / 0,85 + 2 Вт; КПД 85% и 2 Вт контроллера — проектные допущения.`:`Питание: 230 В → ${d.name} → ${state.count} плат последовательно. Драйвер напрямую питает LED; дополнительный токовый драйвер в эту цепь не добавляется.`;
+    q(&#x27;pbe-controller&#x27;).textContent=pwm?&#x27;Наш блок: питание контроллера через DC/DC 24 → 3,3 В; MCU → PWM 500 Гц → DIM каждого LDD. Логический HIGH 3,3 В, LOW &lt;0,8 В относительно −Vin; при старте DIM удерживается в LOW. Отдельные каналы позволяют разделить яркость двух групп. Это архитектура, не готовая электрическая схема.&#x27;:&#x27;Наш блок: MCU → изолированный интерфейс 0–10 В (или 10 В PWM 500 Гц) → DIM+/DIM−. GPIO 3,3 В напрямую не подходит; DIM− не соединяется с −V LED. Питание контроллера — отдельное. LCM изменяет ток: 70% DIM не означает ровно 70% PPF. Это архитектура, не готовая электрическая схема.&#x27;;
+    q(&#x27;pbe-driver-comparison&#x27;).innerHTML=Object.entries(hardware.drivers).map(([id,driver])=&gt;{const f=hardware.fit(state.source,id,state.current,state.count);return `&lt;tr&gt;&lt;td&gt;${driver.name}${id===&#x27;ldd&#x27;?&#x27; × &#x27;+state.count:&#x27;&#x27;}&lt;/td&gt;&lt;td&gt;${driver.size}&lt;/td&gt;&lt;td&gt;${f.ok?&#x27;В пределах по тип. данным. &#x27;:&#x27;&#x27;}${f.reason}&lt;/td&gt;&lt;/tr&gt;`;}).join(&#x27;&#x27;);
+    q(&#x27;pbe-ppf-table&#x27;).innerHTML=m.rows.map(r=&gt;`&lt;tr&gt;&lt;td&gt;${r[0]}&lt;/td&gt;&lt;td&gt;${r[1].toLocaleString(&#x27;ru-RU&#x27;)}&lt;/td&gt;&lt;td&gt;${r[2].toLocaleString(&#x27;ru-RU&#x27;)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;);
+    q(&#x27;pbe-module-link&#x27;).href=m.url;q(&#x27;pbe-driver-link&#x27;).href=d.url;
+    q(&#x27;pbe-operating&#x27;).textContent=op.ok?`${pwm?&#x27;LDD-&#x27;+state.current+&#x27;H · импульсный ток&#x27;:&#x27;LCM · ток сейчас&#x27;} ${Math.round(op.current)} мА · ${op.voltage.toFixed(2)} В ${pwm?&#x27;на плату&#x27;:&#x27;цепочка&#x27;} · ≈ ${op.watts.toFixed(1)} Вт на LED. ${op.exact?&#x27;Опорная точка PPF&#x27;:&#x27;PPF интерполирован по току&#x27;}. Совместимость предварительная: типичный Vf, без проверки нагрева и разброса.`:&#x27;&#x27;;
+  }
   function render() {
-    const p=profiles[state.source];const dim=p.fixed?100:state.dim;
+    const p=profiles[state.source],catalog=p.kind===&#x27;catalog&#x27;,dim=p.fixed?100:state.dim;
+    const driver=hardware.drivers[state.driver];
+    if(!driver.currents.includes(state.current))state.current=700;
+    if(controls.current.dataset.driver!==state.driver){controls.current.replaceChildren(...driver.currents.map(i=&gt;{const o=document.createElement(&#x27;option&#x27;);o.value=i;o.textContent=state.driver===&#x27;ldd&#x27;?`LDD-${i}H · ${i} мА`:`${i} мА`;return o;}));controls.current.dataset.driver=state.driver;}
     for(const [key,c] of Object.entries(controls))c.value=String(state[key]);
     controls.dim.disabled=!!p.fixed;
+    controls.angle.disabled=catalog;controls.ppf.disabled=catalog;
+    controls.angle.step=catalog?&#x27;any&#x27;:&#x27;5&#x27;;controls.ppf.step=catalog?&#x27;any&#x27;:&#x27;5&#x27;;
+    q(&#x27;pbe-hardware&#x27;).hidden=!catalog;q(&#x27;pbe-data-details&#x27;).hidden=!catalog;
+    q(&#x27;pbe-channel2&#x27;).hidden=!catalog||state.driver!==&#x27;ldd&#x27;||state.count===1;
+    const op=catalog?hardware.operate(state):null;
+    const angle=catalog?photometry.nativeAngle:state.angle;
+    if(catalog){controls.angle.value=String(angle);hardwareDetails(op);}else q(&#x27;pbe-operating&#x27;).textContent=&#x27;&#x27;;
+    q(&#x27;pbe-validation&#x27;).hidden=!catalog||op.ok;
+    q(&#x27;pbe-validation&#x27;).textContent=catalog&amp;&amp;!op.ok?op.reason:&#x27;&#x27;;
     q(&#x27;pbe-height-value&#x27;).textContent=state.height+&#x27; см&#x27;;
-    q(&#x27;pbe-angle-value&#x27;).textContent=state.angle+&#x27;°&#x27;;
-    q(&#x27;pbe-ppf-value&#x27;).textContent=state.ppf+&#x27; мкмоль/с&#x27;;
+    q(&#x27;pbe-angle-label&#x27;).textContent=catalog?&#x27;Пучок LM301B · без оптики&#x27;:&#x27;Условный полный угол пучка&#x27;;
+    q(&#x27;pbe-angle-value&#x27;).textContent=catalog?&#x27;≈ &#x27;+Math.round(angle)+&#x27;° · фиксирован&#x27;:state.angle+&#x27;°&#x27;;
+    const base=catalog?hardware.point(state.source,state.current):null;
+    q(&#x27;pbe-ppf-value&#x27;).textContent=(catalog?(base.ppf*state.count).toLocaleString(&#x27;ru-RU&#x27;,{maximumFractionDigits:2}):state.ppf)+&#x27; мкмоль/с&#x27;;
+    if(catalog)controls.ppf.value=String(base.ppf*state.count);
     q(&#x27;pbe-hours-value&#x27;).textContent=state.hours+&#x27; ч&#x27;;
     q(&#x27;pbe-tilt-value&#x27;).textContent=(state.tilt&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+state.tilt+&#x27;°&#x27;;
+    q(&#x27;pbe-dim-label&#x27;).textContent=catalog?(state.driver===&#x27;ldd&#x27;?(state.count&gt;1?(state.source===&#x27;linear98&#x27;?&#x27;Нечётные ряды · PWM&#x27;:&#x27;Левые платы · PWM&#x27;):&#x27;Яркость · PWM&#x27;):&#x27;DIM · доля номинального тока&#x27;):&#x27;Яркость источника&#x27;;
+    q(&#x27;pbe-dim2-label&#x27;).textContent=state.source===&#x27;linear98&#x27;?&#x27;Чётные ряды · PWM&#x27;:&#x27;Правые платы · PWM&#x27;;
     q(&#x27;pbe-dim-value&#x27;).textContent=p.fixed?&#x27;Не подтверждено&#x27;:dim+&#x27;%&#x27;;
+    q(&#x27;pbe-dim2-value&#x27;).textContent=state.dim2+&#x27;%&#x27;;
     q(&#x27;pbe-capability&#x27;).textContent=p.cap;
-    const h=state.height/100,b=state.angle*Math.PI/360,t=state.tilt*Math.PI/180;
-    const g=groups(p),alpha=dim/100;
-    const flux=state.ppf*alpha,key=JSON.stringify([state.source,state.height,state.angle,state.tilt,flux]);
-    if(key!==metricKey){metrics=photometry.summarize(g,h,t,state.angle,flux);metricKey=key;}
+    q(&#x27;pbe-method&#x27;).textContent=(catalog?&#x27;PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. &#x27;:&#x27;PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. &#x27;)+ &#x27;Купол, отражения, нагрев и затенение листьями не учтены. Карта — расчёт на плоскости, не измерения листьев.&#x27;;
+    if(catalog&amp;&amp;!op.ok){
+      for(const id of [&#x27;pbe-mean&#x27;,&#x27;pbe-center&#x27;,&#x27;pbe-dli&#x27;])q(id).textContent=&#x27;—&#x27;;
+      q(&#x27;pbe-status&#x27;).textContent=&#x27;Расчёт недоступен для этой комбинации&#x27;;q(&#x27;pbe-status-dot&#x27;).style.background=&#x27;var(--muted)&#x27;;
+      for(const id of [&#x27;pbe-flow&#x27;,&#x27;pbe-target&#x27;,&#x27;pbe-geometric-value&#x27;])q(id).textContent=&#x27;&#x27;;
+      for(const svg of [side,plan]){const w=Math.max(260,svg.getBoundingClientRect().width);setup(svg,w);el(svg,&#x27;text&#x27;,{x:14,y:145},&#x27;Измени ток, DIM или драйвер&#x27;);svg.setAttribute(&#x27;aria-label&#x27;,&#x27;Нет расчёта: &#x27;+op.reason);}
+      for(let i=0;i&lt;legendItems.length;i++)legendItems[i].textContent=plantModel.categories[i].label+&#x27; · —&#x27;;
+      for(const row of comparisonRows){row.dot.style.background=&#x27;var(--muted)&#x27;;row.label.textContent=&#x27;Нет расчёта&#x27;;}
+      return;
+    }
+    const h=state.height/100,b=angle*Math.PI/360,t=state.tilt*Math.PI/180;
+    const g=groups(p),flux=catalog?op.flux:state.ppf*dim/100,alpha=catalog?(op.basePPF?flux/op.basePPF:0):dim/100;
+    if(catalog)g.forEach((a,i)=&gt;a.weight=flux&gt;0?op.fluxes[i]/flux:1/g.length);
+    const curve=catalog?&#x27;lm301b&#x27;:state.angle,key=JSON.stringify([state.source,state.height,curve,state.tilt,flux,g]);
+    if(key!==metricKey){metrics=photometry.summarize(g,h,t,curve,flux);metricKey=key;}
     const number=v=&gt;v&gt;0&amp;&amp;v&lt;1?&#x27;&lt;1&#x27;:Math.round(v).toLocaleString(&#x27;ru-RU&#x27;);
     q(&#x27;pbe-mean&#x27;).textContent=&#x27;≈ &#x27;+number(metrics.mean);
     q(&#x27;pbe-center&#x27;).textContent=&#x27;≈ &#x27;+number(metrics.center);
@@ -2145,14 +2288,16 @@ html&gt;body{padding:0}&lt;/style&gt;
     q(&#x27;pbe-plant-source&#x27;).href=selected.url;
     for(let i=0;i&lt;legendItems.length;i++)legendItems[i].textContent=plantModel.categories[i].label+&#x27; · &#x27;+decimal(assessment.percentages[i])+&#x27;%&#x27;;
     for(const row of comparisonRows){const c=plantModel.categories[plantModel.classify(daily,row.p.group)];row.dot.style.background=c.color;row.label.textContent=c.label;}
-    q(&#x27;pbe-flow&#x27;).textContent=`Общий поток сейчас: ${Number(flux.toFixed(1)).toLocaleString(&#x27;ru-RU&#x27;)} мкмоль/с · ${g.length===1?&#x27;один модуль&#x27;:`поровну между ${g.length} модулями`} · при смене угла поток постоянный`;
+    q(&#x27;pbe-flow&#x27;).textContent=`Общий поток сейчас: ${Number(flux.toFixed(1)).toLocaleString(&#x27;ru-RU&#x27;)} мкмоль/с · ${g.length===1?&#x27;одна плата&#x27;:`${g.length} плат(ы)`}`+(catalog?&#x27; · без купола&#x27;: &#x27; · при смене угла поток постоянный&#x27;);
     const beam=&#x27;var(--muted-foreground)&#x27;,plant=&#x27;var(--foreground)&#x27;,desk=&#x27;var(--muted-foreground)&#x27;,edge=&#x27;var(--muted-foreground)&#x27;;
+    side.setAttribute(&#x27;aria-label&#x27;,&#x27;Прямые пучки над зоной кроны и рабочей поверхностью, без купола&#x27;);
     const sw=Math.max(260,side.getBoundingClientRect().width),pw=Math.max(260,plan.getBoundingClientRect().width);
     const sg=setup(side,sw),pg=setup(plan,pw);
     const s=(sw-28)/2.05,x0=14+.70*s,z0=253;
     const sx=x=&gt;x0+x*s,sy=z=&gt;z0-z*s;
     el(sg,&#x27;line&#x27;,{x1:14,y1:z0,x2:sw-14,y2:z0,stroke:edge,&#x27;stroke-width&#x27;:1});
-    for(const a of g){
+    for(const [idx,a] of g.entries()){
+      const alpha=catalog?op.fluxes[idx]/base.ppf:dim/100;
       const ex=a.w/2*Math.cos(t),ez=a.w/2*Math.sin(t);
       const left=a.x-ex+(h-ez)*Math.tan(t-b),right=a.x+ex+(h+ez)*Math.tan(t+b);
       el(sg,&#x27;path&#x27;,{d:`M${sx(a.x-ex)} ${sy(h-ez)} L${sx(a.x+ex)} ${sy(h+ez)} L${sx(right)} ${z0} L${sx(left)} ${z0} Z`,fill:beam,&#x27;fill-opacity&#x27;:.08*alpha,stroke:beam,&#x27;stroke-opacity&#x27;:.6*alpha,&#x27;stroke-width&#x27;:1});
@@ -2167,7 +2312,8 @@ html&gt;body{padding:0}&lt;/style&gt;
     const ps=(pw-28)/2.05,px=x=&gt;14+(x+.70)*ps,py=y=&gt;145+y*ps;
     const A=Math.cos(b)**2-Math.sin(t)**2;
     const center=h*Math.sin(t)*Math.cos(t)/A,rx=h*Math.sin(b)*Math.cos(b)/A,ry=h*Math.sin(b)/Math.sqrt(A);
-    for(const a of g){
+    for(const [idx,a] of g.entries()){
+      const alpha=catalog?op.fluxes[idx]/base.ppf:dim/100;
       if(a.disc){el(pg,&#x27;ellipse&#x27;,{cx:px(a.x+center),cy:py(a.y),rx:(rx+a.w/2)*ps,ry:(ry+a.d/2)*ps,fill:beam,&#x27;fill-opacity&#x27;:.10*alpha,stroke:beam,&#x27;stroke-width&#x27;:1,&#x27;stroke-opacity&#x27;:alpha*.7});}
       else{
         const X=px(a.x+center-a.w/2-rx),Y=py(a.y-a.d/2-ry),W=(a.w+2*rx)*ps,H=(a.d+2*ry)*ps;
@@ -2199,11 +2345,11 @@ html&gt;body{padding:0}&lt;/style&gt;
     el(plan,&#x27;text&#x27;,{x:14,y:296,class:&#x27;text-small&#x27;},&#x27;Крона — локальные оценки DLI&#x27;);
     plan.setAttribute(&#x27;aria-label&#x27;,`${selected.name}. По среднему DLI: ${plantModel.categories[meanClass].label}. Доли площади: ${plantModel.categories.map((c,i)=&gt;c.label+&#x27; &#x27;+decimal(assessment.percentages[i])+&#x27;%&#x27;).join(&#x27;, &#x27;)}.`);
     const diameter=2*h*Math.tan(b)*100;
-    q(&#x27;pbe-geometric-value&#x27;).textContent=`Для точечного источника без наклона: ${state.angle}° на высоте ${state.height} см → условный диаметр ${Math.round(diameter)} см. Размер платы расширяет охват.`;
+    q(&#x27;pbe-geometric-value&#x27;).textContent=`Для точечного источника без наклона: ≈ ${Math.round(angle)}° на высоте ${state.height} см → контур половинной силы излучения ≈ ${Math.round(diameter)} см. За контуром тоже есть свет.`;
   }
-  function save(){const f=window.openai?.setWidgetState;if(f)Promise.resolve(f.call(window.openai,{modelContent:{schema:&#x27;phyto-beams-v3&#x27;,...state},privateContent:null})).catch(()=&gt;{});}
+  function save(){const f=window.openai?.setWidgetState;if(f)Promise.resolve(f.call(window.openai,{modelContent:{schema:&#x27;phyto-beams-v4&#x27;,...state},privateContent:null})).catch(()=&gt;{});}
   for(const [key,c] of Object.entries(controls)){
-    c.addEventListener(&#x27;input&#x27;,()=&gt;{state[key]=[&#x27;source&#x27;,&#x27;plant&#x27;].includes(key)?c.value:Number(c.value);render();});
+    c.addEventListener(&#x27;input&#x27;,()=&gt;{state[key]=[&#x27;source&#x27;,&#x27;plant&#x27;,&#x27;driver&#x27;].includes(key)?c.value:Number(c.value);render();});
     c.addEventListener(&#x27;change&#x27;,save);
   }
   window.addEventListener(&#x27;openai:set_globals&#x27;,event=&gt;{const saved=event.detail?.globals?.widgetState;restore(saved?.modelContent??saved);render();});
