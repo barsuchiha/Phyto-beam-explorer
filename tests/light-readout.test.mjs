@@ -5,6 +5,7 @@ import {
   ppfdMapColor,
   ppfdMapPosition,
   surfaceReadout,
+  surfaceMetricCards,
   percentText,
   lightMapScales,
   continuousLightColor,
@@ -132,6 +133,77 @@ test("small nonzero reflected fractions do not display as zero", () => {
   assert.equal(percentText(0.000387570071), "0,04%");
   assert.equal(percentText(0.000001), "<0,01%");
   assert.equal(percentText(0.08553674592), "8,6%");
+});
+
+test("both DLI maps switch leaf metrics and units, preserving scenarios and photon capture", () => {
+  const result = {
+    receiver: "leaves",
+    range: [4, 8],
+    middle: 0,
+    output: { fluxes: [30, 50] },
+    metrics: [{ budget: { target: 0.08 } }, { budget: { target: 0.08 } }],
+    leaves: [
+      {
+        id: 7,
+        sides: [
+          { mean: 1, range: [0, 2] },
+          { mean: 18, range: [12, 24] },
+        ],
+      },
+    ],
+  };
+  const original = JSON.stringify(result);
+  const ppfd = surfaceMetricCards(result, { colorMetric: "ppfd", hours: 9 });
+  assert.equal(ppfd[0][1], "4–8");
+  assert.equal(ppfd[1][1], "12–24");
+  for (const colorMetric of ["dli", "dli-guide"]) {
+    const dli = surfaceMetricCards(result, { colorMetric, hours: 9 });
+    assert.equal(dli[0][1], "0,13–0,26");
+    assert.equal(dli[1][1], "0,39–0,78");
+    for (const card of dli.slice(0, 2)) {
+      assert.ok(card[0].startsWith("DLI"));
+      assert.match(card[2], /моль\/\(м²·сутки\).*9 ч\/день/);
+      assert.ok(!card.join(" ").includes("PPFD"));
+    }
+    assert.deepEqual(dli[2], ppfd[2]);
+    const longer = surfaceMetricCards(result, { colorMetric, hours: 12 });
+    assert.equal(longer[0][1], "0,17–0,35");
+    assert.equal(longer[1][1], "0,52–1,04");
+    const crown = surfaceMetricCards(
+      { ...result, receiver: "crown", leaves: undefined },
+      { colorMetric, hours: 9 },
+    );
+    assert.equal(crown[0][1], dli[0][1]);
+    assert.ok(!crown.flat().join(" ").includes("PPFD"));
+  }
+  assert.equal(JSON.stringify(result), original);
+  assert.deepEqual(
+    surfaceMetricCards(result, { colorMetric: "ppfd", hours: 12 }),
+    ppfd,
+  );
+});
+
+test("DLI metric formatting keeps narrow scenario ranges and zero flux", () => {
+  const result = {
+    receiver: "leaves",
+    range: [0.1, 1],
+    middle: 0,
+    output: { fluxes: [1] },
+    metrics: [{ budget: { target: 0.1 } }],
+    leaves: [{ id: 0, sides: [{ mean: 1, range: [0.1, 1] }] }],
+  };
+  const state = { colorMetric: "dli", hours: 9 };
+  assert.equal(surfaceMetricCards(result, state)[0][1], "0–0,03");
+  const off = {
+    ...result,
+    range: [0, 0],
+    output: { fluxes: [0] },
+    leaves: [{ id: 0, sides: [{ mean: 0, range: [0, 0] }] }],
+  };
+  const cards = surfaceMetricCards(off, state);
+  assert.equal(cards[0][1], "0");
+  assert.equal(cards[1][1], "0");
+  assert.equal(cards[2][1], "—");
 });
 
 test("the screenshot's side-lit olive case has illuminated leaves despite a zero top detector", () => {

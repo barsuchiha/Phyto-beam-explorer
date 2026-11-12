@@ -22,6 +22,7 @@ import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
 import { lightWorkerFile } from "./data/worker-asset.js";
 import {
   surfaceReadout,
+  surfaceMetricCards,
   percentText,
   lightMapScales,
 } from "./models/light-readout.js";
@@ -293,6 +294,23 @@ function renderLeafDetail() {
       ? " Ноль попаданий лучей не доказывает полную темноту: слабый свет может не попасть в выборку."
       : "");
 }
+function renderSurfaceMetrics(result) {
+  q("metrics").replaceChildren(
+    ...surfaceMetricCards(result, state).map(([title, value, note]) => {
+      const card = document.createElement("div");
+      for (const [tag, text] of [
+        ["span", title],
+        ["strong", value],
+        ["small", note],
+      ]) {
+        const el = document.createElement(tag);
+        el.textContent = text;
+        card.append(el);
+      }
+      return card;
+    }),
+  );
+}
 function renderResult(result, geometry, reference) {
   latestResult = result;
   const leafMode = result.receiver === "leaves";
@@ -327,49 +345,7 @@ function renderResult(result, geometry, reference) {
     values.map((v) => plantModel.dli(v, state.hours));
   const readout = surfaceReadout(result),
     best = readout.brightest;
-  const captured = readout.emitting
-    ? Math.abs(readout.captureRange[1] - readout.captureRange[0]) > 0.0005
-      ? readout.captureRange.map(percentText).join("–")
-      : percentText(b.target)
-    : "—";
-  const cards = [
-    [
-      leafMode ? "PPFD · среднее по листьям" : "PPFD · среднее по оболочке",
-      rangeText(range),
-      leafMode ? "обе стороны · мкмоль/(м²·с)" : "вся оболочка · мкмоль/(м²·с)",
-    ],
-    leafMode
-      ? [
-          "Самая освещённая сторона листа",
-          rangeText(best.range),
-          `PPFD · лист ${best.leaf + 1}, сторона ${best.side === 0 ? "A" : "B"}`,
-        ]
-      : [
-          `DLI от лампы · ${state.hours} ч`,
-          rangeText(dliRange(range), dose),
-          "моль/(м²·сутки) · вся оболочка",
-        ],
-    [
-      leafMode ? "На листья" : "На крону",
-      captured,
-      readout.emitting ? "доля исходного PPF" : "лампа выключена",
-    ],
-  ];
-  q("metrics").replaceChildren(
-    ...cards.map(([title, value, note]) => {
-      const card = document.createElement("div");
-      for (const [tag, text] of [
-        ["span", title],
-        ["strong", value],
-        ["small", note],
-      ]) {
-        const el = document.createElement(tag);
-        el.textContent = text;
-        card.append(el);
-      }
-      return card;
-    }),
-  );
+  renderSurfaceMetrics(result);
   q("source-summary").textContent =
     `PPF источников: ${ppfText} мкмоль/с · ${geometry.sources.length} шт. Это поток до взаимодействия с корпусом и растением.`;
   q("reference-metrics").textContent =
@@ -509,7 +485,10 @@ for (const [name, control] of Object.entries(controls))
     save();
     if (name === "colorMetric") {
       renderMapLegend();
-      if (latestResult) view?.light(state, latestResult);
+      if (latestResult) {
+        renderSurfaceMetrics(latestResult);
+        view?.light(state, latestResult);
+      }
       return;
     }
     render();
