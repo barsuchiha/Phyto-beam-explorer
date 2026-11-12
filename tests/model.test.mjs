@@ -6,7 +6,7 @@ const html=fs.readFileSync(new URL('../src/calculator.html',import.meta.url),'ut
 const code=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(code); // Syntax validation includes the UI code.
 const ctx=vm.createContext({});
-for(const [marker,name] of [['HARDWARE MODEL','hardware'],['PHOTOMETRY','photometry'],['PLANT MODEL','plantModel'],['ESTIMATE MODEL','estimateModel']]){
+for(const [marker,name] of [['HARDWARE MODEL','hardware'],['PHOTOMETRY','photometry'],['PLANT MODEL','plantModel'],['ESTIMATE MODEL','estimateModel'],['MINI36 MODEL','mini36Model']]){
   const part=code.slice(code.indexOf('// '+marker+' START'),code.indexOf('// '+marker+' END'));
   vm.runInContext(part+`;globalThis.${name}Export=${name};`,ctx);
 }
@@ -95,3 +95,51 @@ for(const angle of e.angles){
 console.log('PASS: module tables, interpolation limits, driver voltage/power checks, analog/PWM distinction, channel independence, angular normalization, PPFD, convergence and DLI.');
 console.log('PASS: MiniFermer conditional PPF, nine-scenario envelopes, linear PWM including zero, height/tilt, layout and angular normalization.');
 console.log(JSON.stringify({defaultPPF:51.772,defaultPPFD:standard.mean,defaultDLI:plant.dli(standard.mean,12),convergencePercent:100*Math.abs(standard.mean/dense.mean-1)},null,2));
+
+const mini=ctx.mini36ModelExport;
+assert.equal(mini.whitePoints.length,24);
+assert.equal(mini.whiteCurrent,600/4); // Hypothesized 6s4p white block, series red.
+assert.ok(mini.whiteCurrent<350&&mini.redCurrent<1000); // E1/Osram ratings, not E2.
+near(mini.output().base[1],24*1.78*.51*.94+5.42*.86*.98);
+const ref=mini.comparison();
+assert.equal(JSON.stringify(ref.map(r=>[r.height,r.ppfd])),JSON.stringify([[20,244],[30,120],[40,75],[50,50]]));
+for(const row of ref){
+  near(row.delta,100*(row.calculated/row.ppfd-1));
+  near(row.equivalentPPF*row.calculated/mini.output().flux,row.ppfd);
+  assert.ok(row.ppfd>row.range[1]); // The selected hypothesis does not reproduce the vendor measurements.
+}
+for(const count of [1,2,4]){
+  const layout=mini.layout(count),out=mini.output('mf36',count,100);
+  near(out.flux,mini.output().flux*count);
+  for(let i=1;i<count;i++)near(layout[i].y-layout[i-1].y-layout[i].d,.04);
+  for(let level=0;level<3;level++){
+    const emitters=p.sampleEmitters(mini.weightedGroups(layout,level),.4,0);
+    assert.equal(emitters.length,25*count);
+    near(emitters.reduce((sum,x)=>sum+x.weight,0),1);
+    const c=mini.components[level];
+    near(emitters[24].weight*count,c.red/(c.white+c.red));
+  }
+  const full=mini.summarize(layout,.4,0,out.fluxes);
+  const half=mini.summarize(layout,.4,0,mini.output('mf36',count,50).fluxes);
+  const off=mini.summarize(layout,.4,0,mini.output('mf36',count,0).fluxes);
+  near(full.mean,full.samples.reduce((sum,x)=>sum+x.value,0)/full.samples.length);
+  for(const key of ['mean','center']){
+    near(half[key],full[key]/2);near(off[key],0);
+    for(let i=0;i<2;i++){near(half.range[key][i],full.range[key][i]/2);near(off.range[key][i],0);}
+    assert.ok(full.range[key][0]<full[key]&&full[key]<full.range[key][1]);
+  }
+  const high=mini.summarize(layout,.8,0,out.fluxes);
+  assert.ok(high.center<full.center);
+  const tilt=mini.summarize(layout,.4,20*Math.PI/180,out.fluxes);
+  assert.ok(Number.isFinite(tilt.center)&&tilt.mean>0);
+  const dense=mini.summarize(layout,.4,0,out.fluxes,2);
+  assert.ok(Math.abs(full.mean/dense.mean-1)<.01);
+  near(full.center,dense.center); // Discrete physical LED positions do not change with grid density.
+}
+// Independent on-axis formula: one central red LED plus 24 spatially separated white LEDs.
+const c=mini.components[1],z=.2;
+const expected=c.red/(Math.PI*z*z)+mini.whitePoints.reduce((sum,[x,y])=>sum+c.white/24*z*z/(Math.PI*(x*x+y*y+z*z)**2),0);
+near(ref[0].calculated,expected);
+assert.equal(mini.comparison(),ref); // User settings never alter the reference experiment.
+console.log('PASS: MiniFermer 3.6 separate white/red PPF and positions, normalized weights, current ratings, PWM including zero, heights, tilt, convergence, fixed vendor comparison and independent centre formula.');
+console.log(JSON.stringify({mini36PPF:mini.output().base,components:mini.components,comparison:ref},null,2));

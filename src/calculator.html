@@ -18,11 +18,12 @@
     #phyto-beam-explorer .beam-swatch.plant { background:var(--viz-series-2); }
     #phyto-beam-explorer .beam-swatch.desk { background:var(--viz-series-3); }
     #phyto-beam-explorer .beam-brief { display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--font-size-base) * .6); }
+    #phyto-beam-explorer #pbe-estimate-details th:first-child { width:30%; }
     @media(max-width:560px) { #phyto-beam-explorer .beam-columns, #phyto-beam-explorer .beam-brief { grid-template-columns:1fr; } }
   </style>
   <div>
     <h2>Источник, пучок и две полезные зоны</h2>
-    <div class="text-small">Модули Samsung · драйверы и диммирование · 10 растений</div>
+    <div class="text-small">Samsung и MiniFermer · диммирование · 10 растений</div>
   </div>
   <div class="viz-controls">
     <label class="form-label beam-field" for="pbe-plant">Растение
@@ -58,6 +59,7 @@
         <optgroup label="MiniFermer · оценка с допущениями">
           <option value="mf193">MiniFermer 1.9.3 · 3500 K · диапазон PPFD</option>
           <option value="mf194">MiniFermer 1.9.4 · 4000 K · диапазон PPFD</option>
+          <option value="mf36">MiniFermer 3.6 · гипотеза Seoul + Osram 660 нм</option>
         </optgroup>
         <optgroup label="Условные сценарии · PPF вручную">
         <option value="mini">Quantum Board Mini · 120 × 120 мм</option>
@@ -133,6 +135,15 @@
   <div class="text-small" id="pbe-target" aria-live="polite"></div>
   <div class="text-small" id="pbe-flow" aria-live="polite"></div>
   <div class="text-small" id="pbe-capability" aria-live="polite"></div>
+  <section id="pbe-vendor-comparison" class="beam-field" aria-labelledby="pbe-vendor-title" hidden>
+    <h3 id="pbe-vendor-title">MiniFermer 3.6: расчёт и замеры продавца</h3>
+    <div class="text-small">Отдельное сравнение: 1 плата, 100% яркости, без наклона. Ползунки выше не меняют эту таблицу. PPFD — мкмоль/(м²·с).</div>
+    <table class="table table-sm"><thead><tr><th scope="col">см</th><th scope="col">Замер</th><th scope="col">Расчёт<br><span class="text-small">база · диапазон</span></th><th scope="col">Δ, %</th></tr></thead><tbody id="pbe-vendor-rows"></tbody></table>
+    <div class="text-small" id="pbe-vendor-result"></div>
+    <div class="text-small" id="pbe-vendor-model-check"></div>
+    <div class="text-small">У продавца указано 12 Вт и изображён бокс; положение датчика, отражения, температура и наличие линз не описаны. Здесь условно сравниваем с точкой под центром открытой платы в свободном пространстве, а не со средним по кроне. Подгонки PPF под замеры нет.</div>
+    <div class="text-small"><a href="https://minifermer.ru/data/111%20sasa/qb-mini-36-specs.jpg" target="_blank" rel="noopener noreferrer">Исходная картинка MiniFermer: 244 / 120 / 75 / 50</a></div>
+  </section>
   <details id="pbe-data-details">
     <summary class="cursor-interaction">Плата, драйверы и наш контроллер</summary>
     <div class="beam-field">
@@ -152,8 +163,8 @@
     <div class="beam-field">
       <div class="text-small" id="pbe-estimate-description"></div>
       <table class="table table-sm"><thead><tr><th scope="col">Параметр</th><th scope="col">Что принято в расчёте</th></tr></thead><tbody id="pbe-estimate-table"></tbody></table>
-      <div class="text-small">Диапазон условен: CRI 80, выбранные группы потока и 65 мА на LED ещё не подтверждены. Другая партия, схема питания или оптика могут дать результат за его пределами. Карты MiniFermer в отражающем гроубоксе не использованы как замер света в комнате.</div>
-      <div class="text-small"><a id="pbe-estimate-link" target="_blank" rel="noopener noreferrer">Плата · MiniFermer</a> · <a href="https://www1.futureelectronics.com/doc/Samsung%20LED/SPHWHAHDNG28YZR2D2.pdf" target="_blank" rel="noopener noreferrer">Каталог Samsung · LM281B+ Pro</a> · <a href="https://minifermer.ru/page_422.html" target="_blank" rel="noopener noreferrer">Измерения MiniFermer в гроубоксе</a></div>
+      <div class="text-small" id="pbe-estimate-limits"></div>
+      <div class="text-small"><a id="pbe-estimate-link" target="_blank" rel="noopener noreferrer">Плата · MiniFermer</a><span id="pbe-estimate-sources"></span></div>
     </div>
   </details>
   <div class="beam-columns">
@@ -202,6 +213,7 @@
     linear98:{w:.4999,d:.016,kind:'catalog',cap:'Линейка 98: длинный источник для полки или подвеса. Несколько плат расположены параллельными рядами.'},
     mf193:{w:.39,d:.18,kind:'estimate',cap:'MiniFermer 1.9.3: открытая плата 390 × 180 мм, 3500 K. Высота и наклон меняют пятно; яркость здесь — условный PWM совместимого драйвера.'},
     mf194:{w:.39,d:.18,kind:'estimate',cap:'MiniFermer 1.9.4: открытая плата 390 × 180 мм, 4000 K. Высота и наклон меняют пятно; яркость здесь — условный PWM совместимого драйвера.'},
+    mf36:{w:.12,d:.12,kind:'estimate',cap:'MiniFermer 3.6: 24 белых + 1 красный LED, 120 × 120 мм. Seoul SunLike — принятая замена неизвестного белого LED, не подтверждённый состав платы. Osram GH CSSRM3.24 заявлен продавцом.'},
     mini:{w:.12,d:.12,kind:'rect',cap:'Mini: высота, поворот, разнос модулей; диммирование с отдельным драйвером. Линзы — по совместимости.'},
     qb30:{w:.39,d:.12,kind:'rect',cap:'30 Вт: высота, поворот, диммер; штатные линзы MiniFermer для этой раскладки не подходят.'},
     qb60:{w:.39,d:.18,kind:'rect',cap:'60 Вт: высота, поворот, диммер. Линзы доступны для части LM301B/Sunlike; для LM281B+Pro — нет.'},
@@ -293,6 +305,50 @@
     return {modules,ledCount,photonFactors,heatFactors,angles,output,layout,summarize};
   })();
   // ESTIMATE MODEL END
+  // MINI36 MODEL START: Seoul is a substitute hypothesis, NOT a confirmed MiniFermer BOM.
+  const mini36Model = (() => {
+    const whiteCount=24,whiteReferencePPF=1.78,whiteCurrent=150,redCurrent=600;
+    const url='https://minifermer.ru/product_3950.html';
+    const seoulURL='https://www.neumueller.com/datenblatt/seoulsemiconductor/STD_Datasheet_STWSC12S-E1H10000_231025_R1_2.pdf';
+    const osramURL='https://look.ams-osram.com/m/1c76048636e1819b/original/GH-CSSRM3-24.pdf';
+    // Approximate readings from Seoul E1 rev1.2 pp6,8 and Osram rev1.7 pp9,10.
+    // Current-factor brackets are chosen rounding sensitivity, not manufacturer tolerances.
+    // Transfer luminous/radiant relative factors to PPF assuming invariant spectral shape.
+    const scenarios=[
+      {name:'нижний',tj:85,whiteI:.50,whiteT:.87,redReference:5.05,redI:.85,redT:.94},
+      {name:'базовый',tj:55,whiteI:.51,whiteT:.94,redReference:5.42,redI:.86,redT:.98},
+      {name:'верхний',tj:25,whiteI:.52,whiteT:1,redReference:5.65,redI:.87,redT:1}
+    ];
+    const components=scenarios.map(s=>({white:whiteCount*whiteReferencePPF*s.whiteI*s.whiteT,red:s.redReference*s.redI*s.redT}));
+    // Approximate LED centres from the vendor's board illustration, in metres.
+    const whitePoints=[-.045,-.022,.022,.045].flatMap(y=>[-.05,-.03,-.01,.01,.03,.05].map(x=>[x,y]));
+    function output(_id='mf36',count=1,dim=100){
+      const base=components.map(c=>c.white+c.red),full=base.map(f=>f*count),fluxes=full.map(f=>f*dim/100);
+      return {base,full,fluxes,flux:fluxes[1],components};
+    }
+    function layout(count){return Array.from({length:count},(_,i)=>({x:0,y:(i-(count-1)/2)*.16,w:.12,d:.12}));}
+    function weightedGroups(groups,level){
+      const c=components[level],total=c.white+c.red;
+      return groups.map(g=>({...g,points:[...whitePoints.map(([x,y])=>[x,y,c.white/whiteCount/total]),[0,0,c.red/total]]}));
+    }
+    function summarize(groups,h,t,fluxes,density=1){
+      const results=fluxes.map((flux,i)=>photometry.summarize(weightedGroups(groups,i),h,t,120,flux,density));
+      const span=key=>[Math.min(...results.map(s=>s[key])),Math.max(...results.map(s=>s[key]))];
+      return {...results[1],range:{mean:span('mean'),center:span('center')},scenarios:results};
+    }
+    const measurements=[{height:20,ppfd:244},{height:30,ppfd:120},{height:40,ppfd:75},{height:50,ppfd:50}];
+    let reference=null;
+    function comparison(){
+      // Fixed reference: one board at 100%, no tilt/optics/reflections. Never fit to measurements.
+      if(!reference)reference=measurements.map(m=>{
+        const result=summarize(layout(1),m.height/100,0,output().fluxes);
+        return {...m,calculated:result.center,range:result.range.center,delta:100*(result.center/m.ppfd-1),equivalentPPF:output().flux*m.ppfd/result.center};
+      });
+      return reference;
+    }
+    return {whiteCount,whiteReferencePPF,whiteCurrent,redCurrent,scenarios,components,whitePoints,url,seoulURL,osramURL,output,layout,weightedGroups,summarize,measurements,comparison};
+  })();
+  // MINI36 MODEL END
   // PLANT MODEL START: broad light groups, explicit scenario thresholds (not injury limits).
   const plantModel = (() => {
     const groups={low:{L:3,U:6},medium:{L:6,U:10},high:{L:12,U:16}};
@@ -324,7 +380,7 @@
   let state = {source:'square50',angle:60,height:40,tilt:0,dim:70,dim2:70,ppf:50,plant:'monstera',hours:12,count:2,driver:'ldd',current:700};
   const bounded=(v,a,b,f)=>Number.isFinite(Number(v))?Math.min(b,Math.max(a,Number(v))):f;
   function restore(saved) {
-    if (!saved || !['phyto-beams-v1','phyto-beams-v2','phyto-beams-v3','phyto-beams-v4','phyto-beams-v5'].includes(saved.schema)) return;
+    if (!saved || !['phyto-beams-v1','phyto-beams-v2','phyto-beams-v3','phyto-beams-v4','phyto-beams-v5','phyto-beams-v6'].includes(saved.schema)) return;
     const driver=hardware.drivers[saved.driver]?saved.driver:'ldd';
     state={source:profiles[saved.source]?saved.source:'square50',angle:bounded(saved.angle,30,120,60),height:bounded(saved.height,20,100,40),tilt:bounded(saved.tilt,-20,20,0),dim:bounded(saved.dim,0,100,70),dim2:bounded(saved.dim2,0,100,70),ppf:bounded(saved.ppf,0,400,50),plant:plantModel.plants[saved.plant]?saved.plant:'monstera',hours:bounded(saved.hours,6,16,12),count:[1,2,4].includes(Number(saved.count))?Number(saved.count):2,driver,current:hardware.drivers[driver].currents.includes(Number(saved.current))?Number(saved.current):700};
   }
@@ -337,7 +393,7 @@
     svg.appendChild(n);return n;
   }
   function groups(p) {
-    if(p.kind==='estimate')return estimateModel.layout(state.count);
+    if(p.kind==='estimate')return (state.source==='mf36'?mini36Model:estimateModel).layout(state.count);
     if(p.kind==='catalog'){
       if(state.source==='linear98')return Array.from({length:state.count},(_,i)=>({x:0,y:(i-(state.count-1)/2)*.12,w:p.w,d:p.d}));
       if(state.count===1)return [{x:0,y:0,w:p.w,d:p.d}];
@@ -360,7 +416,9 @@
       const result=[];
       for(const a of groups) {
         const local=[];
-        if(a.disc) {
+        if(a.points) {
+          local.push(...a.points);
+        } else if(a.disc) {
           const nr=4*density,na=24*density;
           for(let i=0;i<nr;i++)for(let j=0;j<na;j++) {
             const r=Math.sqrt((i+.5)/nr),p=2*Math.PI*(j+.5)/na;
@@ -370,7 +428,7 @@
           const nx=Math.max(4,Math.ceil(a.w/.01))*density,ny=Math.max(3,Math.ceil(a.d/.01))*density;
           for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)local.push([a.w*((i+.5)/nx-.5),a.d*((j+.5)/ny-.5)]);
         }
-        for(const [u,v] of local)result.push({x:a.x+u*Math.cos(t),y:a.y+v,z:h+u*Math.sin(t),weight:(a.weight??(1/groups.length))/local.length});
+        for(const [u,v,weight] of local)result.push({x:a.x+u*Math.cos(t),y:a.y+v,z:h+u*Math.sin(t),weight:(a.weight??(1/groups.length))*(weight??1/local.length)});
       }
       return result;
     }
@@ -436,6 +494,7 @@
     return lo===hi?format(lo):format(lo)+'–'+format(hi);
   };
   function estimateDetails(output){
+    if(state.source==='mf36'){mini36Details(output);return;}
     const m=estimateModel.modules[state.source];
     q('pbe-estimate-description').textContent=`${m.name} · ${m.cct} K. По карточке продавца: 320 Samsung LM281B+ Pro; плата 390 × 180 мм; 44 В, 1,3 А. Полный артикул и бин текущей партии неизвестны.`;
     const rows=[
@@ -451,14 +510,42 @@
     ];
     q('pbe-estimate-table').replaceChildren(...rows.map(([a,b])=>{const tr=document.createElement('tr');for(const value of [a,b]){const td=document.createElement('td');td.textContent=value;tr.appendChild(td);}return tr;}));
     q('pbe-estimate-link').href=m.url;
+    q('pbe-estimate-limits').textContent='Диапазон условен: CRI 80, выбранные группы потока и 65 мА на LED ещё не подтверждены. Другая партия, схема питания или оптика могут дать результат за его пределами. Карты MiniFermer в отражающем гроубоксе не использованы как замер света в комнате.';
+    q('pbe-estimate-sources').innerHTML=' · <a href="https://www1.futureelectronics.com/doc/Samsung%20LED/SPHWHAHDNG28YZR2D2.pdf" target="_blank" rel="noopener noreferrer">Каталог Samsung · LM281B+ Pro</a> · <a href="https://minifermer.ru/page_422.html" target="_blank" rel="noopener noreferrer">Измерения MiniFermer в гроубоксе</a>';
     q('pbe-operating').textContent=`MiniFermer · ${state.count} плат(ы) · принято CRI 80 и 65 мА/LED в импульсе · условный PWM ${state.dim}%. Драйвер требует отдельного подбора.`;
+  }
+  function mini36Details(output){
+    const m=mini36Model,c=output.components[1],decimal=v=>v.toLocaleString('ru-RU',{maximumFractionDigits:2});
+    q('pbe-estimate-description').textContent='По MiniFermer: 24 Sunlike 4000 K + 1 Osram GH CSSRM3.24 660 нм; 120 × 120 × 2 мм, 19,2 В, 600 мА, 11–12 Вт. Производитель и артикул белого LED не указаны. В расчёте вместо него принят Seoul SunLike STWSC12S-E1H10000, 4000 K, CRI ≥95.';
+    const rows=[
+      ['Белый LED · гипотеза Seoul','Паспорт E1, стр. 3: типичный PPF 1,78 мкмоль/с при 300 мА, Tj = 25 °C. Это данные отдельного Seoul, не готовой платы MiniFermer. E2 с меньшим допустимым током здесь не используется.'],
+      ['Ток · гипотеза схемы','24 белых: 6 последовательно × 4 параллельные ветви; общий ток 600 мА делится поровну → 150 мА/белый LED. Один красный последовательно с этим блоком → 600 мА. Внутренняя схема платы не подтверждена.'],
+      ['Красный LED · паспорт Osram','GH CSSRM3.24: типичный PPF 5,42 мкмоль/с при 700 мА, Tj = 25 °C. Для крайних сценариев приняты 5,05–5,65 мкмоль/с группы V5–V7; фактический бин неизвестен.'],
+      ['Поправка на ток · оценка по графикам','Seoul 150/300 мА: коэффициенты 0,50 / 0,51 / 0,52; Osram 600/700 мА: 0,85 / 0,86 / 0,87. Средние — приближённое чтение графиков; ±0,01 — выбранная чувствительность к чтению, не паспортный допуск.'],
+      ['Температура · три сценария','Нижний / базовый / верхний поток: Tj = 85 / 55 / 25 °C. Поправки Seoul: 0,87 / 0,94 / 1; Osram: 0,94 / 0,98 / 1, приблизительно по графикам. Это температура кристалла, не воздуха; теплового расчёта платы нет.'],
+      ['Перенос кривых · допущение','Относительные световые/радиометрические поправки перенесены на PPF при неизменном спектре. Температурные кривые сняты при паспортном токе, а здесь применены к 150/600 мА.'],
+      ['PPF одной платы · расчёт',`${formatRange(output.base,1)} мкмоль/с; база ${decimal(output.base[1])} = белые ${decimal(c.white)} + красный ${decimal(c.red)}. Красный даёт ≈ ${Math.round(100*c.red/output.base[1])}% фотонов базы. PPF: 400–700 нм; люмены в PPF не переводятся.`],
+      ['Пучок и геометрия · допущение','Оба типа LED заменены ламбертовыми источниками 120°, каждый нормирован на свой PPF. Это приближение паспортных диаграмм, не их точная оцифровка. 24 точки по иллюстрации платы + красный в центре. Несколько плат — ряды с зазором 40 мм. Линзы и отражения не учтены.'],
+      ['Яркость · допущение','Общий идеальный PWM: оба цвета меняются пропорционально яркости, ток в импульсе фиксирован. Охлаждение при снижении яркости не моделируется. Драйвер и раздельное управление цветами не подтверждены.'],
+      ['Границы диапазона','Три совместных сценария температуры, чтения кривых и бина красного. Типичный PPF Seoul фиксирован: неизвестный разброс белых LED, их возможная замена и ошибка формы пучка в диапазон не включены. Он не гарантирует охват реальной платы.']
+    ];
+    q('pbe-estimate-table').replaceChildren(...rows.map(([a,b])=>{const tr=document.createElement('tr');for(const value of [a,b]){const td=document.createElement('td');td.textContent=value;tr.appendChild(td);}return tr;}));
+    q('pbe-estimate-link').href=m.url;
+    q('pbe-estimate-limits').textContent='Seoul — согласованное допущение. Сравнение с замерами не подтверждает производителя белых LED, схему платы или точность модели. Отличия условий измерения пока не позволяют выделить причину расхождения.';
+    q('pbe-estimate-sources').innerHTML=` · <a href="${m.seoulURL}" target="_blank" rel="noopener noreferrer">Seoul E1 · PPF и графики</a> · <a href="${m.osramURL}" target="_blank" rel="noopener noreferrer">Osram · паспорт</a>`;
+    q('pbe-operating').textContent=`MiniFermer 3.6 · ${state.count} плат(ы) · гипотеза: Seoul 150 мА + Osram 600 мА · базовая Tj 55 °C · условный PWM ${state.dim}%. Драйвер требует отдельного подбора.`;
+    const comparison=m.comparison();
+    q('pbe-vendor-rows').innerHTML=comparison.map(row=>`<tr><td>${row.height}</td><td class="tabular-nums">${row.ppfd}</td><td class="tabular-nums">≈ ${Math.round(row.calculated)}<div class="text-small">${formatRange(row.range)}</div></td><td class="tabular-nums">${row.delta>0?'+':''}${Math.round(row.delta)}%</td></tr>`).join('');
+    const differences=comparison.map(row=>Math.abs(row.delta));
+    q('pbe-vendor-result').textContent=`Базовый расчёт ниже замеров примерно на ${Math.round(Math.min(...differences))}–${Math.round(Math.max(...differences))}%. Все четыре замера выше выбранного диапазона. Гипотеза Seoul и принятые условия пока не воспроизводят замеры продавца. Разница: (расчёт − замер) / замер.`;
+    q('pbe-vendor-model-check').textContent=`Проверка гипотезы: при неизменных пучке и долях цветов для совпадения на 20 см потребовалось бы ≈ ${Math.round(comparison[0].equivalentPPF)} мкмоль/с, а на 50 см — ≈ ${Math.round(comparison[3].equivalentPPF)}. Одной заменой PPF все точки не совместить. Эти значения не использованы в расчёте и не являются измерением полного потока.`;
   }
   function scenarioStatus(dailyRange,group){
     const lo=plantModel.classify(dailyRange[0],group),hi=plantModel.classify(dailyRange[1],group);
     return {label:lo===hi?plantModel.categories[lo].label+' во всех сценариях':plantModel.categories[lo].label+' → '+plantModel.categories[hi].label+' · зависит от сценария',color:lo===hi?plantModel.categories[lo].color:'var(--muted-foreground)'};
   }
   function render() {
-    const p=profiles[state.source],catalog=p.kind==='catalog',estimated=p.kind==='estimate',dim=p.fixed?100:state.dim;
+    const p=profiles[state.source],catalog=p.kind==='catalog',estimated=p.kind==='estimate',mini36=state.source==='mf36',estimateEngine=mini36?mini36Model:estimateModel,dim=p.fixed?100:state.dim;
     const driver=hardware.drivers[state.driver];
     if(!driver.currents.includes(state.current))state.current=700;
     if(controls.current.dataset.driver!==state.driver){controls.current.replaceChildren(...driver.currents.map(i=>{const o=document.createElement('option');o.value=i;o.textContent=state.driver==='ldd'?`LDD-${i}H · ${i} мА`:`${i} мА`;return o;}));controls.current.dataset.driver=state.driver;}
@@ -469,16 +556,17 @@
     q('pbe-hardware').hidden=!catalog&&!estimated;q('pbe-data-details').hidden=!catalog;
     controls.driver.parentElement.hidden=!catalog;controls.current.parentElement.hidden=!catalog;
     q('pbe-estimate-details').hidden=!estimated;q('pbe-estimate-notice').hidden=!estimated;
+    q('pbe-vendor-comparison').hidden=!mini36;
     q('pbe-channel2').hidden=!catalog||state.driver!=='ldd'||state.count===1;
     const op=catalog?hardware.operate(state):null;
-    const estimate=estimated?estimateModel.output(state.source,state.count,dim):null;
+    const estimate=estimated?estimateEngine.output(state.source,state.count,dim):null;
     const angle=catalog?photometry.nativeAngle:estimated?120:state.angle;
     if(catalog){controls.angle.value=String(angle);hardwareDetails(op);}else if(estimated){controls.angle.value=String(angle);estimateDetails(estimate);}else q('pbe-operating').textContent='';
     q('pbe-validation').hidden=!catalog||op.ok;
     q('pbe-validation').textContent=catalog&&!op.ok?op.reason:'';
     q('pbe-height-value').textContent=state.height+' см';
     q('pbe-angle-label').textContent=catalog?'Пучок LM301B · без оптики':estimated?'Пучок · принятый базовый сценарий':'Условный полный угол пучка';
-    q('pbe-angle-value').textContent=catalog?'≈ '+Math.round(angle)+'° · фиксирован':estimated?'120° · сценарии 110–130°':state.angle+'°';
+    q('pbe-angle-value').textContent=catalog?'≈ '+Math.round(angle)+'° · фиксирован':mini36?'120° · приближение без линз':estimated?'120° · сценарии 110–130°':state.angle+'°';
     const base=catalog?hardware.point(state.source,state.current):null;
     q('pbe-ppf-value').textContent=(estimated?'≈ '+formatRange(estimate.full):catalog?(base.ppf*state.count).toLocaleString('ru-RU',{maximumFractionDigits:2}):state.ppf)+' мкмоль/с';
     controls.ppf.max=String(estimated?Math.max(400,Math.ceil(estimate.full[2])):400);
@@ -491,7 +579,7 @@
     q('pbe-dim-value').textContent=p.fixed?'Не подтверждено':dim+'%';
     q('pbe-dim2-value').textContent=state.dim2+'%';
     q('pbe-capability').textContent=p.cap;
-    q('pbe-method').textContent=(estimated?'PPF и PPFD оценены при принятых спектральных, тепловых и угловых сценариях. Каталожный поток отдельного LED не является измерением платы. Поправка на нагрев условная; теплового расчёта нет. ':catalog?'PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. ':'PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. ')+ 'Купол, отражения и затенение листьями не учтены. Карта — расчёт на плоскости, не измерения листьев.';
+    q('pbe-method').textContent=(mini36?'PPF — сумма белых Seoul и красного Osram с приближёнными поправками по графикам. Состав белых LED и их ток — гипотеза; температуры заданы сценариями. Кривые обоих пучков приближены ламбертовыми. ':estimated?'PPF и PPFD оценены при принятых спектральных, тепловых и угловых сценариях. Каталожный поток отдельного LED не является измерением платы. Поправка на нагрев условная; теплового расчёта нет. ':catalog?'PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. ':'PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. ')+ 'Купол, отражения и затенение листьями не учтены. Карта — расчёт на плоскости, не измерения листьев.';
     if(catalog&&!op.ok){
       for(const id of ['pbe-mean','pbe-center','pbe-dli'])q(id).textContent='—';
       q('pbe-status').textContent='Расчёт недоступен для этой комбинации';q('pbe-status-dot').style.background='var(--muted)';
@@ -505,7 +593,7 @@
     const g=groups(p),flux=estimated?estimate.flux:catalog?op.flux:state.ppf*dim/100;
     if(catalog)g.forEach((a,i)=>a.weight=flux>0?op.fluxes[i]/flux:1/g.length);
     const curve=catalog?'lm301b':angle,key=JSON.stringify([state.source,state.height,curve,state.tilt,flux,g]);
-    if(key!==metricKey){metrics=estimated?estimateModel.summarize(g,h,t,estimate.fluxes):photometry.summarize(g,h,t,curve,flux);metricKey=key;}
+    if(key!==metricKey){metrics=estimated?estimateEngine.summarize(g,h,t,estimate.fluxes):photometry.summarize(g,h,t,curve,flux);metricKey=key;}
     const number=v=>v>0&&v<1?'<1':Math.round(v).toLocaleString('ru-RU');
     q('pbe-mean').textContent='≈ '+(estimated?formatRange(metrics.range.mean):number(metrics.mean));
     q('pbe-center').textContent='≈ '+(estimated?formatRange(metrics.range.center):number(metrics.center));
@@ -518,7 +606,7 @@
     const status=estimated?scenarioStatus(dailyRange,selected.group):{label:plantModel.categories[meanClass].label+' по среднему DLI',color:plantModel.categories[meanClass].color};
     q('pbe-status').textContent=selected.name+' · '+status.label;
     q('pbe-status-dot').style.background=status.color;
-    if(estimated)q('pbe-estimate-notice').textContent=`Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. Это не измерение и не доверительный интервал. Карта и проценты площади — базовый сценарий: средний PPFD ≈ ${number(metrics.mean)} мкмоль/(м²·с), DLI ≈ ${decimal(daily)}.`;
+    if(estimated)q('pbe-estimate-notice').textContent=(mini36?'Гипотеза Seoul + Osram: диапазон по 3 сценариям температуры и потока; пучок принят 120°. ':'Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. ')+`Это не измерение и не доверительный интервал. Карта и проценты площади — базовый сценарий: средний PPFD ≈ ${number(metrics.mean)} мкмоль/(м²·с), DLI ≈ ${decimal(daily)}.`;
     q('pbe-target').textContent=`Зелёная цель: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: средний PPFD ${Math.round(target.L/(state.hours*.0036))}–${Math.round(target.U/(state.hours*.0036))} мкмоль/(м²·с)`;
     q('pbe-plant-source').href=selected.url;
     for(let i=0;i<legendItems.length;i++)legendItems[i].textContent=plantModel.categories[i].label+' · '+decimal(assessment.percentages[i])+'%';
@@ -582,7 +670,7 @@
     const diameter=2*h*Math.tan(b)*100;
     q('pbe-geometric-value').textContent=`Для точечного источника без наклона: ≈ ${Math.round(angle)}° на высоте ${state.height} см → контур половинной силы излучения ≈ ${Math.round(diameter)} см. За контуром тоже есть свет.`;
   }
-  function save(){const f=window.openai?.setWidgetState;if(f)Promise.resolve(f.call(window.openai,{modelContent:{schema:'phyto-beams-v5',...state},privateContent:null})).catch(()=>{});}
+  function save(){const f=window.openai?.setWidgetState;if(f)Promise.resolve(f.call(window.openai,{modelContent:{schema:'phyto-beams-v6',...state},privateContent:null})).catch(()=>{});}
   for(const [key,c] of Object.entries(controls)){
     c.addEventListener('input',()=>{if(key==='source'&&profiles[c.value]?.kind==='estimate'&&profiles[state.source].kind!=='estimate')state.count=1;state[key]=['source','plant','driver'].includes(key)?c.value:Number(c.value);render();});
     c.addEventListener('change',save);
