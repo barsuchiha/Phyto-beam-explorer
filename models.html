@@ -10,7 +10,7 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=63b38062f783" />
+    <link rel="stylesheet" href="./styles/models.css?v=2ad91069cc56" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -28,19 +28,20 @@
           "./src/data/plants.js": "./src/data/plants.js?v=ac1847f6b1e0",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
           "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=cf444792b04a",
-          "./src/models-app.js": "./src/models-app.js?v=46402ae310b2",
+          "./src/models-app.js": "./src/models-app.js?v=b7289f5a084d",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=8ddb7d9b7bf4",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
+          "./src/models/daily-light.js": "./src/models/daily-light.js?v=48b159f820a5",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=111269e33ffb",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=ab0d6246e51e",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/layout.js": "./src/models/layout.js?v=08b53705b4d3",
           "./src/models/leaf-bvh.js": "./src/models/leaf-bvh.js?v=4c04ff2b48f5",
           "./src/models/leaf-collision.js": "./src/models/leaf-collision.js?v=d7e9ed2e991b",
           "./src/models/leaf-geometry.js": "./src/models/leaf-geometry.js?v=5461205619bf",
-          "./src/models/light-readout.js": "./src/models/light-readout.js?v=2ec989bac706",
+          "./src/models/light-readout.js": "./src/models/light-readout.js?v=474f0463b1bc",
           "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=3a184fd9616b",
           "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=38a07b8ec53c",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
@@ -58,11 +59,12 @@
           "./src/ui/bulb-details.js": "./src/ui/bulb-details.js?v=14630a51790e",
           "./src/ui/bulb-mesh.js": "./src/ui/bulb-mesh.js?v=3ab5192c6787",
           "./src/ui/controls.js": "./src/ui/controls.js?v=bed80977e352",
+          "./src/ui/daily-light.js": "./src/ui/daily-light.js?v=063bd50470e4",
           "./src/ui/details.js": "./src/ui/details.js?v=b3bf000685a4",
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=c0e44bceef37",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=1ad5fd8d93fe",
           "./src/ui/olive-view.js": "./src/ui/olive-view.js?v=d7a04319f710",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=79fa6cfb08cc",
           "./src/ui/results.js": "./src/ui/results.js?v=efc24d0a9431",
@@ -75,7 +77,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=46402ae310b2"></script>
+    <script type="module" src="./src/models-app.js?v=b7289f5a084d"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -410,23 +412,13 @@
               ><button type="button" data-view="rays" aria-pressed="false">
                 Ход лучей</button
               ><button type="button" data-view="map" aria-pressed="false">
-                Карта света
+                Карта PPFD
               </button>
             </div>
             <button type="button" id="lm-focus">Головка крупно</button
             ><button type="button" id="lm-reset-view">Вся сцена</button>
           </div>
           <div id="lm-map-controls" hidden>
-            <label for="lm-colorMetric"
-              >Цвет карты
-              <select class="form-select" id="lm-colorMetric">
-                <option value="ppfd">PPFD · плавная шкала</option>
-                <option value="dli">DLI · плавная шкала</option>
-                <option value="dli-guide">
-                  DLI · условный ориентир растения
-                </option>
-              </select>
-            </label>
             <div
               id="lm-continuous-legend"
               aria-label="Шкала PPFD от 0 до 300 и выше"
@@ -439,20 +431,6 @@
                 верхний цвет.
               </p>
             </div>
-            <div class="model-legend" id="lm-legend">
-              <span style="--dot: #3b8fea">Значительно ниже ориентира</span
-              ><span style="--dot: #e6c64d">Ниже ориентира</span
-              ><span style="--dot: #56b879">В диапазоне ориентира</span
-              ><span style="--dot: #eb6b62">Выше ориентира</span
-              ><span style="--dot: #7e2748">Значительно выше ориентира</span>
-            </div>
-            <p class="model-hint" id="lm-dli-note">
-              Цвет — вклад лампы в DLI участка относительно условного ориентира
-              группы. Синий: менее половины нижней границы; бордовый: от двух
-              верхних границ. Это не оценка здоровья растения и не пороги ожога.
-              Теневой участок может быть синим при достаточном свете на других
-              листьях. Свет окна не добавлен.
-            </p>
           </div>
           <div id="lm-view">
             <p id="lm-loading">Загружаю сохранённую 3D-модель…</p>
@@ -467,30 +445,75 @@
           <p id="lm-status" class="model-hint" role="status">
             Расчёт после загрузки модели.
           </p>
-          <div class="model-metrics" id="lm-metrics" aria-live="polite"></div>
-          <p class="model-hint" id="lm-source-summary"></p>
-          <p class="model-hint" id="lm-daily-note"></p>
-          <p class="model-surface-summary" id="lm-surface-summary"></p>
-          <div id="lm-budget"></div>
-          <p class="model-hint" id="lm-receiver-note">
-            PPFD усредняется по всей внешней оболочке кроны, включая теневую
-            сторону. Это другая область усреднения, чем на первой странице.
-            Рисованные листья не участвуют в расчёте.
-          </p>
-          <div id="lm-leaf-panel" hidden>
-            <label for="lm-leaf-select"
-              >Лист · можно нажать на него в 3D
-              <select class="form-select" id="lm-leaf-select"></select>
-            </label>
-            <p class="model-hint" id="lm-leaf-detail" aria-live="polite"></p>
-          </div>
-          <details id="lm-reference-details" class="model-hint">
-            <summary>Датчик над растением · вспомогательный</summary>
-            <div
-              id="lm-reference-metrics"
-              class="model-reference-metrics"
-            ></div>
-            <p id="lm-reference-note"></p>
+          <section
+            id="lm-daily-panel"
+            class="daily-report"
+            aria-labelledby="lm-daily-heading"
+            hidden
+          >
+            <div class="daily-overview">
+              <svg
+                id="lm-daily-icon"
+                viewBox="0 0 96 96"
+                role="img"
+                aria-label="Свет за день"
+              >
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <path
+                    class="daily-rays"
+                    d="M48 5v9 M48 82v9 M5 48h9 M82 48h9 M18 18l6 6 M72 72l6 6 M18 78l6-6 M72 24l6-6"
+                  />
+                  <circle cx="48" cy="48" r="25" opacity="0.35" />
+                </g>
+                <path id="lm-daily-fill" fill="currentColor" />
+              </svg>
+              <div aria-live="polite">
+                <h2 id="lm-daily-heading">Свет за день · от лампы</h2>
+                <p id="lm-daily-title" class="daily-title"></p>
+                <p id="lm-daily-amount" class="daily-amount"></p>
+                <p id="lm-daily-reference" class="model-hint">
+                  Полное солнце = нижний ориентир для растения.
+                </p>
+              </div>
+            </div>
+            <div id="lm-leaf-panel">
+              <label for="lm-leaf-select"
+                >Смотрим лист · можно нажать на него в 3D
+                <select class="form-select" id="lm-leaf-select"></select>
+              </label>
+            </div>
+            <p id="lm-daily-context" class="model-hint"></p>
+            <button id="lm-daily-switch" type="button" hidden>
+              Считать на листьях
+            </button>
+          </section>
+          <details id="lm-light-details" class="light-details">
+            <summary>Цифры и баланс света</summary>
+            <p id="lm-trace-note" class="model-hint"></p>
+            <div class="model-metrics" id="lm-metrics"></div>
+            <p class="model-hint" id="lm-source-summary"></p>
+            <p class="model-hint" id="lm-daily-note"></p>
+            <p class="model-surface-summary" id="lm-surface-summary"></p>
+            <div id="lm-budget"></div>
+            <p class="model-hint" id="lm-receiver-note">
+              PPFD усредняется по всей внешней оболочке кроны, включая теневую
+              сторону. Это другая область усреднения, чем на первой странице.
+              Рисованные листья не участвуют в расчёте.
+            </p>
+            <p class="model-hint" id="lm-leaf-detail"></p>
+            <details id="lm-reference-details" class="model-hint">
+              <summary>Датчик над растением · вспомогательный</summary>
+              <div
+                id="lm-reference-metrics"
+                class="model-reference-metrics"
+              ></div>
+              <p id="lm-reference-note"></p>
+            </details>
           </details>
         </section>
       </div>

@@ -94,9 +94,8 @@ export function normalizeFitting(input = {}) {
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.hours = clamp(s.hours, 6, 16, 12);
   s.receiver = s.receiver === "leaves" ? "leaves" : "crown";
-  s.colorMetric = ["dli", "dli-guide"].includes(s.colorMetric)
-    ? s.colorMetric
-    : "ppfd";
+  // Migrate saved DLI maps to the single PPFD map.
+  s.colorMetric = "ppfd";
   s.canopy = clamp(s.canopy, 70, 140, 105);
   s.flap = clamp(s.flap, 25, 65, 45);
   s.screen = m.optic === "cone" && s.screen === true;

@@ -17,6 +17,7 @@ import {
 import { calculateLuminaire, lightOutput } from "./models/luminaire-light.js";
 import { calculateReferenceLight } from "./models/reference-light.js";
 import { createLuminaireView } from "./ui/luminaire-view.js";
+import { renderDailyLight } from "./ui/daily-light.js";
 import { plantModel } from "./models/plants.js";
 import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
 import { lightWorkerFile } from "./data/worker-asset.js";
@@ -24,7 +25,8 @@ import {
   surfaceReadout,
   surfaceMetricCards,
   percentText,
-  lightMapScales,
+  ppfdMapStops,
+  ppfdMapPosition,
 } from "./models/light-readout.js";
 
 const q = (id) => document.getElementById("lm-" + id),
@@ -60,7 +62,7 @@ for (const [id, p] of Object.entries(plants))
   q("plant").append(option(id, p.name));
 let view,
   latestResult = null,
-  selectedLeaf = 0;
+  selectedLeaf = -1;
 try {
   view = createLuminaireView(q("view"), (id) => {
     selectedLeaf = id;
@@ -105,33 +107,19 @@ function setOptions(id, items, value) {
   select.value = value;
 }
 function renderMapLegend() {
-  const scale = lightMapScales[state.colorMetric],
-    continuous = Boolean(scale);
-  hide("continuous-legend", !continuous);
-  hide("legend", continuous);
-  hide("dli-note", continuous);
-  if (!continuous) return;
-  q("continuous-legend").setAttribute(
-    "aria-label",
-    `Шкала ${scale.label} от 0 до ${scale.max} и выше`,
-  );
   q("continuous-gradient").style.background =
-    `linear-gradient(to right,${scale.stops.map(([v, c]) => `${c} ${scale.position(v) * 100}%`).join(",")})`;
+    `linear-gradient(to right,${ppfdMapStops.map(([v, c]) => `${c} ${ppfdMapPosition(v) * 100}%`).join(",")})`;
   q("continuous-ticks").replaceChildren(
-    ...scale.stops.map(([value]) => {
+    ...ppfdMapStops.map(([value]) => {
       const tick = document.createElement("span");
-      tick.style.left = scale.position(value) * 100 + "%";
+      tick.style.left = ppfdMapPosition(value) * 100 + "%";
       tick.textContent =
-        value.toLocaleString("ru-RU") + (value === scale.max ? "+" : "");
+        value.toLocaleString("ru-RU") + (value === 300 ? "+" : "");
       return tick;
     }),
   );
   q("continuous-note").textContent =
-    `${scale.units} · общая логарифмическая шкала. ` +
-    (state.colorMetric === "dli"
-      ? `Добавка от лампы за ${state.hours} ч в день; свет окна не включён. `
-      : "") +
-    `Цвет показывает количество света, а не достаточность для растения. ${scale.max}+ — верхний цвет.`;
+    "PPFD · мкмоль/(м²·с). Цвет показывает, куда попадает свет сейчас. Суточная досветка — в значке солнца под сценой. Шкала общая, логарифмическая; 300+ — верхний цвет.";
 }
 function renderControls(poses, geometry) {
   const m = luminaires[state.model],
@@ -280,16 +268,18 @@ const budgetItems = [
 const fmt = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
 const dose = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
 function renderLeafDetail() {
-  const leaf = latestResult?.leaves?.[selectedLeaf];
+  if (!latestResult) return;
+  const summary = renderDailyLight(state, latestResult, selectedLeaf);
+  const leaf = latestResult.leaves?.find((l) => l.id === summary?.leaf);
   if (!leaf) return;
   q("leaf-select").value = String(selectedLeaf);
-  view?.selectLeaf(selectedLeaf);
+  view?.selectLeaf(leaf.id);
   const values = leaf.sides.map(
     (side, i) =>
       `Сторона ${i === 0 ? "A" : "B"}: PPFD ${fmt(side.range[0])}–${fmt(side.range[1])}, DLI ${dose(plantModel.dli(side.range[0], state.hours))}–${dose(plantModel.dli(side.range[1], state.hours))}`,
   );
   q("leaf-detail").textContent =
-    `Лист ${selectedLeaf + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A — лицевая сторона модели, B — обратная; положение настоящего листа не измерено.` +
+    `Лист ${leaf.id + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A — лицевая сторона модели, B — обратная; положение настоящего листа не измерено.` +
     (leaf.sides.some((s) => s.hits === 0)
       ? " Ноль попаданий лучей не доказывает полную темноту: слабый свет может не попасть в выборку."
       : "");
@@ -316,13 +306,19 @@ function renderResult(result, geometry, reference) {
   const leafMode = result.receiver === "leaves";
   hide("leaf-panel", !leafMode);
   if (leafMode) {
-    if (!result.leaves[selectedLeaf]) selectedLeaf = 0;
+    if (!result.leaves.some((l) => l.id === selectedLeaf)) selectedLeaf = -1;
     setOptions(
       "leaf-select",
-      result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
+      [
+        [-1, "Самый освещённый · автоматически"],
+        ...result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
+      ],
       String(selectedLeaf),
     );
     renderLeafDetail();
+  } else {
+    renderDailyLight(state, result, selectedLeaf);
+    q("leaf-detail").textContent = "";
   }
   q("receiver-note").textContent = leafMode
     ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее взвешено по площади и включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Второе число — среднее по самой освещённой стороне одного листа, не точечный пик. Это показатели распределения, не оценка достаточности света. Форма и наклоны — допущения; значения маленьких участков могут быть шумными.`
@@ -378,6 +374,8 @@ function renderResult(result, geometry, reference) {
   q("status").textContent = readout.emitting
     ? `Всего на ${leafMode ? "листья" : "крону"}: ${percentText(b.target)} исходного PPF; в том числе после отражений: ${percentText(b.returned)} исходного PPF. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`
     : "Лампа выключена: её вклад в PPFD и DLI равен нулю. Доля попавшего света не определяется без исходного потока.";
+  q("trace-note").textContent = q("status").textContent;
+  hide("status", true);
   view?.light(state, result);
 }
 let serial = 0,
@@ -390,6 +388,9 @@ async function render() {
   lightWorker = null;
   latestResult = null;
   hide("leaf-panel", true);
+  hide("daily-panel", true);
+  hide("status", false);
+  q("status").textContent = "Обновляю сцену и считаю свет…";
   try {
     const poses = await getCAD(state.model);
     if (run !== serial) return;
@@ -483,14 +484,6 @@ for (const [name, control] of Object.entries(controls))
       history.replaceState(null, "", url);
     }
     save();
-    if (name === "colorMetric") {
-      renderMapLegend();
-      if (latestResult) {
-        renderSurfaceMetrics(latestResult);
-        view?.light(state, latestResult);
-      }
-      return;
-    }
     render();
   });
 for (const button of document.querySelectorAll("[data-view]"))
@@ -506,6 +499,11 @@ q("reference-details").addEventListener("toggle", () =>
 q("leaf-select").addEventListener("input", () => {
   selectedLeaf = Number(q("leaf-select").value);
   renderLeafDetail();
+});
+q("daily-switch").addEventListener("click", () => {
+  state = changeFitting(state, "receiver", "leaves");
+  save();
+  render();
 });
 q("focus").addEventListener("click", () => view?.fit(true));
 q("reset-view").addEventListener("click", () => view?.fit());

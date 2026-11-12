@@ -36,31 +36,6 @@ export function ppfdMapColor(value) {
       .join("")
   );
 }
-// Both legends and surface colours use these fixed scales. DLI is the lamp's
-// daily contribution, with a 0.1 mol softening scale so zero remains defined.
-export const lightMapScales = {
-  ppfd: {
-    label: "PPFD",
-    max: PPFD_MAP_MAX,
-    units: "мкмоль/(м²·с)",
-    stops: ppfdMapStops,
-    position: ppfdMapPosition,
-    color: ppfdMapColor,
-  },
-  dli: {
-    label: "DLI",
-    max: 30,
-    units: "моль/(м²·сутки)",
-    stops: ppfdMapStops.map(([v, color]) => [v / 10, color]),
-    position: (value) => ppfdMapPosition(value * 10),
-    color: (value) => ppfdMapColor(value * 10),
-  },
-};
-export function continuousLightColor(ppfd, metric, hours) {
-  return metric === "dli"
-    ? lightMapScales.dli.color(plantModel.dli(ppfd, hours))
-    : lightMapScales.ppfd.color(ppfd);
-}
 export function surfaceReadout(result) {
   let brightest = null;
   for (const leaf of result.leaves ?? [])
@@ -78,51 +53,45 @@ export function surfaceReadout(result) {
     ],
   };
 }
-// The selected map controls the displayed quantity, not just the colours.
-// Readouts stay linear physical values; only the colour scale is logarithmic.
-export function surfaceMetricCards(result, { colorMetric, hours }) {
-  const daily = colorMetric === "dli" || colorMetric === "dli-guide";
-  const { label, units } = lightMapScales[daily ? "dli" : "ppfd"];
-  const readout = surfaceReadout(result),
-    best = readout.brightest;
-  const leafMode = result.receiver === "leaves";
-  const rangeText = (values, asDaily = daily) => {
-    const formatted = values.map((value) =>
-      (asDaily ? plantModel.dli(value, hours) : value).toLocaleString("ru-RU", {
-        maximumFractionDigits: asDaily ? 2 : 1,
+// Detailed readouts stay in PPFD. The simple daily indicator is separate.
+export function surfaceMetricCards(result, { hours }) {
+  const r = surfaceReadout(result),
+    leafMode = result.receiver === "leaves";
+  const range = (values, daily = false) => {
+    const text = values.map((v) =>
+      (daily ? plantModel.dli(v, hours) : v).toLocaleString("ru-RU", {
+        maximumFractionDigits: daily ? 2 : 1,
       }),
     );
-    return formatted[0] === formatted[1] ? formatted[0] : formatted.join("–");
+    return text[0] === text[1] ? text[0] : text.join("–");
   };
-  const unitNote = units + (daily ? ` · ${hours} ч/день` : "");
-  const captured = !readout.emitting
+  const unit = "мкмоль/(м²·с)";
+  const captured = !r.emitting
     ? "—"
-    : Math.abs(readout.captureRange[1] - readout.captureRange[0]) > 0.0005
-      ? readout.captureRange.map(percentText).join("–")
+    : r.captureRange[1] - r.captureRange[0] > 0.0005
+      ? r.captureRange.map(percentText).join("–")
       : percentText(result.metrics[result.middle].budget.target);
   return [
     [
-      `${label} · среднее по ${leafMode ? "листьям" : "оболочке"}`,
-      rangeText(readout.meanRange),
-      `${leafMode ? "обе стороны" : "вся оболочка"} · ${unitNote}`,
+      `PPFD · среднее по ${leafMode ? "листьям" : "оболочке"}`,
+      range(r.meanRange),
+      `${leafMode ? "обе стороны" : "вся оболочка"} · ${unit}`,
     ],
     leafMode
       ? [
-          `${label} · самая освещённая сторона`,
-          rangeText(best.range),
-          `лист ${best.leaf + 1}, сторона ${best.side === 0 ? "A" : "B"} · ${unitNote}`,
+          "PPFD · самая освещённая сторона",
+          range(r.brightest.range),
+          `лист ${r.brightest.leaf + 1}, сторона ${r.brightest.side === 0 ? "A" : "B"} · ${unit}`,
         ]
-      : daily
-        ? ["Досветка в день", String(hours), "ч · вклад лампы"]
-        : [
-            `DLI от лампы · ${hours} ч`,
-            rangeText(readout.meanRange, true),
-            `${lightMapScales.dli.units} · вся оболочка`,
-          ],
+      : [
+          `DLI от лампы · ${hours} ч`,
+          range(r.meanRange, true),
+          "моль/(м²·сутки) · вся оболочка",
+        ],
     [
       leafMode ? "На листья" : "На крону",
       captured,
-      readout.emitting ? "доля исходного PPF" : "лампа выключена",
+      r.emitting ? "доля исходного PPF" : "лампа выключена",
     ],
   ];
 }

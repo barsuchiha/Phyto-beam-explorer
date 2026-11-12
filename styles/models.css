@@ -201,22 +201,6 @@ html > body {
   border-radius: 50%;
   margin-right: 5px;
 }
-.model-legend {
-  display: flex;
-  gap: 8px 16px;
-  flex-wrap: wrap;
-  margin: 16px 0 8px;
-  font-size: 11px;
-}
-.model-legend span:before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: var(--dot);
-  border-radius: 50%;
-  margin-right: 6px;
-}
 .model-warning {
   padding: 12px 0;
   color: var(--destructive);
@@ -365,18 +349,6 @@ a:focus-visible {
 #lm-map-controls {
   margin: 0 0 14px;
 }
-#lm-map-controls > label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  margin-bottom: 14px;
-}
-#lm-colorMetric {
-  width: auto;
-  max-width: 100%;
-  font-size: 12px;
-}
 #lm-continuous-gradient {
   height: 12px;
   border-radius: 4px;
@@ -411,13 +383,97 @@ a:focus-visible {
   color: var(--foreground);
   margin-top: 12px;
 }
+
+.daily-report {
+  border-top: 1px solid var(--border);
+  padding: 22px 0 18px;
+  margin-top: 16px;
+}
+.daily-overview {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+#lm-daily-icon {
+  width: 88px;
+  height: 88px;
+  color: #d9c180;
+}
+.daily-rays {
+  opacity: 0.7;
+}
+#lm-daily-heading {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  margin: 0 0 7px;
+}
+.daily-title {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 0 0 7px;
+}
+.daily-amount {
+  font-size: 14px;
+  margin: 0;
+}
+#lm-daily-reference {
+  font-size: 11px;
+  margin: 7px 0 0;
+}
+#lm-daily-context {
+  margin: 12px 0 0;
+}
+.daily-report #lm-leaf-panel {
+  margin-top: 18px;
+  max-width: 460px;
+}
+#lm-daily-switch {
+  margin-top: 12px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+}
+#lm-daily-switch:hover {
+  background: var(--muted);
+}
+.light-details {
+  border-top: 1px solid var(--border);
+  padding: 14px 0;
+  font-size: 13px;
+}
+.light-details > summary {
+  cursor: pointer;
+  color: var(--muted-foreground);
+}
+.light-details[open] > summary {
+  margin-bottom: 12px;
+  color: var(--foreground);
+}
+.light-details .model-metrics {
+  border-top: 0;
+  padding-top: 8px;
+}
 @media (max-width: 680px) {
-  #lm-map-controls > label {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
+  .daily-overview {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
   }
-  #lm-colorMetric {
-    width: 100%;
+  #lm-daily-icon {
+    width: 64px;
+    height: 64px;
+  }
+  .daily-title {
+    font-size: 18px;
+  }
+  .daily-amount {
+    font-size: 13px;
   }
 }

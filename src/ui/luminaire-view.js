@@ -3,13 +3,11 @@ import { miniFermerBody } from "./bulb-mesh.js";
 import { OrbitControls } from "../vendor/OrbitControls.js";
 import { plantIllustration } from "../models/plant-illustration.js";
 import { add, mul, surfacePoint } from "../models/crown.js";
-import { plantModel } from "../models/plants.js";
 import { referenceDetector } from "../models/reference-light.js";
 import { populateOlive } from "./olive-view.js";
-import { continuousLightColor } from "../models/light-readout.js";
+import { ppfdMapColor } from "../models/light-readout.js";
 
-const vector = (p) => new T.Vector3(...p),
-  colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
+const vector = (p) => new T.Vector3(...p);
 function material(color, options = {}) {
   return new T.MeshStandardMaterial({
     color,
@@ -435,19 +433,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     currentResult = result;
     dispose(rayGroup);
     dispose(heatGroup);
-    const lightColor = (ppfd) =>
-      state.colorMetric === "dli-guide"
-        ? new T.Color(
-            colors[
-              plantModel.classify(
-                plantModel.dli(ppfd, state.hours),
-                plantModel.plants[state.plant].group,
-              )
-            ],
-          )
-        : new T.Color(
-            continuousLightColor(ppfd, state.colorMetric, state.hours),
-          );
+    const lightColor = (ppfd) => new T.Color(ppfdMapColor(ppfd));
     for (const ray of result.rays)
       rayGroup.add(
         line(
