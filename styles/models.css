@@ -14,14 +14,32 @@ html > body {
 }
 .model-workspace {
   display: grid;
-  grid-template-columns: 290px minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: minmax(220px, 250px) minmax(0, 1fr) minmax(
+      220px,
+      250px
+    );
+  grid-template-areas: "lamp preview plant";
+  gap: 24px;
   align-items: start;
 }
 .model-controls {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   font-size: 14px;
+  min-width: 0;
+}
+.model-lamp-controls {
+  grid-area: lamp;
+}
+.model-plant-controls {
+  grid-area: plant;
+}
+.model-controls-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 .model-controls label {
   display: grid;
@@ -82,6 +100,7 @@ html > body {
   font-size: 13px;
 }
 .model-preview {
+  grid-area: preview;
   position: sticky;
   top: 16px;
   min-width: 0;
@@ -96,6 +115,9 @@ html > body {
 .view-tabs {
   display: flex;
   gap: 3px;
+  flex: 1;
+}
+.view-tabs button {
   flex: 1;
 }
 .model-toolbar button {
@@ -116,7 +138,7 @@ html > body {
   color: var(--background);
 }
 #lm-view {
-  height: 530px;
+  height: clamp(320px, 44vh, 420px);
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -138,15 +160,14 @@ html > body {
   max-height: 70px;
 }
 .model-caption {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  gap: 4px;
   font-size: 11px;
   color: var(--muted-foreground);
   margin: 10px 0;
 }
 .model-caption span:last-child {
-  text-align: right;
+  text-align: left;
 }
 .model-metrics {
   display: grid;
@@ -233,26 +254,20 @@ a:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
-@media (max-width: 900px) {
+@media (max-width: 1040px) {
   .model-workspace {
-    grid-template-columns: 240px minmax(0, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "preview preview"
+      "lamp plant";
+    gap: 28px;
   }
-  #lm-view {
-    height: 430px;
+  .model-preview {
+    position: static;
+    width: 100%;
   }
   .model-metrics strong {
     font-size: 22px;
-  }
-  .model-caption {
-    display: block;
-  }
-  .model-caption span {
-    display: block;
-  }
-  .model-caption span:last-child {
-    text-align: left;
-    margin-top: 4px;
   }
 }
 @media (max-width: 680px) {
@@ -266,8 +281,8 @@ a:focus-visible {
     font-size: 24px;
   }
   .model-workspace {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "preview" "lamp" "plant";
     gap: 24px;
   }
   .model-controls {
@@ -276,7 +291,8 @@ a:focus-visible {
     width: 100%;
     gap: 16px;
   }
-  .model-controls > label:first-child,
+  .model-controls-heading,
+  .model-controls > label:first-of-type,
   .model-controls > hr,
   .model-controls > .model-hint,
   #lm-architecture-details,
@@ -292,7 +308,7 @@ a:focus-visible {
     width: 100%;
   }
   #lm-view {
-    height: 420px;
+    height: 340px;
   }
   .model-metrics {
     gap: 10px;

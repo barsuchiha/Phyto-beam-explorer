@@ -10,7 +10,7 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=35febd4fc934" />
+    <link rel="stylesheet" href="./styles/models.css?v=f0628e771f33" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -90,7 +90,14 @@
         <p class="text-muted">Конструкция → подходящий источник → растение</p>
       </header>
       <div class="model-workspace">
-        <form class="model-controls" onsubmit="return false">
+        <form
+          class="model-controls model-lamp-controls"
+          aria-labelledby="lm-lamp-heading"
+          onsubmit="return false"
+        >
+          <h2 class="model-controls-heading" id="lm-lamp-heading">
+            Светильник
+          </h2>
           <label for="lm-model"
             >Модель<select id="lm-model" class="form-select"></select
           ></label>
@@ -184,44 +191,16 @@
           <p class="model-hint" id="lm-fixed" hidden>
             Лампочка работает на 100%: диммирование не подтверждено.
           </p>
-          <hr />
-          <label for="lm-plant"
-            >Растение<select class="form-select" id="lm-plant"></select
-          ></label>
-          <label for="lm-plantSize"
-            ><span
-              >Высота при типовом наклоне
-              <output id="lm-plantSize-value"></output></span
-            ><input class="form-range" id="lm-plantSize" type="range" step="5"
-          /></label>
-          <label for="lm-leafTilt">
-            <span
-              >Поправка наклона листьев <output id="lm-leafTilt-value"></output
-            ></span>
-            <input
+          <label for="lm-hours"
+            ><span>Досветка в день <output id="lm-hours-value"></output></span
+            ><input
               class="form-range"
-              id="lm-leafTilt"
+              id="lm-hours"
               type="range"
-              min="-20"
-              max="20"
-              step="5"
-            />
-          </label>
-          <p class="model-hint" id="lm-posture-note"></p>
-          <details class="model-hint" id="lm-architecture-details">
-            <summary>Как устроено это растение</summary>
-            <p id="lm-architecture-note"></p>
-            <a id="lm-architecture-source" target="_blank" rel="noopener"
-              >Ботаническое описание формы</a
-            >
-          </details>
-          <label for="lm-receiver"
-            >Где считаем свет
-            <select class="form-select" id="lm-receiver">
-              <option value="crown">Оболочка кроны · прежняя модель</option>
-              <option value="leaves">На листьях · с взаимными тенями</option>
-            </select>
-          </label>
+              min="6"
+              max="16"
+              step="1"
+          /></label>
           <label for="lm-install" id="lm-install-field"
             ><span id="lm-install-label">Высота установки</span
             ><output id="lm-install-value"></output
@@ -232,27 +211,6 @@
               min="50"
               max="250"
               step="5"
-          /></label>
-          <label for="lm-plantOffset"
-            ><span
-              >Сдвиг растения <output id="lm-plantOffset-value"></output></span
-            ><input
-              class="form-range"
-              id="lm-plantOffset"
-              type="range"
-              min="-60"
-              max="60"
-              step="5"
-          /></label>
-          <label for="lm-hours"
-            ><span>Досветка в день <output id="lm-hours-value"></output></span
-            ><input
-              class="form-range"
-              id="lm-hours"
-              type="range"
-              min="6"
-              max="16"
-              step="1"
           /></label>
           <hr />
           <label for="lm-canopy" id="lm-canopy-field"
@@ -555,6 +513,61 @@
             </details>
           </details>
         </section>
+        <form
+          class="model-controls model-plant-controls"
+          aria-labelledby="lm-plant-heading"
+          onsubmit="return false"
+        >
+          <h2 class="model-controls-heading" id="lm-plant-heading">Растение</h2>
+          <label for="lm-plant"
+            >Вид растения<select class="form-select" id="lm-plant"></select
+          ></label>
+          <label for="lm-plantSize"
+            ><span
+              >Высота при типовом наклоне
+              <output id="lm-plantSize-value"></output></span
+            ><input class="form-range" id="lm-plantSize" type="range" step="5"
+          /></label>
+          <label for="lm-leafTilt">
+            <span
+              >Поправка наклона листьев <output id="lm-leafTilt-value"></output
+            ></span>
+            <input
+              class="form-range"
+              id="lm-leafTilt"
+              type="range"
+              min="-20"
+              max="20"
+              step="5"
+            />
+          </label>
+          <p class="model-hint" id="lm-posture-note"></p>
+          <details class="model-hint" id="lm-architecture-details">
+            <summary>Как устроено это растение</summary>
+            <p id="lm-architecture-note"></p>
+            <a id="lm-architecture-source" target="_blank" rel="noopener"
+              >Ботаническое описание формы</a
+            >
+          </details>
+          <label for="lm-receiver"
+            >Где считаем свет
+            <select class="form-select" id="lm-receiver">
+              <option value="crown">Оболочка кроны · прежняя модель</option>
+              <option value="leaves">На листьях · с взаимными тенями</option>
+            </select>
+          </label>
+          <label for="lm-plantOffset"
+            ><span
+              >Сдвиг растения <output id="lm-plantOffset-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-plantOffset"
+              type="range"
+              min="-60"
+              max="60"
+              step="5"
+          /></label>
+        </form>
       </div>
       <section class="model-detail">
         <h2>Что помещается в эту конструкцию</h2>
