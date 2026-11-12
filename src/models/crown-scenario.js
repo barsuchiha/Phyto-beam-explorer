@@ -4,6 +4,7 @@ import {
   summarizeCrown,
   photonBudget,
 } from "./crown.js";
+import { bulbModel } from "./minifermer-bulbs.js";
 import { eraModel } from "./era.js";
 import { mini36Model } from "./mini36.js";
 import { compareScreens, reflectedMetrics, transport } from "./reflections.js";
@@ -20,7 +21,11 @@ export function crownScenario(state, groups, flux, estimate) {
         flux: f,
       }),
     );
-  } else if (state.source === "mf193" || state.source === "mf194") {
+  } else if (
+    state.source === "mf193" ||
+    state.source === "mf194" ||
+    bulbModel.modules[state.source]
+  ) {
     for (const angle of [110, 120, 130])
       for (const f of estimate.fluxes)
         spec.push({ g: groups, curve: angle, flux: f });
@@ -39,7 +44,11 @@ export function crownScenario(state, groups, flux, estimate) {
     });
   const cache = new Map();
   const directScenarios = spec.map((s) => {
-    if (state.source === "mf193" || state.source === "mf194") {
+    if (
+      state.source === "mf193" ||
+      state.source === "mf194" ||
+      bulbModel.modules[state.source]
+    ) {
       if (!cache.has(s.curve))
         cache.set(s.curve, summarizeCrown(crown, rig, s.g, s.curve, 1));
       const shape = cache.get(s.curve);

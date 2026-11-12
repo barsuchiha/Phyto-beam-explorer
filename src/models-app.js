@@ -1,3 +1,4 @@
+import { bulbScreenNote, minifermerBulbs } from "./data/minifermer-bulbs.js";
 import { luminaires, mounts, fittingSources } from "./data/luminaires.js";
 import { cadAssets } from "./data/cad-assets.js";
 import { plants } from "./data/plants.js";
@@ -148,6 +149,8 @@ function renderControls(poses) {
     m.family === "Soltech"
       ? `Экран начинается у светового выхода; стенка 60 мм, зазор 10 мм ${source.type === "bulb" ? "от края колбы" : "от габарита корпуса"}. Верх открыт. Крепление показано условно; нагрев и нагрузка не проверены.`
       : "Стенка 60 мм, радиальный зазор 10 мм вокруг корпуса. Геометрический вариант, механизм регулировки не разработан.";
+  if (minifermerBulbs[state.source])
+    q("screen-note").textContent += " " + bulbScreenNote;
   hide(
     "material-controls",
     m.optic === "none" || (m.optic === "cone" && !state.screen),
@@ -197,11 +200,19 @@ const budgetItems = [
 const fmt = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
 const dose = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
 function renderResult(result, geometry) {
-  const { metrics, range } = result,
-    b = metrics[1].budget;
+  const { metrics, range, middle } = result,
+    b = metrics[middle].budget;
+  const ppfRange = [
+    Math.min(...result.output.fluxes),
+    Math.max(...result.output.fluxes),
+  ];
+  const ppfText =
+    ppfRange[0] === ppfRange[1]
+      ? fmt(metrics[middle].flux)
+      : fmt(ppfRange[0]) + "–" + fmt(ppfRange[1]);
   const ranged = range[1] - range[0] > 0.05;
   q("metrics").innerHTML =
-    `<div><span>Средний PPFD</span><strong>${ranged ? fmt(range[0]) + "–" + fmt(range[1]) : fmt(result.mean)}</strong><small>мкмоль/(м²·с) · вся крона</small></div><div><span>DLI за ${state.hours} ч</span><strong>${ranged ? dose(plantModel.dli(range[0], state.hours)) + "–" + dose(plantModel.dli(range[1], state.hours)) : dose(plantModel.dli(result.mean, state.hours))}</strong><small>моль/(м²·сутки)</small></div><div><span>PPF источников</span><strong>${fmt(metrics[1].flux)}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
+    `<div><span>Средний PPFD</span><strong>${ranged ? fmt(range[0]) + "–" + fmt(range[1]) : fmt(result.mean)}</strong><small>мкмоль/(м²·с) · вся крона</small></div><div><span>DLI за ${state.hours} ч</span><strong>${ranged ? dose(plantModel.dli(range[0], state.hours)) + "–" + dose(plantModel.dli(range[1], state.hours)) : dose(plantModel.dli(result.mean, state.hours))}</strong><small>моль/(м²·сутки)</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
   const bar = document.createElement("div");
   bar.className = "model-budget";
   const labels = document.createElement("div");

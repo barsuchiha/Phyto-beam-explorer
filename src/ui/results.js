@@ -65,6 +65,7 @@ export function createResults(q) {
       era,
       ranged,
       mini36,
+      bulb,
       op,
       estimate,
       metrics,
@@ -136,7 +137,7 @@ export function createResults(q) {
       row.label.textContent = c.label;
     }
     q("pbe-flow").textContent =
-      `Общий поток сейчас: ${estimated ? "≈ " + formatRange(estimate.fluxes) : Number(flux.toFixed(1)).toLocaleString("ru-RU")} мкмоль/с · ${era ? `${g.length} светильник(а)` : g.length === 1 ? "одна плата" : `${g.length} плат(ы)`}` +
+      `Общий поток сейчас: ${estimated ? "≈ " + formatRange(estimate.fluxes, bulb ? 1 : 0) : Number(flux.toFixed(1)).toLocaleString("ru-RU")} мкмоль/с · ${era || bulb ? `${g.length} светильник(а)` : g.length === 1 ? "одна плата" : `${g.length} плат(ы)`}` +
       " · поток до экрана";
   };
 }

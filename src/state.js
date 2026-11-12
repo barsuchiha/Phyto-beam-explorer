@@ -84,10 +84,16 @@ export function updateState(state, key, value) {
     next.plantSize = plantShapes[value].initial;
   if (
     key === "source" &&
-    ["estimate", "era"].includes(profiles[value]?.kind) &&
+    ["estimate", "era", "bulb"].includes(profiles[value]?.kind) &&
     profiles[state.source].kind !== profiles[value]?.kind
   )
     next.count = 1;
+  if (
+    key === "source" &&
+    profiles[value]?.kind === "bulb" &&
+    value !== state.source
+  )
+    next.screenSector = 0;
   next[key] = ["source", "plant", "driver", "screenMode"].includes(key)
     ? value
     : Number(value);

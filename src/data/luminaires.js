@@ -1,3 +1,5 @@
+import { minifermerBulbs, bulbScreenNote } from "./minifermer-bulbs.js";
+
 // Dimensions from the project's P00 / Soltech / flexible-B3 CAD sketches.
 // These are concept envelopes, not manufacturing or thermal approvals.
 export const luminaires = {
@@ -148,9 +150,9 @@ export const mounts = {
   e27: {
     name: "Открытый подвес E27 · проект",
     type: "bulb",
-    maxDiameter: 120,
+    maxDiameter: 140,
     margin: 0,
-    note: "Собственный открытый патрон E27, без закрывающего радиатор купола. Габарит примерки до Ø120 мм; допустимая масса и нагрев ещё не проверены.",
+    note: "Собственный открытый патрон E27, без закрывающего радиатор купола. Габарит нашей примерки расширен до Ø140 мм под MiniFermer. Это проектный вариант, не размер штатного подвеса Soltech; допустимая масса и нагрев ещё не проверены.",
   },
 };
 
@@ -199,4 +201,17 @@ export const fittingSources = {
     url: "https://www.eraworld.ru/catalog/3107707",
     dimmable: false,
   },
+  ...Object.fromEntries(
+    Object.entries(minifermerBulbs).map(([id, m]) => [
+      id,
+      {
+        name: m.name,
+        type: "bulb",
+        size: m.size,
+        url: m.url,
+        dimmable: false,
+        evidence: `${m.dimensionsNote} Масса ${m.mass.toLocaleString("ru-RU")} кг. PPF и пучок — предположения; расчётная эффективность 1,5 / 1,9 / 2,3 мкмоль/Дж. ${bulbScreenNote}`,
+      },
+    ]),
+  ),
 };

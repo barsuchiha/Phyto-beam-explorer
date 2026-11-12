@@ -1,3 +1,4 @@
+import { bulbModel } from "./models/minifermer-bulbs.js";
 import { profiles } from "./data/profiles.js";
 import { hardware } from "./models/hardware.js";
 import { photometry } from "./models/photometry.js";
@@ -16,12 +17,13 @@ export function createCalculator({ geometry = "crown" } = {}) {
   return function calculate(state) {
     const p = profiles[state.source];
     const catalog = p.kind === "catalog",
-      estimated = p.kind === "estimate";
+      bulb = p.kind === "bulb",
+      estimated = p.kind === "estimate" || bulb;
     const mini36 = state.source === "mf36";
     const era = p.kind === "era",
       eraData = era ? eraModel.modules[state.source] : null;
     const ranged = estimated || (era && !eraData.ies);
-    const engine = mini36 ? mini36Model : estimateModel;
+    const engine = bulb ? bulbModel : mini36 ? mini36Model : estimateModel;
     const dim = p.fixed ? 100 : state.dim;
     const op = catalog ? hardware.operate(state) : null;
     const estimate = estimated
@@ -40,6 +42,7 @@ export function createCalculator({ geometry = "crown" } = {}) {
       catalog,
       estimated,
       mini36,
+      bulb,
       era,
       eraData,
       ranged,

@@ -1,3 +1,4 @@
+import { renderBulbDetails } from "./bulb-details.js";
 import { hardware } from "../models/hardware.js";
 import { estimateModel } from "../models/minifermer.js";
 import { mini36Model } from "../models/mini36.js";
@@ -183,6 +184,10 @@ function mini36Details(q, state, output) {
 
 export function renderDetails(q, state, scene) {
   const { catalog, estimated, era, op, estimate } = scene;
+  if (scene.bulb) {
+    renderBulbDetails(q, state, scene);
+    return;
+  }
   if (era) {
     renderEraDetails(q, state, scene);
     return;

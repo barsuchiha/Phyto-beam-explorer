@@ -1,3 +1,4 @@
+import { bulbScreenNote } from "../data/minifermer-bulbs.js";
 import { hardware } from "../models/hardware.js";
 import { formatRange } from "./format.js";
 import { plantShapes } from "../data/plant-shapes.js";
@@ -8,6 +9,7 @@ export function renderControls(q, controls, state, scene) {
     catalog,
     estimated,
     mini36,
+    bulb,
     dim,
     op,
     estimate,
@@ -51,6 +53,7 @@ export function renderControls(q, controls, state, scene) {
     (rig
       ? ` Глубина по оси ≈ ${(rig.depth * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} см, диаметр выходного края ≈ ${Math.round(rig.mouthRadius * 200)} см. Форма — условный ${state.screenOpening === 0 ? "цилиндр" : "усечённый конус"} с открытым торцом.`
       : "");
+  if (bulb) q("pbe-screen-note").textContent += " " + bulbScreenNote;
   q("pbe-screenTurn-value").textContent = state.screenTurn + "°";
   q("pbe-screen-controls").hidden = !state.screenSector;
   q("pbe-material-controls").hidden = !state.screenSector;
@@ -73,19 +76,19 @@ export function renderControls(q, controls, state, scene) {
   q("pbe-estimate-details").hidden = !estimated;
   q("pbe-estimate-notice").hidden = !estimated && !era;
   q("pbe-era-details").hidden = !era;
-  q("pbe-count-label").textContent = era
-    ? "Количество светильников"
-    : "Количество плат";
+  q("pbe-count-label").textContent =
+    era || bulb ? "Количество светильников" : "Количество плат";
   for (const o of controls.count.options)
-    o.textContent = era
-      ? { 1: "1 светильник", 2: "2 светильника", 4: "4 светильника" }[o.value]
-      : { 1: "1 плата", 2: "2 платы", 4: "4 платы" }[o.value];
+    o.textContent =
+      era || bulb
+        ? { 1: "1 светильник", 2: "2 светильника", 4: "4 светильника" }[o.value]
+        : { 1: "1 плата", 2: "2 платы", 4: "4 платы" }[o.value];
   q("pbe-vendor-comparison").hidden = !mini36;
   q("pbe-channel2").hidden =
     !catalog || state.driver !== "ldd" || state.count === 1;
 
   if (catalog || estimated || era) controls.angle.value = String(angle);
-  if (era) controls.dim.value = "100";
+  if (era || bulb) controls.dim.value = "100";
   q("pbe-validation").hidden = !catalog || op.ok;
   q("pbe-validation").textContent = catalog && !op.ok ? op.reason : "";
   q("pbe-height-value").textContent = state.height + " см";
@@ -113,7 +116,7 @@ export function renderControls(q, controls, state, scene) {
     (era
       ? flux
       : estimated
-        ? "≈ " + formatRange(estimate.full)
+        ? "≈ " + formatRange(estimate.full, bulb ? 1 : 0)
         : catalog
           ? (base.ppf * state.count).toLocaleString("ru-RU", {
               maximumFractionDigits: 2,
@@ -126,17 +129,18 @@ export function renderControls(q, controls, state, scene) {
   if (estimated) controls.ppf.value = String(estimate.full[1]);
   if (era) controls.ppf.value = String(flux);
   q("pbe-hours-value").textContent = state.hours + " ч";
-  q("pbe-dim-label").textContent = estimated
-    ? "Яркость · условный PWM"
-    : catalog
-      ? state.driver === "ldd"
-        ? state.count > 1
-          ? state.source === "linear98"
-            ? "Нечётные ряды · PWM"
-            : "Левые платы · PWM"
-          : "Яркость · PWM"
-        : "DIM · доля номинального тока"
-      : "Яркость источника";
+  q("pbe-dim-label").textContent =
+    estimated && !bulb
+      ? "Яркость · условный PWM"
+      : catalog
+        ? state.driver === "ldd"
+          ? state.count > 1
+            ? state.source === "linear98"
+              ? "Нечётные ряды · PWM"
+              : "Левые платы · PWM"
+            : "Яркость · PWM"
+          : "DIM · доля номинального тока"
+        : "Яркость источника";
   q("pbe-dim2-label").textContent =
     state.source === "linear98" ? "Чётные ряды · PWM" : "Правые платы · PWM";
   q("pbe-dim-value").textContent = era
@@ -147,16 +151,18 @@ export function renderControls(q, controls, state, scene) {
   q("pbe-dim2-value").textContent = state.dim2 + "%";
   q("pbe-capability").textContent = p.cap;
   q("pbe-method").textContent =
-    (era
-      ? eraData.ies
-        ? "PPF ЭРА и опубликованный IES; распределённая геометрия линейки и перенос диаграммы на её элементы — допущения ближнего поля. "
-        : "PPF ЭРА; геометрия и форма пучка E27 предположены. Диапазон — чувствительность к углу, не измеренная погрешность. "
-      : mini36
-        ? "PPF — сумма белых Seoul и красного Osram с приближёнными поправками по графикам. Состав белых LED и их ток — гипотеза; температуры заданы сценариями. Кривые обоих пучков приближены ламбертовыми. "
-        : estimated
-          ? "PPF и PPFD оценены при принятых спектральных, тепловых и угловых сценариях. Каталожный поток отдельного LED не является измерением платы. Поправка на нагрев условная; теплового расчёта нет. "
-          : catalog
-            ? "PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. "
-            : "PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. ") +
+    (bulb
+      ? "MiniFermer E27: PPF = ватты × предполагаемая эффективность всей лампы; три уровня потока × три предполагаемых пучка. Замеры продавца в Mylar-боксе не перенесены на комнатную крону. "
+      : era
+        ? eraData.ies
+          ? "PPF ЭРА и опубликованный IES; распределённая геометрия линейки и перенос диаграммы на её элементы — допущения ближнего поля. "
+          : "PPF ЭРА; геометрия и форма пучка E27 предположены. Диапазон — чувствительность к углу, не измеренная погрешность. "
+        : mini36
+          ? "PPF — сумма белых Seoul и красного Osram с приближёнными поправками по графикам. Состав белых LED и их ток — гипотеза; температуры заданы сценариями. Кривые обоих пучков приближены ламбертовыми. "
+          : estimated
+            ? "PPF и PPFD оценены при принятых спектральных, тепловых и угловых сценариях. Каталожный поток отдельного LED не является измерением платы. Поправка на нагрев условная; теплового расчёта нет. "
+            : catalog
+              ? "PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. "
+              : "PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. ") +
     "Карта — на обращённой к лампе поверхности эллипсоидной кроны. Экран: поглощающий, идеализированный зеркальный или матовый ламбертов; отражение задано пользователем. Учтены повторные отражения и возврат на поглощающие платы. Свет окна, внутренние листья, отражения комнаты и нагрев не рассчитаны. Это модель, не измерение.";
 }

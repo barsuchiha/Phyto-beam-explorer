@@ -1,4 +1,5 @@
 import * as T from "../vendor/three.module.min.js";
+import { miniFermerBody } from "./bulb-mesh.js";
 import { OrbitControls } from "../vendor/OrbitControls.js";
 import { SVGLoader } from "../vendor/SVGLoader.js";
 import { plantIllustration } from "../models/plant-illustration.js";
@@ -290,7 +291,11 @@ export function createLuminaireView(host) {
           material(0xe2e0d3),
         );
         bulb.rotation.x = Math.PI / 2;
-        group.add(bulb);
+        if (state.source.startsWith("mfE27_")) {
+          bulb.geometry.dispose();
+          bulb.material.dispose();
+          group.add(miniFermerBody(r, length));
+        } else group.add(bulb);
         const socket = new T.Mesh(
           new T.CylinderGeometry(0.019, 0.019, 0.045, 24),
           material(0x72766b),

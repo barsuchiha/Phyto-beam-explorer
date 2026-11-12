@@ -174,7 +174,7 @@ test("size limits are species-specific; v1-v7 settings migrate and physical scre
   );
 });
 
-test("all 21 profiles support overhead, oblique and side lighting with conserved photon budgets", () => {
+test("all catalog profiles support overhead, oblique and side lighting with conserved photon budgets", () => {
   const calculate = createCalculator();
   for (const source of Object.keys(profiles))
     for (const orbit of [0, 45, 90]) {

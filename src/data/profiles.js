@@ -1,6 +1,19 @@
+import { minifermerBulbs } from "./minifermer-bulbs.js";
 import { eraModules } from "./era.js";
 
 export const profiles = {
+  ...Object.fromEntries(
+    Object.entries(minifermerBulbs).map(([id, m]) => [
+      id,
+      {
+        w: m.size[0] / 1000,
+        d: m.size[1] / 1000,
+        kind: "bulb",
+        fixed: true,
+        cap: "MiniFermer E27 · Фулл Комфорт 4000 K + 660 нм. PPF и пучок предположены. Диммирование не подтверждено. Экран — оптическая гипотеза; изготовитель рекомендует открытый патрон без плафона/отражателя.",
+      },
+    ]),
+  ),
   ...Object.fromEntries(
     Object.entries(eraModules).map(([id, m]) => [
       id,

@@ -1,3 +1,4 @@
+import { bulbModel } from "./minifermer-bulbs.js";
 import { hardware } from "./hardware.js";
 import { mini36Model } from "./mini36.js";
 import { eraModel } from "./era.js";
@@ -33,6 +34,15 @@ function noise(i) {
   return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
 }
 export function lightOutput(state, count) {
+  if (bulbModel.modules[state.source]) {
+    const p = bulbModel.output(state.source, count),
+      m = bulbModel.modules[state.source];
+    return {
+      fluxes: bulbModel.angles.flatMap(() => p.fluxes),
+      curves: bulbModel.angles.flatMap((angle) => p.fluxes.map(() => angle)),
+      note: `PPF предположен: ${m.watts.join(" / ")} Вт × 1,5 / 1,9 / 2,3 мкмоль/Дж всей лампы. Девять сочетаний потока и пучков 110 / 120 / 130°. Это не измеренный диапазон. Встроенное питание, DIM не подтверждён; яркость 100%. Замеры в отражающем Mylar-боксе не использованы для подгонки.`,
+    };
+  }
   if (state.source === "mf36") {
     const p = mini36Model.output("mf36", count, state.dim);
     return {
@@ -166,6 +176,8 @@ export function tracePath(
 
 export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
   const output = lightOutput(state, scene.sources.length),
+    scenarioCount = output.fluxes.length,
+    middle = Math.floor(scenarioCount / 2),
     nz = 16,
     na = 32;
   const geometry = {
@@ -179,10 +191,10 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
     return {
       p: s.p,
       area: (((s.jacobian * 2) / nz) * TAU) / na,
-      power: [0, 0, 0],
+      power: Array(scenarioCount).fill(0),
     };
   });
-  const budgets = Array.from({ length: 3 }, () => ({
+  const budgets = Array.from({ length: scenarioCount }, () => ({
     target: 0,
     room: 0,
     screen: 0,
@@ -234,7 +246,7 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
         Math.min(nz - 1, Math.floor((cz + 1) * 0.5 * nz)) * na +
         Math.min(na - 1, Math.floor((cp / TAU) * na));
     }
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < scenarioCount; k++) {
       const w = (TAU * intensity(output.curves[k], mu, phi)) / rayCount;
       budgets[k].total += w;
       budgets[k].screen += w * result.absorbed;
@@ -264,7 +276,9 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
     };
   });
   bins.forEach((b) => {
-    b.ppfd = ((b.power[1] / budgets[1].total) * output.fluxes[1]) / b.area;
+    b.ppfd =
+      ((b.power[middle] / budgets[middle].total) * output.fluxes[middle]) /
+      b.area;
   });
   return {
     output,
@@ -275,7 +289,8 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
     rays,
     area,
     rayCount,
-    mean: metrics[1].mean,
+    middle,
+    mean: metrics[middle].mean,
     range: [
       Math.min(...metrics.map((m) => m.mean)),
       Math.max(...metrics.map((m) => m.mean)),

@@ -31,7 +31,12 @@ test("fits enforce dimensions, clearance and mount type on every model switch", 
     "compact21",
     "mf36",
   ]);
-  assert.deepEqual(compatibleSources("e27"), ["eraE27_18", "eraE27_25"]);
+  assert.deepEqual(compatibleSources("e27"), [
+    "eraE27_18",
+    "eraE27_25",
+    "mfE27_12",
+    "mfE27_25",
+  ]);
   assert.equal(sourceFit("original", "compact21").ok, false);
   assert.equal(sourceFit("e27", "square50").ok, false);
   const initial = normalizeFitting({
@@ -81,6 +86,8 @@ test("Soltech screens fit both bulb sizes and panel heads without enclosing the 
       for (const [mount, source] of [
         ["e27", "eraE27_18"],
         ["e27", "eraE27_25"],
+        ["e27", "mfE27_12"],
+        ["e27", "mfE27_25"],
         ["pendantPanel", "mf36"],
       ])
         for (const opening of [0, 120]) {

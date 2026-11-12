@@ -9,7 +9,10 @@ export function sourceFit(mountId, sourceId) {
   if (mount.type === "bulb")
     return {
       ok: source.size[0] <= mount.maxDiameter,
-      reason: "Открытый подвес E27; высота и масса проверяются отдельно",
+      reason:
+        source.size[0] <= mount.maxDiameter
+          ? "Открытый подвес E27; высота и масса проверяются отдельно"
+          : `Диаметр ${source.size[0]} мм превышает габарит примерки ${mount.maxDiameter} мм`,
       rotated: false,
     };
   const [w, d] = source.size,
@@ -96,5 +99,11 @@ export function changeFitting(state, key, value) {
   }
   if (key === "plant" && plantShapes[value])
     next.plantSize = plantShapes[value].initial;
-  return normalizeFitting(next);
+  const normalized = normalizeFitting(next);
+  if (
+    normalized.source.startsWith("mfE27_") &&
+    normalized.source !== state.source
+  )
+    normalized.screen = false;
+  return normalized;
 }
