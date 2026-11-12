@@ -1,0 +1,101 @@
+#phyto-beam-explorer {
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--font-size-base) * 1);
+  --pbe-blue: light-dark(#2563eb, #60a5fa);
+  --pbe-yellow: light-dark(#eab308, #facc15);
+  --pbe-green: light-dark(#16a34a, #4ade80);
+  --pbe-red: light-dark(#ef4444, #f87171);
+  --pbe-burgundy: light-dark(#781c3b, #a52b50);
+}
+#phyto-beam-explorer .beam-field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--font-size-base) * 0.35);
+  min-width: 0;
+}
+#phyto-beam-explorer [hidden] {
+  display: none !important;
+}
+#phyto-beam-explorer .beam-label {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: calc(var(--font-size-base) * 0.5);
+}
+#phyto-beam-explorer .beam-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--font-size-base) * 1.5);
+}
+#phyto-beam-explorer .beam-svg {
+  display: block;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+#phyto-beam-explorer .beam-svg text {
+  font: inherit;
+  fill: var(--foreground);
+}
+#phyto-beam-explorer .beam-key {
+  display: inline-flex;
+  gap: calc(var(--font-size-base) * 0.4);
+  align-items: center;
+}
+#phyto-beam-explorer .plant-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  background: var(--pbe-blue);
+}
+#phyto-beam-explorer .plant-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--font-size-base) * 0.6) calc(var(--font-size-base) * 1);
+}
+#phyto-beam-explorer .plant-status {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--font-size-base) * 0.5);
+}
+#phyto-beam-explorer .plant-map {
+  display: block;
+  width: 100%;
+  height: 300px;
+}
+#phyto-beam-explorer .plant-map text {
+  font: inherit;
+  fill: var(--foreground);
+}
+#phyto-beam-explorer .plant-comparison {
+  margin-top: calc(var(--font-size-base) * 0.5);
+}
+#phyto-beam-explorer .beam-swatch {
+  width: 18px;
+  height: 3px;
+  background: var(--viz-series-1);
+}
+#phyto-beam-explorer .beam-swatch.plant {
+  background: var(--viz-series-2);
+}
+#phyto-beam-explorer .beam-swatch.desk {
+  background: var(--viz-series-3);
+}
+#phyto-beam-explorer .beam-brief {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--font-size-base) * 0.6);
+}
+#phyto-beam-explorer #pbe-estimate-details th:first-child {
+  width: 30%;
+}
+@media (max-width: 560px) {
+  #phyto-beam-explorer .beam-columns,
+  #phyto-beam-explorer .beam-brief {
+    grid-template-columns: 1fr;
+  }
+}

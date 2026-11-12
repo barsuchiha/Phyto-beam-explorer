@@ -1,3397 +1,485 @@
 <!doctype html>
-<html lang="ru" data-visualize-standalone>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Калькулятор PPFD и DLI для комнатных растений: модули Samsung и MiniFermer, диапазоны с допущениями и сравнение с замерами.">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/charts/; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Свет для растений — модули и диапазон PPFD</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit;max-width:1072px;margin:0 auto}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
-
-</head>
-<body>
-<iframe id="codex-visualization" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Свет для растений — модули и диапазон PPFD" data-srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;ru&quot; data-visualize-standalone&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
-&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
-&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://persistent.oaistatic.com/plugins/visualize/charts/; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;title&gt;Свет для растений — модули и диапазон PPFD&lt;/title&gt;
-&lt;style&gt;:root {
-  color-scheme: light dark;
-  background-color: var(
-    --background,
-    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
-  ) !important;
-
-  /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: var(
-    --color-background-primary,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
-  --card-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --popover: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255), rgb(45 45 45))
-  );
-  --popover-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --primary: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --primary-foreground: var(
-    --color-text-inverse,
-    light-dark(rgb(255 255 255), rgb(13 13 13))
-  );
-  --secondary: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
-  );
-  --secondary-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: var(
-    --color-text-secondary,
-    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
-  );
-  --accent: var(
-    --color-background-info,
-    light-dark(rgb(229 242 255), rgb(13 39 63))
-  );
-  --accent-foreground: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --destructive: var(
-    --color-text-warning,
-    light-dark(rgb(226 85 7), rgb(255 133 73))
-  );
-  --border: var(
-    --color-border-secondary,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-  --input: var(
-    --color-border-primary,
-    light-dark(
-      rgb(26 28 31 / 11.8%),
-      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
-    )
-  );
-  --ring: var(
-    --color-ring-primary,
-    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
-  );
-  --font-size-base: var(--font-text-md-size, 16px);
-  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
-  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
-  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
-  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
-  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
-  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
-  --viz-series-1: var(--primary);
-  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
-  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
-  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
-  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
-  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
-
-  /* Internal implementation variables; not part of the agent contract. */
-  --font-sans:
-    -apple-system-body, ui-sans-serif, -apple-system, system-ui, &quot;Segoe UI&quot;,
-    Helvetica, &quot;Apple Color Emoji&quot;, Arial, sans-serif, &quot;Segoe UI Emoji&quot;,
-    &quot;Segoe UI Symbol&quot;;
-  --font-mono:
-    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
-    monospace;
-  --font-size-normal: max(11px, var(--font-size-base));
-  --font-size-tooltip: calc(var(--font-size-base) - 1px);
-  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
-  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
-  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
-  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --icon-size: 16px;
-  --line-height-normal: calc(var(--font-size-normal) * 1.5);
-  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
-  --line-height-small: calc(var(--font-size-small) + 4px);
-  --corner-shape: round;
-  --radius: var(--border-radius-lg, 8px);
-  --radius-sm: calc(var(--radius) * 0.5);
-  --radius-md: calc(var(--radius) * 0.75);
-  --radius-lg: var(--radius);
-  --radius-2xl: calc(var(--radius) * 2);
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
-  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 17 17&#x27;%3E%3Cpath d=&#x27;M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z&#x27;/%3E%3C/svg%3E&quot;);
-
-  /* Legacy aliases; not part of the current agent contract. */
-  --viz-bg: transparent;
-  --viz-panel: var(--card);
-  --viz-border: var(--border);
-  --viz-text: var(--foreground);
-  --viz-muted: var(--muted-foreground);
-  --viz-accent: var(--primary);
-  --viz-accent-text: var(--primary-foreground);
-  --viz-accent-bg: var(--accent);
-  --viz-font-size: var(--font-size-base);
-  --viz-warning: var(--destructive);
-}
-
-:root[data-theme=&quot;light&quot;] {
-  color-scheme: light;
-}
-
-:root[data-theme=&quot;dark&quot;] {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html &gt; body {
-  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
-  --color-background-primary: var(
-    --background,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --color-text-primary: var(
-    --foreground,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --color-border-secondary: var(
-    --border,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-
-  margin: 0;
-  padding: var(--visualize-paint-gutter, 0px);
-  color: var(--foreground);
-  background: transparent !important;
-  font-family: var(--font-sans) !important;
-  -webkit-font-smoothing: antialiased;
-  font-size: var(--font-size-base);
-  line-height: calc(var(--font-size-base) * 1.625);
-  font-weight: var(--font-weight-normal);
-}
-
-.cursor-interaction {
-  cursor: var(--cursor-interaction, pointer);
-}
-
-a {
-  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
-  cursor: var(--cursor-interaction, pointer);
-  text-decoration: none;
-  text-underline-offset: 2px;
-  font-weight: inherit;
-}
-
-a:is(:hover, :focus-visible) {
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 0.5px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin-block: 0;
-}
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-li,
-.table {
-  font-family: var(--font-sans);
-}
-
-h1 {
-  font-size: calc(var(--font-size-base) * 1.5);
-  line-height: 1.3333333333;
-}
-
-h2 {
-  font-size: calc(var(--font-size-base) * 1.25);
-  line-height: 1.4;
-}
-h3 {
-  font-size: calc(var(--font-size-base) * 1.125);
-  line-height: 1.5555555556;
-}
-h4 {
-  font-size: var(--font-size-base);
-  line-height: 1.5;
-}
-h5,
-h6 {
-  font-size: var(--font-size-base);
-  line-height: calc(var(--font-size-base) * 1.625);
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-b,
-strong,
-th {
-  font-weight: 600;
-}
-
-code:not(pre code) {
-  display: inline;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  corner-shape: var(--corner-shape);
-  background: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  overflow-wrap: anywhere;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  word-break: break-word;
-}
-pre,
-pre code {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.table {
-  width: 100%;
-  color: var(--foreground);
-  font: inherit;
-  text-align: start;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: calc(var(--font-size-base) * 0.875);
-  line-height: calc(var(--font-size-base) * 1.625);
-  font-family: var(--font-sans);
-}
-
-.table :is(th, td) {
-  padding-block: 10px;
-  padding-inline: 0 24px;
-  overflow-wrap: anywhere;
-  border-bottom: 1px solid var(--border);
-  text-align: start;
-  vertical-align: top;
-  border-bottom-color: color-mix(in srgb, var(--foreground) 5%, transparent);
-}
-.table :is(th, td):not(:last-child) {
-  padding-inline-end: calc(var(--font-size-base) * 1.5);
-}
-
-.table-responsive &gt; .table :is(th, td) {
-  overflow-wrap: break-word;
-}
-
-.table :is(th, td):last-child {
-  padding-inline-end: 0;
-}
-
-.table :is(caption, thead th) {
-  font-weight: 600;
-}
-
-.table thead :is(th, td) {
-  border-bottom-color: var(--border-strong, var(--input));
-  padding-block: calc(var(--font-size-base) / 2);
-  line-height: var(--font-size-base);
-}
-
-.table tbody tr:last-child :is(th, td) {
-  border-bottom: 0;
-}
-.table tbody :is(th, td) {
-  padding-block: calc(var(--font-size-base) * 0.625);
-}
-
-.table.table-sm :is(th, td) {
-  padding-block: 8px;
-}
-
-.table.table-sm :is(th, td):not(:last-child) {
-  padding-inline-end: 16px;
-}
-
-.table :is(.text-end, [align=&quot;right&quot;]) {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.table :is(.text-center, [align=&quot;center&quot;]) {
-  text-align: center;
-}
-
-.table .text-nowrap {
-  white-space: nowrap;
-}
-
-#widget {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding: 0;
-  background: transparent !important;
-}
-
-.card {
-  min-width: 0;
-  padding: 12px;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  border-radius: var(--radius-2xl);
-  corner-shape: var(--corner-shape);
-  color: var(--card-foreground);
-  background: var(--card);
-}
-
-.widget {
-  min-width: 0;
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  box-shadow: 0 0 0 0.5px var(--border-strong, var(--border));
-  color: var(--foreground);
-  background: var(--background);
-}
-
-#widget &gt; :not(.card, .widget, .progress) {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  width: max-content;
-  max-width: min(
-    20rem,
-    var(--tooltip-available-width, calc(100vw - 10px)),
-    calc(100vw - 10px)
-  );
-  max-height: min(
-    var(--tooltip-available-height, calc(100vh - 10px)),
-    calc(100vh - 10px)
-  );
-  border: 1px solid var(--border);
-  corner-shape: var(--corner-shape);
-  overflow-wrap: break-word;
-  white-space: normal;
-  pointer-events: none;
-  user-select: none;
-  font-family: var(--font-sans);
-  padding: 5px 12px;
-  border-color: color-mix(
-    in oklab,
-    light-dark(var(--primary-foreground), var(--foreground)) 5%,
-    transparent
-  );
-  border-radius: var(--radius-2xl);
-  color: light-dark(var(--primary-foreground), var(--foreground));
-  background: light-dark(var(--foreground), var(--popover));
-  box-shadow: 0 8px 18px rgb(15 23 42 / 20%);
-  letter-spacing: -0.15px;
-  font-size: calc(var(--font-size-base) * 14 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-}
-
-.viz-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
-  gap: 10px;
-}
-
-.viz-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.viz-stat-value {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-.viz-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-hr {
-  width: 100%;
-  height: 1px;
-  margin-block: 6px;
-  border: 0;
-  background: var(--border);
-}
-
-.nav {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 4px;
-}
-
-.progress {
-  display: flex;
-  height: 8px;
-  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-}
-
-.progress-bar:only-child {
-  border-radius: var(--radius-full);
-}
-
-.progress-bar {
-  height: 100%;
-  flex-shrink: 0;
-  border: 0;
-  background: var(--viz-series-1);
-}
-
-.viz-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  color: color-mix(in srgb, var(--foreground) 40%, var(--muted-foreground));
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  font-family: var(--font-sans);
-  font-size: calc(var(--font-size-base) * 14 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
-  font-weight: var(--font-weight-normal);
-  line-height: 1;
-}
-
-small,
-.text-small {
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
-}
-
-.text-muted {
-  color: var(--muted-foreground);
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.viz-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.viz-controls &gt; .form-label {
-  display: grid;
-  min-width: min(100%, 260px);
-  flex: 1 1 280px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 2px 12px;
-  margin-bottom: 0;
-}
-
-.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
-  grid-column: 1 / -1;
-}
-
-.btn,
-.nav-link,
-.form-check-input,
-.form-control,
-.form-range,
-.form-select {
-  font: inherit;
-}
-
-/* Match inline alignment without overriding a containing flex or grid layout. */
-.btn,
-.nav-link,
-.form-control,
-.form-select,
-.form-range,
-.form-check {
-  vertical-align: middle;
-}
-
-.btn,
-.nav-link {
-  --btn-size: calc(12px + 2 * var(--control-spacing, 12px));
-  appearance: button;
-  display: inline-flex;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin: 0;
-  padding: 0 8px;
-  -webkit-app-region: no-drag;
-  border: 1px solid var(--input);
-  corner-shape: var(--corner-shape);
-  cursor: var(--cursor-interaction, pointer);
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-font-smoothing: inherit;
-  font-family: var(--font-sans);
-  height: fit-content;
-  min-height: var(--btn-size);
-  padding-inline: var(--control-spacing, 12px);
-  border-color: transparent;
-  border-radius: var(--radius-full);
-  color: var(--foreground);
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  font-size: calc(var(--font-size-base) * 14 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
-  font-weight: var(--font-weight-normal);
-  line-height: 18px;
-}
-
-.btn {
-  border-color: var(--border);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-}
-
-/* Codex Button size=&quot;compact&quot;; appearance stays with the button variant. */
-.btn-sm {
-  --btn-size: 24px;
-  padding-inline: 8px;
-  font-size: calc(var(--font-size-base) * 12 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 12 / 16), 1px);
-  line-height: 16px;
-}
-
-.btn:is(.btn-block, .viz-tile) {
-  inline-size: 100%;
-}
-
-.btn.viz-tile {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-a.btn {
-  cursor: var(--cursor-interaction, pointer);
-  text-decoration: none;
-}
-
-.btn:not(:disabled):hover {
-  background: light-dark(
-    color-mix(in srgb, var(--foreground) 5.5%, transparent),
-    color-mix(in srgb, var(--foreground) 8%, transparent)
-  );
-}
-
-.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
-  background: color-mix(in srgb, var(--foreground) 10%, transparent);
-}
-
-.btn-primary {
-  border-color: var(--border);
-  color: var(--primary-foreground);
-  background: var(--foreground);
-  background-clip: border-box;
-}
-
-.btn-primary .text-muted {
-  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
-}
-
-.btn-primary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--foreground) 80%, transparent);
-  background-clip: border-box;
-}
-
-.btn-ghost {
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.btn-ghost:not(:disabled):hover {
-  color: var(--muted-foreground);
-  background: light-dark(
-    color-mix(in srgb, var(--foreground) 5.5%, transparent),
-    color-mix(in srgb, var(--foreground) 8%, transparent)
-  );
-}
-
-.nav-pills .nav-link {
-  min-width: 0;
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.nav-justified .nav-link {
-  flex: 1 1 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-.nav-pills .nav-link.active {
-  color: var(--foreground);
-  background: var(--muted);
-}
-
-/* Shared preview chrome; product styles stay inside each variant. */
-.viz-dotted-background {
-  background-image: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--foreground) 14%, transparent) 0.8px,
-    transparent 0.8px
-  );
-  background-position: center;
-  background-size: 16px 16px;
-}
-
-.viz-carousel {
-  position: relative;
-  min-width: 0;
-}
-
-.viz-carousel:has(&gt; .viz-carousel-controls) {
-  min-height: calc(60px + var(--viz-carousel-picker-height, 0px));
-  padding-bottom: 60px;
-}
-
-.viz-carousel &gt; [data-variant][hidden] {
-  display: none !important;
-}
-
-.viz-carousel &gt; [data-variant] {
-  isolation: isolate;
-}
-
-.viz-carousel-controls {
-  --viz-carousel-hover: light-dark(
-    color-mix(in srgb, var(--foreground) 5.4%, transparent),
-    color-mix(in srgb, var(--foreground) 7.8%, transparent)
-  );
-  position: absolute;
-  z-index: 2;
-  bottom: 8px;
-  left: 50%;
-  display: flex;
-  width: max-content;
-  /* Leave room for the host&#x27;s design-controls launcher at the trailing edge. */
-  max-width: calc(100% - 96px);
-  align-items: center;
-  gap: 0;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sans);
-  /* Match the settings dropdown chrome independently of the content font size. */
-  font-size: 13px;
-  font-weight: var(--font-weight-normal);
-  line-height: 18px;
-  transform: translateX(-50%);
-  user-select: none;
-}
-
-/* Keep authored mockup button styles out of the shared carousel chrome. */
-.viz-carousel-controls button,
-.viz-carousel-picker &gt; summary {
-  display: flex !important;
-  height: auto !important;
-  min-height: 30px;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px;
-  padding: 0 6px !important;
-  -webkit-app-region: no-drag;
-  border: 0 !important;
-  border-radius: 14px !important;
-  color: inherit !important;
-  background: transparent !important;
-  font: inherit !important;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.viz-carousel-controls &gt; button,
-.viz-carousel-picker &gt; summary {
-  position: relative;
-  isolation: isolate;
-}
-
-.viz-carousel-controls &gt; button {
-  --icon-size: 16px;
-  width: 30px !important;
-  padding: 0 !important;
-}
-
-.viz-carousel-picker &gt; summary {
-  padding-inline: 12px !important;
-}
-
-.viz-carousel-controls .viz-carousel-caret {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  margin: 0;
-  color: inherit;
-  transform: rotate(180deg);
-}
-
-.viz-carousel-controls &gt; button &gt; svg,
-.viz-carousel-controls .viz-carousel-caret,
-.viz-carousel-count {
-  opacity: 0.5;
-}
-
-.viz-carousel-controls &gt; button::before,
-.viz-carousel-picker &gt; summary::before {
-  position: absolute;
-  z-index: -1;
-  inset: 3px;
-  border-radius: 12px;
-  content: &quot;&quot;;
-  pointer-events: none;
-}
-
-.viz-carousel-controls &gt; button:hover::before,
-.viz-carousel-picker &gt; summary:hover::before {
-  background: var(--viz-carousel-hover);
-}
-
-.viz-carousel-controls &gt; button,
-.viz-carousel-controls [data-lucide],
-.viz-carousel-controls .lucide {
-  flex-shrink: 0;
-}
-
-.viz-carousel-picker {
-  min-width: 0;
-}
-
-.viz-carousel-picker &gt; summary {
-  min-width: 0;
-  list-style: none;
-}
-
-.viz-carousel-picker &gt; summary::-webkit-details-marker {
-  display: none;
-}
-
-.viz-carousel-count {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.viz-carousel-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.viz-carousel-options {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 4px);
-  left: 0;
-  display: flex;
-  max-height: 240px;
-  flex-direction: column;
-  gap: 2px;
-  overflow: auto;
-  padding: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--background);
-  box-shadow: 0 4px 12px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 25%));
-}
-
-.viz-carousel-options &gt; button {
-  border-radius: max(0px, calc(var(--radius-lg) - 5px)) !important;
-  width: 100% !important;
-  min-height: 28px;
-  justify-content: flex-start !important;
-  padding: 4px 8px !important;
-  font-size: var(--font-size-small) !important;
-  text-align: start;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.viz-carousel-options &gt; [aria-current=&quot;true&quot;],
-.viz-carousel-options &gt; button:hover {
-  background: var(--viz-carousel-hover) !important;
-}
-
-.btn:disabled,
-.nav-link:disabled,
-.nav-link[aria-disabled=&quot;true&quot;] {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-[data-lucide] {
-  stroke-width: 1.6;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--foreground);
-}
-
-.form-control {
-  display: block;
-  width: 100%;
-  padding: 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  height: calc(12px + 2 * var(--control-spacing, 12px));
-  min-height: calc(12px + 2 * var(--control-spacing, 12px));
-  padding-inline: calc(4px + var(--control-spacing, 12px) / 2);
-  border-color: var(--input);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--popover) 96%, transparent);
-  font-size: calc(var(--font-size-base) * 14 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
-  font-weight: var(--font-weight-normal);
-  line-height: 1.4285714286;
-}
-.form-control:is(
-  [type=&quot;file&quot;],
-  [type=&quot;date&quot;],
-  [type=&quot;datetime-local&quot;],
-  [type=&quot;month&quot;],
-  [type=&quot;week&quot;],
-  [type=&quot;color&quot;]
-) {
-  height: calc(12px + 2 * var(--control-spacing, 12px));
-  min-height: calc(12px + 2 * var(--control-spacing, 12px));
-  line-height: 18px;
-}
-.form-control:is(
-  [type=&quot;date&quot;],
-  [type=&quot;datetime-local&quot;],
-  [type=&quot;month&quot;],
-  [type=&quot;week&quot;]
-) {
-  padding-inline: var(--control-spacing, 12px);
-}
-
-.form-control::placeholder {
-  color: var(--muted-foreground);
-}
-
-.form-control[type=&quot;file&quot;] {
-  overflow: hidden;
-  cursor: var(--cursor-interaction, pointer);
-  padding: 0;
-}
-
-.form-control[type=&quot;file&quot;]::file-selector-button {
-  padding: 0 8px;
-  border: 0;
-  border-right: 1px solid var(--input);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: inherit;
-  font: inherit;
-  min-height: calc(10px + 2 * var(--control-spacing, 12px));
-  padding-inline: var(--control-spacing, 12px);
-  margin-inline-end: var(--control-spacing, 12px);
-}
-
-.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-control-color[type=&quot;color&quot;] {
-  width: 40px;
-  height: calc(12px + 2 * var(--control-spacing, 12px));
-  padding: 3px;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
-  border: 0;
-  border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: var(--corner-shape);
-}
-
-textarea.form-control {
-  height: auto;
-  resize: vertical;
-  min-height: 96px;
-  padding: 8px 10px;
-}
-
-.form-control:focus-visible {
-  border-color: var(--ring);
-  box-shadow: none;
-}
-.form-control:disabled {
-  color: var(--muted-foreground);
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  opacity: 1;
-}
-.form-control[aria-invalid=&quot;true&quot;] {
-  border-color: var(--red);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 20%, transparent);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  cursor: not-allowed;
-}
-
-.form-select {
-  appearance: none;
-  display: block;
-  width: 100%;
-  height: fit-content;
-  min-height: calc(12px + 2 * var(--control-spacing, 12px));
-  margin: 0;
-  /* The secondary icon role is 14px at compact density and 16px at web density. */
-  --icon-size: calc(10px + var(--control-spacing, 12px) / 2);
-  /* Settings dropdowns retain a 12px inset and a 4px text-to-chevron gap. */
-  padding: 0 calc(16px + var(--icon-size)) 0 12px;
-  outline: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  background-color: var(--secondary);
-  background-image:
-    linear-gradient(
-      45deg,
-      transparent calc(50% - 0.6px),
-      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
-      transparent calc(50% + 0.6px)
-    ),
-    linear-gradient(
-      135deg,
-      transparent calc(50% - 0.6px),
-      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
-      transparent calc(50% + 0.6px)
-    );
-  background-position:
-    calc(100% - 12px - var(--icon-size) / 2) 50%,
-    calc(100% - 12px - var(--icon-size) * 0.18) 50%;
-  background-repeat: no-repeat;
-  background-size: calc(var(--icon-size) * 0.32) calc(var(--icon-size) * 0.32);
-  cursor: var(--cursor-interaction, default);
-  font-size: calc(var(--font-size-base) * 14 / 16);
-  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
-  font-weight: var(--font-weight-normal);
-  line-height: 18px;
-}
-
-.form-select :is(option, optgroup) {
-  color: var(--popover-foreground);
-  background-color: var(--popover);
-}
-
-.form-select :is(option, optgroup):disabled {
-  color: var(--muted-foreground);
-}
-
-.form-select:not(:disabled):hover {
-  background-color: light-dark(
-    color-mix(in srgb, var(--foreground) 5.5%, transparent),
-    color-mix(in srgb, var(--foreground) 8%, transparent)
-  );
-}
-
-.form-select:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
-}
-.form-select:disabled {
-  opacity: 0.4;
-}
-
-.form-check {
-  display: flex;
-  min-height: calc(12px + 2 * var(--control-spacing, 12px));
-  align-items: center;
-  gap: 6px;
-}
-
-.form-check-input {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  margin: 0;
-  border: 1px solid var(--input);
-  color: var(--primary-foreground);
-  background-color: transparent;
-  cursor: var(--cursor-interaction, default);
-  transition:
-    background-color 150ms,
-    border-color 150ms,
-    box-shadow 150ms;
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
-  corner-shape: round;
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  width: calc(10px + var(--control-spacing, 12px) / 2);
-  height: calc(10px + var(--control-spacing, 12px) / 2);
-  border-color: var(--border-strong, var(--input));
-  border-radius: calc(var(--radius-sm) / 2);
-  background-color: transparent;
-  color: var(--foreground);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input:not(:disabled):not(:checked):hover {
-  background-color: var(--card);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:is(:checked, :indeterminate) {
-  border-color: var(--border-strong, var(--input));
-  background-color: color-mix(in srgb, var(--popover) 96%, transparent);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--primary-foreground);
-  content: &quot;&quot;;
-  mask: var(--checkmark-image) center / 12px 12px no-repeat;
-  background-color: var(--foreground);
-}
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:indeterminate::before {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 65%;
-  height: 6.65%;
-  margin: auto;
-  border-radius: var(--radius-full);
-  background: var(--foreground);
-  mask: none;
-  content: &quot;&quot;;
-}
-
-.form-check-input[type=&quot;radio&quot;] {
-  border-radius: var(--radius-full);
-  width: 16px;
-  height: 16px;
-  border: 0;
-  box-shadow: inset 0 0 0 1px var(--input);
-}
-
-.form-check-input[type=&quot;radio&quot;]:checked {
-  border: 0;
-  background: radial-gradient(
-    circle,
-    var(--primary-foreground) 0 3px,
-    var(--foreground) 3px
-  );
-  box-shadow: none;
-}
-
-.form-check:not(.form-switch) .form-check-input:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:focus-visible {
-  border-color: var(--ring);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-}
-.form-check:not(.form-switch) .form-check-input[type=&quot;radio&quot;]:disabled,
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;radio&quot;]:disabled
-  + .form-check-label {
-  opacity: 0.5;
-}
-
-.form-switch .form-check-input:disabled,
-.form-switch .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.form-check-label {
-  color: var(--foreground);
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-switch .form-check-input {
-  position: relative;
-  width: 32px;
-  height: 20px;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-  box-shadow: none;
-  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input::before {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
-  content: &quot;&quot;;
-  transform: translate(2px, -50%);
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-  border-color: #fff;
-  background: #fff;
-}
-
-.form-switch .form-check-input:checked {
-  background: var(--blue);
-}
-
-.form-switch .form-check-input:checked::before {
-  transform: translate(14px, -50%);
-}
-
-.form-switch .form-check-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
-  outline: none;
-}
-
-.form-range {
-  appearance: none;
-  display: block;
-  width: 100%;
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  accent-color: var(--primary);
-  height: calc(12px + 2 * var(--control-spacing, 12px));
-  min-height: calc(12px + 2 * var(--control-spacing, 12px));
-  outline: none;
-  border-radius: var(--radius-full);
-  color: var(--foreground);
-  background: transparent;
-}
-
-.form-range::-webkit-slider-runnable-track {
-  background: var(--form-range-track, var(--border));
-  height: 2px;
-  border-radius: var(--radius-full);
-}
-
-.form-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  margin-top: -9px;
-  border-color: transparent;
-  background: currentColor;
-  box-shadow: var(--shadow-sm);
-}
-
-/* Outline the native track and thumb, preserving the larger input hit area. */
-.form-range:focus-visible::-webkit-slider-runnable-track {
-  outline: 2px auto Highlight;
-  outline-color: -webkit-focus-ring-color;
-}
-
-.form-range::-moz-range-track {
-  background: var(--form-range-track, var(--border));
-  height: 2px;
-  border-radius: var(--radius-full);
-}
-
-.form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  border-color: transparent;
-  background: currentColor;
-  box-shadow: var(--shadow-sm);
-}
-
-.form-range:focus-visible::-moz-range-thumb {
-  outline: 2px solid Highlight;
-  outline-offset: 2px;
-}
-
-.form-range:disabled {
-  opacity: 1;
-  cursor: default;
-}
-
-.btn:not(.btn-primary, .viz-tile):is(
-  [aria-pressed=&quot;true&quot;],
-  [aria-selected=&quot;true&quot;],
-  .is-selected
-) {
-  border-color: transparent;
-  color: var(--primary-foreground);
-  background: var(--blue);
-}
-
-.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-
-.btn:focus-visible,
-.nav-link:focus-visible {
-  outline-offset: 2px;
-  outline: none;
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-.viz-carousel-controls :is(button, summary):focus-visible {
-  outline: 2px solid var(--ring) !important;
-  outline-offset: 2px !important;
-}
-
-/* Web recipes are the default, including on renderers without inline style queries. */
-@supports (border-radius: if(style(--corner-shape: round): 1px; else: 2px)) {
-  /* Match the host&#x27;s proportional text-sm scale at every text preference. */
-  .tooltip,
-  .viz-badge,
-  .btn,
-  .nav-link,
-  .form-control,
-  .form-select {
-    font-size: if(
-      style(--corner-shape: round): round(
-          nearest,
-          calc(var(--font-size-base) * 14 / 16),
-          1px
-        );
-        else: round(nearest, calc(var(--font-size-base) * 13 / 14), 1px)
-    );
-  }
-
-  .btn-sm {
-    font-size: if(
-      style(--corner-shape: round): round(
-          nearest,
-          calc(var(--font-size-base) * 12 / 16),
-          1px
-        );
-        else: round(nearest, calc(var(--font-size-base) * 12 / 14), 1px)
-    );
-  }
-
-  .btn,
-  .nav-link,
-  .form-select {
-    border-radius: if(
-      style(--corner-shape: round): var(--radius-full); else: var(--radius-lg)
-    );
-  }
-
-  .form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
-    border-radius: if(
-      style(--corner-shape: round): calc(var(--radius-sm) / 2);
-        else: calc(var(--radius-lg) * 0.4)
-    );
-  }
-
-  .tooltip {
-    font-weight: if(
-      style(--corner-shape: round): 600; else: var(--font-weight-normal)
-    );
-  }
-}
-
-@media (pointer: coarse) {
-  .viz-carousel:has(&gt; .viz-carousel-controls) {
-    min-height: calc(76px + var(--viz-carousel-picker-height, 0px));
-    padding-bottom: 76px;
-  }
-
-  .btn,
-  .nav-link,
-  .viz-carousel-controls button,
-  .viz-carousel-picker &gt; summary,
-  .form-control,
-  .form-select {
-    --btn-size: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  /* Keep small-screen WebKit from zooming when a text field receives focus. */
-  .form-control,
-  .form-select {
-    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
-    font-size: max(
-      16px,
-      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
-    );
-  }
-  .form-control:is(
-    [type=&quot;file&quot;],
-    [type=&quot;date&quot;],
-    [type=&quot;datetime-local&quot;],
-    [type=&quot;month&quot;],
-    [type=&quot;week&quot;],
-    [type=&quot;time&quot;],
-    [type=&quot;color&quot;]
-  ) {
-    height: 44px;
-    min-height: 44px;
-    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
-    font-size: max(
-      16px,
-      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
-    );
-  }
-
-  .form-control[type=&quot;file&quot;]::file-selector-button {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  .form-control-color[type=&quot;color&quot;] {
-    width: 44px;
-    height: 44px;
-  }
-
-  .form-control:is(
-    [type=&quot;date&quot;],
-    [type=&quot;datetime-local&quot;],
-    [type=&quot;month&quot;],
-    [type=&quot;time&quot;],
-    [type=&quot;week&quot;]
-  ) {
-    min-width: 0;
-    max-width: 100%;
-    padding-block: 8px;
-  }
-
-  .form-check {
-    min-height: 44px;
-    padding-inline: 15px;
-  }
-
-  .form-check-input {
-    position: relative;
-  }
-
-  .form-check-input::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    content: &quot;&quot;;
-    transform: translate(-50%, -50%);
-  }
-
-  .form-check-label {
-    display: inline-flex;
-    min-width: 44px;
-    min-height: 44px;
-    align-items: center;
-  }
-
-  .form-range {
-    height: 44px;
-    touch-action: pan-y;
-  }
-}
-
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-#widget &gt; svg {
-  width: 100%;
-}
-
-/* Model-authored chart rules can otherwise stretch icons after these styles load. */
-svg.lucide {
-  display: block;
-  width: var(--icon-size) !important;
-  height: var(--icon-size) !important;
-  flex: none;
-  margin: 0 !important;
-  stroke-width: 1.6;
-}
-
-.text-warning,
-.text-destructive {
-  color: var(--destructive);
-}
-
-html&gt;body{padding:0}&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;script type=&quot;application/json&quot; id=&quot;codex-visualization-widget-state&quot;&gt;__CODEX_VISUALIZATION_WIDGET_STATE__&lt;/script&gt;
-&lt;script&gt;(() =&gt; {
-  const root = document.documentElement;
-  const mediaQuery = globalThis.matchMedia(&quot;(prefers-color-scheme: dark)&quot;);
-  const apply = Reflect.apply;
-  const isArray = Array.isArray;
-  const hasOwn = Object.hasOwn;
-  const parentWindow = globalThis.parent;
-  const stringify = JSON.stringify;
-  const parse = JSON.parse;
-  const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
-  const initialStateElement = document.getElementById(
-    &quot;codex-visualization-widget-state&quot;,
-  );
-  const initialGlobals = parse(initialStateElement?.textContent ?? &quot;{}&quot;);
-  initialStateElement?.remove();
-  /** @type {Record&lt;string, unknown&gt; | null} */
-  let state = initialGlobals.widgetState ?? null;
-  const statePersistence = initialGlobals.statePersistence ?? &quot;none&quot;;
-  let nextStateRequestId = 0;
-  /** @type {Map&lt;number, { resolve: () =&gt; void; reject: (error: Error) =&gt; void; timeout: ReturnType&lt;typeof globalThis.setTimeout&gt;; serializedState: string }&gt;} */
-  const pendingStateWrites = new Map();
-  const persistenceError = () =&gt;
-    Object.assign(
-      new Error(&quot;The host could not persist the widget state update&quot;),
-      {
-        code: -32000,
-        data: { code: &quot;widget_state_persistence_failed&quot;, retryable: false },
-      },
-    );
-  /**
-   * @param {object} prototype
-   * @param {string} property
-   */
-  const getPrototypeGetter = (prototype, property) =&gt; {
-    // oxlint-disable-next-line typescript/unbound-method -- invoked through captured Reflect.apply
-    const getter = Object.getOwnPropertyDescriptor(prototype, property)?.get;
-    if (getter == null) {
-      throw new Error(`Missing ${property} getter`);
-    }
-    return getter;
-  };
-  const getMessageData = getPrototypeGetter(MessageEvent.prototype, &quot;data&quot;);
-  const getMessagePorts = getPrototypeGetter(MessageEvent.prototype, &quot;ports&quot;);
-  const getMessageSource = getPrototypeGetter(MessageEvent.prototype, &quot;source&quot;);
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const addHostMessageListener = MessagePort.prototype.addEventListener;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const postHostMessage = MessagePort.prototype.postMessage;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const startHostPort = MessagePort.prototype.start;
-  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
-  const stopMessagePropagation = Event.prototype.stopImmediatePropagation;
-  /** @type {MessagePort | null} */
-  let hostPort = null;
-  const postToHost = (type, payload) =&gt; {
-    if (hostPort != null) {
-      apply(postHostMessage, hostPort, [{ type, ...payload }]);
-    }
-  };
-  const openExternal = ({ href }) =&gt; {
-    if (globalThis.navigator.userActivation?.isActive === true) {
-      postToHost(&quot;open-external&quot;, { href });
-    }
-  };
-  const sendFollowUpMessage = ({ context, prompt, title }) =&gt; {
-    if (globalThis.navigator.userActivation?.isActive === true) {
-      postToHost(&quot;follow-up&quot;, { context, prompt, title });
-    }
-    return Promise.resolve();
-  };
-  /**
-   * @param {Record&lt;string, unknown&gt; | ((previous: Record&lt;string, unknown&gt; | null) =&gt; Record&lt;string, unknown&gt;)} next
-   * @returns {Promise&lt;void&gt;}
-   */
-  const setWidgetState = async (next) =&gt; {
-    const nextState = typeof next === &quot;function&quot; ? next(state) : next;
-    if (
-      nextState == null ||
-      typeof nextState !== &quot;object&quot; ||
-      isArray(nextState)
-    ) {
-      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-    }
-    const inputState = stringify(
-      nextState,
-      (_key, /** @type {unknown} */ value) =&gt; {
-        if (
-          typeof value === &quot;undefined&quot; ||
-          typeof value === &quot;function&quot; ||
-          typeof value === &quot;symbol&quot; ||
-          (typeof value === &quot;number&quot; &amp;&amp; !Number.isFinite(value))
-        ) {
-          throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-        }
-        return value;
-      },
-    );
-    const parsedState = parse(inputState);
-    if (
-      parsedState == null ||
-      typeof parsedState !== &quot;object&quot; ||
-      isArray(parsedState)
-    ) {
-      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
-    }
-    const storedState = {
-      modelContent: null,
-      privateContent: null,
-      ...parsedState,
-    };
-    const serializedState = stringify(storedState);
-    if (encode(serializedState).length &gt; 16 * 1024) {
-      throw new TypeError(
-        &quot;Widget state must be a JSON object of at most 16 KiB&quot;,
-      );
-    }
-    if (
-      hasOwn(storedState, &quot;imageIds&quot;) &amp;&amp;
-      (!isArray(storedState.imageIds) ||
-        storedState.imageIds.some(
-          (/** @type {unknown} */ id) =&gt; typeof id !== &quot;string&quot;,
-        ))
-    ) {
-      throw new TypeError(&quot;Widget state imageIds must be an array of strings&quot;);
-    }
-    if (storedState.imageIds?.length &gt; 0) {
-      throw Object.assign(
-        new TypeError(&quot;Visualization state does not support image attachments&quot;),
-        { code: -32602, data: { code: &quot;images_unsupported&quot; } },
-      );
-    }
-    state = storedState;
-    globalThis.openai.widgetState = state;
-    globalThis.dispatchEvent(
-      new CustomEvent(&quot;openai:set_globals&quot;, {
-        detail: { globals: { widgetState: state } },
-      }),
-    );
-    if (statePersistence === &quot;none&quot;) {
-      throw persistenceError();
-    }
-    const id = ++nextStateRequestId;
-    return new Promise((resolve, reject) =&gt; {
-      const timeout = globalThis.setTimeout(() =&gt; {
-        pendingStateWrites.delete(id);
-        reject(persistenceError());
-      }, 30_000);
-      pendingStateWrites.set(id, { resolve, reject, timeout, serializedState });
-      postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
-    });
-  };
-  const mockElement = document.getElementById(&quot;codex-connector-mocks&quot;);
-  const connectorGlobals = {};
-  if (mockElement != null) {
-    const values = new Map(Object.entries(parse(mockElement.textContent)));
-    mockElement.remove();
-    connectorGlobals.visualizationData = {
-      updates: Array.from(values, ([name, value]) =&gt; ({
-        name,
-        revision: 1,
-        state: &quot;ready&quot;,
-        value: { type: &quot;json&quot;, value },
-      })),
-    };
-    connectorGlobals.visualization = {
-      /** @param {string} name @param {(value: unknown) =&gt; void} callback */
-      onData(name, callback) {
-        if (typeof callback !== &quot;function&quot;) {
-          throw new TypeError(&quot;onData requires a callback&quot;);
-        }
-        try {
-          callback(values.get(name));
-        } catch (error) {
-          // oxlint-disable-next-line no-console -- Keep authored callback failures local.
-          console.error(&quot;Live visualization data callback failed&quot;, error);
-        }
-        // A static preview delivers the current fixture once per subscription.
-        return () =&gt; {};
-      },
-    };
-  }
-  const syncTheme = () =&gt; {
-    const theme = mediaQuery.matches ? &quot;dark&quot; : &quot;light&quot;;
-    root.dataset.theme = theme;
-    globalThis.openai = {
-      ...globalThis.openai,
-      ...connectorGlobals,
-      openExternal,
-      sendFollowUpMessage,
-      setWidgetState,
-      theme,
-      visualizationStyleVariables: {},
-      visualizationTheme: theme,
-      widgetState: state,
-      statePersistence,
-      stateModelContext: &quot;none&quot;,
-    };
-    globalThis.dispatchEvent(
-      new CustomEvent(&quot;openai:set_globals&quot;, {
-        detail: { globals: globalThis.openai },
-      }),
-    );
-  };
-  const sendHeight = () =&gt; {
-    postToHost(&quot;height&quot;, {
-      height: Math.ceil(
-        Math.max(
-          document.body.scrollHeight,
-          document.body.getBoundingClientRect().height,
-        ),
-      ),
-    });
-  };
-
-  globalThis.addEventListener(
-    &quot;message&quot;,
-    (event) =&gt; {
-      const data = apply(getMessageData, event, []);
-      const ports = apply(getMessagePorts, event, []);
-      const source = apply(getMessageSource, event, []);
-      if (
-        hostPort != null ||
-        source !== parentWindow ||
-        typeof data !== &quot;object&quot; ||
-        data?.type !== &quot;codex-visualization-initialize&quot; ||
-        !isArray(ports) ||
-        ports.length !== 1
-      ) {
-        return;
-      }
-      apply(stopMessagePropagation, event, []);
-      const nextHostPort = ports[0];
-      try {
-        apply(addHostMessageListener, nextHostPort, [
-          &quot;message&quot;,
-          (event) =&gt; {
-            const data = apply(getMessageData, event, []);
-            if (typeof data === &quot;object&quot; &amp;&amp; data?.type === &quot;measure&quot;) {
-              sendHeight();
-            } else if (
-              typeof data === &quot;object&quot; &amp;&amp;
-              data?.type === &quot;widget-state-result&quot;
-            ) {
-              /** @type {unknown} */
-              const id = data.id;
-              if (typeof id !== &quot;number&quot;) {
-                return;
-              }
-              const pending = pendingStateWrites.get(id);
-              if (pending != null) {
-                pendingStateWrites.delete(id);
-                globalThis.clearTimeout(pending.timeout);
-                if (data.ok === true) {
-                  pending.resolve();
-                } else {
-                  pending.reject(persistenceError());
-                }
-              }
-            }
-          },
-        ]);
-        apply(startHostPort, nextHostPort, []);
-      } catch {
-        return;
-      }
-      hostPort = nextHostPort;
-      for (const [id, { serializedState }] of pendingStateWrites) {
-        postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
-      }
-      sendHeight();
-    },
-    { capture: true },
-  );
-  document.currentScript?.remove();
-  mediaQuery.addEventListener(&quot;change&quot;, syncTheme);
-  globalThis.addEventListener(&quot;click&quot;, (event) =&gt; {
-    if (event.defaultPrevented) {
-      return;
-    }
-    let element = null;
-    if (event.target instanceof globalThis.Element) {
-      element = event.target;
-    } else if (event.target instanceof globalThis.Node) {
-      element = event.target.parentElement;
-    }
-    const link = element?.closest(&quot;a[href]&quot;);
-    const href = link?.getAttribute(&quot;href&quot;);
-    if (href == null) {
-      return;
-    }
-    if (href.startsWith(&quot;#&quot;)) {
-      let id;
-      try {
-        id = decodeURIComponent(href.slice(1));
-      } catch {
-        return;
-      }
-      const target = id.length === 0 ? root : document.getElementById(id);
-      if (
-        target == null ||
-        globalThis.navigator.userActivation?.isActive !== true
-      ) {
-        return;
-      }
-      event.preventDefault();
-      postToHost(&quot;scroll-to&quot;, {
-        top: target.getBoundingClientRect().top + globalThis.scrollY,
-      });
-      return;
-    }
-    event.preventDefault();
-    openExternal({ href });
-  });
-  new ResizeObserver(sendHeight).observe(document.body);
-  syncTheme();
-})();
-&lt;/script&gt;
-&lt;div id=&quot;phyto-beam-explorer&quot;&gt;
-  &lt;style&gt;
-    #phyto-beam-explorer { color:var(--foreground); display:flex; flex-direction:column; gap:calc(var(--font-size-base) * 1); --pbe-blue:light-dark(#2563eb,#60a5fa); --pbe-yellow:light-dark(#eab308,#facc15); --pbe-green:light-dark(#16a34a,#4ade80); --pbe-red:light-dark(#ef4444,#f87171); --pbe-burgundy:light-dark(#781c3b,#a52b50); }
-    #phyto-beam-explorer .beam-field { display:flex; flex-direction:column; gap:calc(var(--font-size-base) * .35); min-width:0; }
-    #phyto-beam-explorer [hidden] { display:none !important; }
-    #phyto-beam-explorer .beam-label { display:flex; justify-content:space-between; flex-wrap:wrap; gap:calc(var(--font-size-base) * .5); }
-    #phyto-beam-explorer .beam-columns { display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--font-size-base) * 1.5); }
-    #phyto-beam-explorer .beam-svg { display:block; width:100%; height:300px; overflow:hidden; }
-    #phyto-beam-explorer .beam-svg text { font:inherit; fill:var(--foreground); }
-    #phyto-beam-explorer .beam-key { display:inline-flex; gap:calc(var(--font-size-base) * .4); align-items:center; }
-    #phyto-beam-explorer .plant-dot { display:inline-block; width:12px; height:12px; flex-shrink:0; background:var(--pbe-blue); }
-    #phyto-beam-explorer .plant-legend { display:flex; flex-wrap:wrap; gap:calc(var(--font-size-base) * .6) calc(var(--font-size-base) * 1); }
-    #phyto-beam-explorer .plant-status { display:grid; grid-template-columns:12px minmax(0,1fr); align-items:center; gap:calc(var(--font-size-base) * .5); }
-    #phyto-beam-explorer .plant-map { display:block; width:100%; height:300px; }
-    #phyto-beam-explorer .plant-map text { font:inherit; fill:var(--foreground); }
-    #phyto-beam-explorer .plant-comparison { margin-top:calc(var(--font-size-base) * .5); }
-    #phyto-beam-explorer .beam-swatch { width:18px; height:3px; background:var(--viz-series-1); }
-    #phyto-beam-explorer .beam-swatch.plant { background:var(--viz-series-2); }
-    #phyto-beam-explorer .beam-swatch.desk { background:var(--viz-series-3); }
-    #phyto-beam-explorer .beam-brief { display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--font-size-base) * .6); }
-    #phyto-beam-explorer #pbe-estimate-details th:first-child { width:30%; }
-    @media(max-width:560px) { #phyto-beam-explorer .beam-columns, #phyto-beam-explorer .beam-brief { grid-template-columns:1fr; } }
-  &lt;/style&gt;
-  &lt;div&gt;
-    &lt;h2&gt;Источник, пучок и две полезные зоны&lt;/h2&gt;
-    &lt;div class=&quot;text-small&quot;&gt;Samsung и MiniFermer · диммирование · 10 растений&lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-plant&quot;&gt;Растение
-      &lt;select class=&quot;form-select&quot; id=&quot;pbe-plant&quot;&gt;
-        &lt;optgroup label=&quot;Крупномеры&quot;&gt;
-          &lt;option value=&quot;monstera&quot; selected&gt;Монстера деликатесная&lt;/option&gt;
-          &lt;option value=&quot;elastica&quot;&gt;Фикус эластика&lt;/option&gt;
-          &lt;option value=&quot;lyrata&quot;&gt;Фикус лирата&lt;/option&gt;
-          &lt;option value=&quot;strelitzia&quot;&gt;Стрелиция Николая&lt;/option&gt;
-          &lt;option value=&quot;dracaena&quot;&gt;Драцена душистая&lt;/option&gt;
-        &lt;/optgroup&gt;
-        &lt;optgroup label=&quot;Средние растения&quot;&gt;
-          &lt;option value=&quot;peace&quot;&gt;Спатифиллум&lt;/option&gt;
-          &lt;option value=&quot;aglaonema&quot;&gt;Аглаонема&lt;/option&gt;
-          &lt;option value=&quot;zz&quot;&gt;Замиокулькас&lt;/option&gt;
-          &lt;option value=&quot;spider&quot;&gt;Хлорофитум&lt;/option&gt;
-          &lt;option value=&quot;jade&quot;&gt;Толстянка овальная&lt;/option&gt;
-        &lt;/optgroup&gt;
-      &lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-hours&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Лампа работает в сутки&lt;/span&gt;&lt;output id=&quot;pbe-hours-value&quot; class=&quot;tabular-nums&quot;&gt;12 ч&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-hours&quot; type=&quot;range&quot; min=&quot;6&quot; max=&quot;16&quot; step=&quot;1&quot; value=&quot;12&quot;&gt;
-    &lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-source&quot;&gt;Источник
-      &lt;select class=&quot;form-select&quot; id=&quot;pbe-source&quot;&gt;
-        &lt;optgroup label=&quot;PPF платы + диаграмма диода Samsung&quot;&gt;
-          &lt;option value=&quot;square50&quot; selected&gt;Square 50 · LM301B · 4000 K&lt;/option&gt;
-          &lt;option value=&quot;compact21&quot;&gt;COMPACT 21 · LM301B · 4000 K&lt;/option&gt;
-          &lt;option value=&quot;linear98&quot;&gt;Линейка 98 · LM301B · 3500 K&lt;/option&gt;
-        &lt;/optgroup&gt;
-        &lt;optgroup label=&quot;MiniFermer · оценка с допущениями&quot;&gt;
-          &lt;option value=&quot;mf193&quot;&gt;MiniFermer 1.9.3 · 3500 K · диапазон PPFD&lt;/option&gt;
-          &lt;option value=&quot;mf194&quot;&gt;MiniFermer 1.9.4 · 4000 K · диапазон PPFD&lt;/option&gt;
-          &lt;option value=&quot;mf36&quot;&gt;MiniFermer 3.6 · гипотеза Seoul + Osram 660 нм&lt;/option&gt;
-        &lt;/optgroup&gt;
-        &lt;optgroup label=&quot;Условные сценарии · PPF вручную&quot;&gt;
-        &lt;option value=&quot;mini&quot;&gt;Quantum Board Mini · 120 × 120 мм&lt;/option&gt;
-        &lt;option value=&quot;qb30&quot;&gt;Quantum Board 30 Вт · 390 × 120 мм&lt;/option&gt;
-        &lt;option value=&quot;qb60&quot;&gt;Quantum Board 60 Вт · 390 × 180 мм&lt;/option&gt;
-        &lt;option value=&quot;qb120&quot;&gt;Quantum Board 120 Вт · пример 580 × 280 мм&lt;/option&gt;
-        &lt;option value=&quot;arlight&quot;&gt;Arlight · линейка 500 × 20 мм&lt;/option&gt;
-        &lt;option value=&quot;compact&quot;&gt;Samsung COMPACT · 149 × 24 мм&lt;/option&gt;
-        &lt;option value=&quot;e27small&quot;&gt;E27 12W · корпус Ø95 мм&lt;/option&gt;
-        &lt;option value=&quot;e27big&quot;&gt;E27 25W · корпус Ø124 мм&lt;/option&gt;
-        &lt;option value=&quot;petal2&quot;&gt;«Лепесток ×2» · условная компоновка&lt;/option&gt;
-        &lt;option value=&quot;petal3&quot;&gt;«Лепесток ×3» · условная компоновка&lt;/option&gt;
-        &lt;option value=&quot;petal4&quot;&gt;«Лепесток ×4» · условная компоновка&lt;/option&gt;
-        &lt;option value=&quot;b3&quot;&gt;Б3 · два модуля, без расчёта купола&lt;/option&gt;
-        &lt;/optgroup&gt;
-      &lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-ppf&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;PPF всех модулей при 100%&lt;/span&gt;&lt;output id=&quot;pbe-ppf-value&quot; class=&quot;tabular-nums&quot;&gt;50 мкмоль/с&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-ppf&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;400&quot; step=&quot;5&quot; value=&quot;50&quot;&gt;
-    &lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div id=&quot;pbe-hardware&quot; class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-count&quot;&gt;Количество плат
-      &lt;select id=&quot;pbe-count&quot; class=&quot;form-select&quot;&gt;&lt;option value=&quot;1&quot;&gt;1 плата&lt;/option&gt;&lt;option value=&quot;2&quot; selected&gt;2 платы&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;4 платы&lt;/option&gt;&lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-driver&quot;&gt;Питание и управление
-      &lt;select id=&quot;pbe-driver&quot; class=&quot;form-select&quot;&gt;&lt;option value=&quot;lcm25&quot;&gt;Mean Well LCM-25 · общий DIM&lt;/option&gt;&lt;option value=&quot;lcm40&quot;&gt;Mean Well LCM-40 · общий DIM&lt;/option&gt;&lt;option value=&quot;ldd&quot; selected&gt;24 В + LDD-H · наш контроллер&lt;/option&gt;&lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-current&quot;&gt;Ток при 100% / модель драйвера
-      &lt;select id=&quot;pbe-current&quot; class=&quot;form-select&quot;&gt;&lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-dim2&quot; id=&quot;pbe-channel2&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-dim2-label&quot;&gt;Вторая группа · PWM&lt;/span&gt;&lt;output id=&quot;pbe-dim2-value&quot; class=&quot;tabular-nums&quot;&gt;70%&lt;/output&gt;&lt;/span&gt;
-      &lt;input id=&quot;pbe-dim2&quot; class=&quot;form-range&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;70&quot;&gt;
-    &lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-height&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Высота над плоскостью&lt;/span&gt;&lt;output id=&quot;pbe-height-value&quot; class=&quot;tabular-nums&quot;&gt;40 см&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-height&quot; type=&quot;range&quot; min=&quot;20&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;40&quot;&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-angle&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-angle-label&quot;&gt;Полный угол пучка&lt;/span&gt;&lt;output id=&quot;pbe-angle-value&quot; class=&quot;tabular-nums&quot;&gt;60°&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-angle&quot; type=&quot;range&quot; min=&quot;30&quot; max=&quot;120&quot; step=&quot;5&quot; value=&quot;60&quot;&gt;
-    &lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-tilt&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span&gt;Наклон вправо, к столу&lt;/span&gt;&lt;output id=&quot;pbe-tilt-value&quot; class=&quot;tabular-nums&quot;&gt;0°&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-tilt&quot; type=&quot;range&quot; min=&quot;-20&quot; max=&quot;20&quot; step=&quot;5&quot; value=&quot;0&quot;&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label beam-field&quot; for=&quot;pbe-dim&quot;&gt;&lt;span class=&quot;beam-label&quot;&gt;&lt;span id=&quot;pbe-dim-label&quot;&gt;Яркость источника&lt;/span&gt;&lt;output id=&quot;pbe-dim-value&quot; class=&quot;tabular-nums&quot;&gt;70%&lt;/output&gt;&lt;/span&gt;
-      &lt;input class=&quot;form-range&quot; id=&quot;pbe-dim&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;5&quot; value=&quot;70&quot;&gt;
-    &lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div id=&quot;pbe-validation&quot; class=&quot;text-small text-destructive&quot; role=&quot;alert&quot; hidden&gt;&lt;/div&gt;
-  &lt;div id=&quot;pbe-operating&quot; class=&quot;text-small&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;div id=&quot;pbe-estimate-notice&quot; class=&quot;text-small&quot; hidden&gt;Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. Это не измерение и не доверительный интервал. Цветная карта и проценты площади — базовый сценарий.&lt;/div&gt;
-  &lt;div class=&quot;viz-grid&quot; aria-live=&quot;polite&quot;&gt;
-    &lt;div class=&quot;card viz-stat&quot;&gt;
-      &lt;div&gt;Средний PPFD в зоне кроны&lt;/div&gt;
-      &lt;div class=&quot;viz-stat-value tabular-nums&quot; id=&quot;pbe-mean&quot;&gt;—&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot;&gt;мкмоль/(м²·с) · горизонтальный овал 56 × 44 см&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;card viz-stat&quot;&gt;
-      &lt;div&gt;PPFD в центре зоны&lt;/div&gt;
-      &lt;div class=&quot;viz-stat-value tabular-nums&quot; id=&quot;pbe-center&quot;&gt;—&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot;&gt;мкмоль/(м²·с) · точка × на схеме&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;card viz-stat&quot;&gt;
-      &lt;div&gt;Средняя суточная доза · DLI&lt;/div&gt;
-      &lt;div class=&quot;viz-stat-value tabular-nums&quot; id=&quot;pbe-dli&quot;&gt;—&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot;&gt;моль/(м²·сут) · только от лампы&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;plant-status&quot; aria-live=&quot;polite&quot;&gt;&lt;span id=&quot;pbe-status-dot&quot; class=&quot;plant-dot&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;&lt;span id=&quot;pbe-status&quot;&gt;—&lt;/span&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot; id=&quot;pbe-target&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot; id=&quot;pbe-flow&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot; id=&quot;pbe-capability&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;section id=&quot;pbe-vendor-comparison&quot; class=&quot;beam-field&quot; aria-labelledby=&quot;pbe-vendor-title&quot; hidden&gt;
-    &lt;h3 id=&quot;pbe-vendor-title&quot;&gt;MiniFermer 3.6: расчёт и замеры продавца&lt;/h3&gt;
-    &lt;div class=&quot;text-small&quot;&gt;Отдельное сравнение: 1 плата, 100% яркости, без наклона. Ползунки выше не меняют эту таблицу. PPFD — мкмоль/(м²·с).&lt;/div&gt;
-    &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;см&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Замер&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Расчёт&lt;br&gt;&lt;span class=&quot;text-small&quot;&gt;база · диапазон&lt;/span&gt;&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Δ, %&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-vendor-rows&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
-    &lt;div class=&quot;text-small&quot; id=&quot;pbe-vendor-result&quot;&gt;&lt;/div&gt;
-    &lt;div class=&quot;text-small&quot; id=&quot;pbe-vendor-model-check&quot;&gt;&lt;/div&gt;
-    &lt;div class=&quot;text-small&quot;&gt;У продавца указано 12 Вт и изображён бокс; положение датчика, отражения, температура и наличие линз не описаны. Здесь условно сравниваем с точкой под центром открытой платы в свободном пространстве, а не со средним по кроне. Подгонки PPF под замеры нет.&lt;/div&gt;
-    &lt;div class=&quot;text-small&quot;&gt;&lt;a href=&quot;https://minifermer.ru/data/111%20sasa/qb-mini-36-specs.jpg&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Исходная картинка MiniFermer: 244 / 120 / 75 / 50&lt;/a&gt;&lt;/div&gt;
-  &lt;/section&gt;
-  &lt;details id=&quot;pbe-data-details&quot;&gt;
-    &lt;summary class=&quot;cursor-interaction&quot;&gt;Плата, драйверы и наш контроллер&lt;/summary&gt;
-    &lt;div class=&quot;beam-field&quot;&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-module-description&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-evidence&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-circuit&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-controller&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot;&gt;Сравнение при выбранном токе и 100% яркости · типичные напряжения&lt;/div&gt;
-      &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Драйвер&lt;/th&gt;&lt;th&gt;Габариты, мм&lt;/th&gt;&lt;th&gt;Предварительная проверка&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-driver-comparison&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
-      &lt;div class=&quot;text-small&quot;&gt;PPF одной платы · данные производителя&lt;/div&gt;
-      &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Ток, мА&lt;/th&gt;&lt;th&gt;Напряжение, В&lt;/th&gt;&lt;th&gt;PPF, мкмоль/с&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-ppf-table&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
-      &lt;div class=&quot;text-small&quot;&gt;&lt;a id=&quot;pbe-module-link&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Плата и PPF · LED-TECH&lt;/a&gt; · &lt;a href=&quot;https://uploadcdn.oneyac.com/attachments/files/brand_pdf/samsungsemiconductor/B4/C9/Data_Sheet_LM301B_CRI80_Rev.10.1.pdf&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Диаграмма Samsung · стр. 15&lt;/a&gt; · &lt;a id=&quot;pbe-driver-link&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Паспорт драйвера&lt;/a&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/details&gt;
-  &lt;details id=&quot;pbe-estimate-details&quot; hidden&gt;
-    &lt;summary class=&quot;cursor-interaction&quot;&gt;MiniFermer: данные и принятые допущения&lt;/summary&gt;
-    &lt;div class=&quot;beam-field&quot;&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-estimate-description&quot;&gt;&lt;/div&gt;
-      &lt;table class=&quot;table table-sm&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Параметр&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Что принято в расчёте&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;pbe-estimate-table&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
-      &lt;div class=&quot;text-small&quot; id=&quot;pbe-estimate-limits&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;text-small&quot;&gt;&lt;a id=&quot;pbe-estimate-link&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Плата · MiniFermer&lt;/a&gt;&lt;span id=&quot;pbe-estimate-sources&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/details&gt;
-  &lt;div class=&quot;beam-columns&quot;&gt;
-    &lt;div&gt;
-      &lt;h3&gt;Сбоку&lt;/h3&gt;
-      &lt;svg id=&quot;pbe-side&quot; class=&quot;beam-svg&quot; role=&quot;img&quot; aria-label=&quot;Условные пучки над зоной кроны и рабочей поверхностью&quot;&gt;&lt;/svg&gt;
-    &lt;/div&gt;
-    &lt;div&gt;
-      &lt;h3&gt;Свет на кроне и столе&lt;/h3&gt;
-      &lt;svg id=&quot;pbe-plan&quot; class=&quot;beam-svg&quot; role=&quot;img&quot; aria-label=&quot;Цветовая оценка суточной дозы по участкам условной кроны&quot;&gt;&lt;/svg&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;plant-legend text-small&quot; id=&quot;pbe-legend&quot; aria-label=&quot;Доли площади кроны в пяти категориях&quot;&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot;&gt;Цвета и проценты — по площади условной кроны. «Оптимально*» — рабочая цель; «опасно*» — условный сигнал риска, не установленный порог ожога.&lt;/div&gt;
-  &lt;details&gt;
-    &lt;summary class=&quot;cursor-interaction&quot;&gt;Все 10 растений при этих настройках&lt;/summary&gt;
-    &lt;div class=&quot;plant-comparison&quot;&gt;
-      &lt;div class=&quot;text-small&quot;&gt;Цели DLI в моль/(м²·сут); оценка по среднему по кроне&lt;/div&gt;
-      &lt;table class=&quot;table table-sm&quot;&gt;
-        &lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Растение&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Цель DLI&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;По среднему&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
-        &lt;tbody id=&quot;pbe-comparison&quot;&gt;&lt;/tbody&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
-  &lt;/details&gt;
-  &lt;div class=&quot;text-small&quot;&gt;Диапазоны — по световым группам; границы цветов условные. Зона 56 × 44 см одинакова для всех видов. Свет окна, адаптация и быстрый световой стресс не учтены.&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot;&gt;
-    &lt;a href=&quot;https://yardandgarden.extension.iastate.edu/how-to/growing-indoor-plants-under-supplemental-lights/important-considerations-providing-supplemental-light-indoor-plants&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Диапазоны DLI · Iowa State&lt;/a&gt; ·
-    &lt;a id=&quot;pbe-plant-source&quot; href=&quot;https://plants.ces.ncsu.edu/plants/monstera-deliciosa/&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Свет для выбранного вида&lt;/a&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;beam-brief text-small&quot;&gt;
-    &lt;span&gt;Растение: PPFD на листьях + суточная доза DLI&lt;/span&gt;
-    &lt;span&gt;Человек: люксы на поверхности + цвет + блики&lt;/span&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;text-small&quot; id=&quot;pbe-geometric-value&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
-  &lt;div class=&quot;text-small&quot; id=&quot;pbe-method&quot;&gt;Купол, отражения и затенение листьями не учтены. Цветная карта — расчёт на плоскости, не измерения листьев.&lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-(() =&gt; {
-  const root = document.getElementById(&#x27;phyto-beam-explorer&#x27;);
-  const q = id =&gt; root.querySelector(&#x27;#&#x27; + id);
-  const controls = { source:q(&#x27;pbe-source&#x27;), angle:q(&#x27;pbe-angle&#x27;), height:q(&#x27;pbe-height&#x27;), tilt:q(&#x27;pbe-tilt&#x27;), dim:q(&#x27;pbe-dim&#x27;), dim2:q(&#x27;pbe-dim2&#x27;), ppf:q(&#x27;pbe-ppf&#x27;), plant:q(&#x27;pbe-plant&#x27;), hours:q(&#x27;pbe-hours&#x27;),count:q(&#x27;pbe-count&#x27;),driver:q(&#x27;pbe-driver&#x27;),current:q(&#x27;pbe-current&#x27;) };
-  const side = q(&#x27;pbe-side&#x27;), plan = q(&#x27;pbe-plan&#x27;);
-  const profiles = {
-    square50:{w:.05,d:.05,kind:&#x27;catalog&#x27;,cap:&#x27;Square 50: компактная плата для головки Б3. Купол и радиатор проектируются отдельно.&#x27;},
-    compact21:{w:.149,d:.024,kind:&#x27;catalog&#x27;,cap:&#x27;COMPACT 21: вытянутая головка. Плата 149 мм не помещается в прежнее окно Б3 длиной 104 мм.&#x27;},
-    linear98:{w:.4999,d:.016,kind:&#x27;catalog&#x27;,cap:&#x27;Линейка 98: длинный источник для полки или подвеса. Несколько плат расположены параллельными рядами.&#x27;},
-    mf193:{w:.39,d:.18,kind:&#x27;estimate&#x27;,cap:&#x27;MiniFermer 1.9.3: открытая плата 390 × 180 мм, 3500 K. Высота и наклон меняют пятно; яркость здесь — условный PWM совместимого драйвера.&#x27;},
-    mf194:{w:.39,d:.18,kind:&#x27;estimate&#x27;,cap:&#x27;MiniFermer 1.9.4: открытая плата 390 × 180 мм, 4000 K. Высота и наклон меняют пятно; яркость здесь — условный PWM совместимого драйвера.&#x27;},
-    mf36:{w:.12,d:.12,kind:&#x27;estimate&#x27;,cap:&#x27;MiniFermer 3.6: 24 белых + 1 красный LED, 120 × 120 мм. Seoul SunLike — принятая замена неизвестного белого LED, не подтверждённый состав платы. Osram GH CSSRM3.24 заявлен продавцом.&#x27;},
-    mini:{w:.12,d:.12,kind:&#x27;rect&#x27;,cap:&#x27;Mini: высота, поворот, разнос модулей; диммирование с отдельным драйвером. Линзы — по совместимости.&#x27;},
-    qb30:{w:.39,d:.12,kind:&#x27;rect&#x27;,cap:&#x27;30 Вт: высота, поворот, диммер; штатные линзы MiniFermer для этой раскладки не подходят.&#x27;},
-    qb60:{w:.39,d:.18,kind:&#x27;rect&#x27;,cap:&#x27;60 Вт: высота, поворот, диммер. Линзы доступны для части LM301B/Sunlike; для LM281B+Pro — нет.&#x27;},
-    qb120:{w:.58,d:.28,kind:&#x27;rect&#x27;,cap:&#x27;Большая плата: широкое покрытие; высота и диммер. Наборы нескольких плат дополнительно регулируются разносом.&#x27;},
-    arlight:{w:.50,d:.02,kind:&#x27;rect&#x27;,cap:&#x27;Arlight: профиль, экран или рассеиватель; яркость через совместимый PWM-регулятор 24 В.&#x27;},
-    compact:{w:.149,d:.024,kind:&#x27;rect&#x27;,cap:&#x27;Samsung COMPACT: отдельные токовые драйверы, поворот и разнос. Дополнительная оптика проектируется отдельно.&#x27;},
-    e27small:{w:.095,d:.095,kind:&#x27;disc&#x27;,fixed:true,cap:&#x27;Готовая E27: высота и поворот патрона. Диммирование не подтверждено; закрывать радиатор куполом нельзя.&#x27;},
-    e27big:{w:.124,d:.124,kind:&#x27;disc&#x27;,fixed:true,cap:&#x27;Готовая E27: высота и поворот патрона. Диммирование не подтверждено; закрывать радиатор куполом нельзя.&#x27;},
-    petal2:{w:.24,d:.08,kind:&#x27;petal&#x27;,n:2,fixed:true,cap:&#x27;«Лепесток»: размеры и положения площадок здесь условные. Регулировка яркости и ход шарниров не подтверждены.&#x27;},
-    petal3:{w:.24,d:.24,kind:&#x27;petal&#x27;,n:3,fixed:true,cap:&#x27;«Лепесток»: размеры и положения площадок здесь условные. Регулировка яркости и ход шарниров не подтверждены.&#x27;},
-    petal4:{w:.24,d:.24,kind:&#x27;petal&#x27;,n:4,fixed:true,cap:&#x27;«Лепесток»: размеры и положения площадок здесь условные. Регулировка яркости и ход шарниров не подтверждены.&#x27;},
-    b3:{w:.104,d:.064,kind:&#x27;pair&#x27;,cap:&#x27;Б3: два условных окна 104 × 64 мм. Показаны прямые пучки; отражение и поглощение купола требуют отдельного расчёта.&#x27;}
-  };
-  // HARDWARE MODEL START: manufacturer-declared module PPF; no low-current extrapolation.
-  const hardware = (() =&gt; {
-    const modules={
-      square50:{name:&#x27;Square 50 · LT-3238&#x27;,size:&#x27;50 × 50 × 4,08 мм&#x27;,cct:4000,price:&#x27;12,90 €&#x27;,url:&#x27;https://www.led-tech.de/de/49x-Samsung-LM301B-Square-50-4000k&#x27;,rows:[[100,18.08,5.59],[350,18.62,19.15],[700,19.09,36.98],[1050,19.46,53.79],[1400,19.73,69.73]]},
-      compact21:{name:&#x27;COMPACT 21 · LT-6469&#x27;,size:&#x27;149 × 24 × 4,08 мм&#x27;,cct:4000,price:&#x27;6,49 €&#x27;,url:&#x27;https://www.led-tech.de/en/21x-Samsung-COMPACT-LM301-stripe-4000k&#x27;,rows:[[100,7.76,2.63],[350,8,9.01],[700,8.21,17.45],[1050,8.38,25.45],[1400,8.54,33.13]]},
-      linear98:{name:&#x27;Линейка 98 · LT-4015&#x27;,size:&#x27;499,9 × 16 × 5,4 мм&#x27;,cct:3500,price:&#x27;19,90 €&#x27;,url:&#x27;https://www.led-tech.de/de/50cm-Alustreifen-mit-98x-Samsung-LM301B-LEDs-3500k-und-Steckerbuchsen&#x27;,rows:[[350,18.59,19.21],[700,18.99,37.63],[1050,19.32,55.36],[1400,19.6,72.59],[1750,19.87,89],[2100,20.1,105.2]]}
-    };
-    const drivers={
-      lcm25:{name:&#x27;LCM-25&#x27;,size:&#x27;105 × 68 × 23&#x27;,currents:[350,500,600,700,900,1050],maxV:[54,50,42,36,28,24],minV:6,power:25.2,url:&#x27;https://www.meanwell.com/Upload/PDF/LCM-25/LCM-25-SPEC.PDF&#x27;},
-      lcm40:{name:&#x27;LCM-40&#x27;,size:&#x27;123,5 × 81,5 × 23&#x27;,currents:[350,500,600,700,900,1050],maxV:[100,80,67,57,45,40],minV:2,power:42,url:&#x27;https://www.mean-well.ru/uploads/files/datasheets/LCM-40.pdf&#x27;},
-      ldd:{name:&#x27;LDD-H + 24 В&#x27;,size:&#x27;31,8 × 20,3 × 12,2 / канал&#x27;,currents:[350,500,600,700,1000],minV:2,power:60,url:&#x27;https://www.meanwell.com/Upload/PDF/LDD-H/LDD-H-SPEC.PDF&#x27;}
-    };
-    function point(id,current){
-      const rows=modules[id].rows;
-      if(current&lt;rows[0][0]-1e-8 || current&gt;rows.at(-1)[0]+1e-8)return null;
-      const hi=rows.findIndex(r=&gt;r[0]&gt;=current-1e-8),r=rows[hi];
-      if(hi===0 || Math.abs(current-r[0])&lt;1e-8)return {voltage:r[1],ppf:r[2],exact:true};
-      const l=rows[hi-1],f=(current-l[0])/(r[0]-l[0]);
-      return {voltage:l[1]+f*(r[1]-l[1]),ppf:l[2]+f*(r[2]-l[2]),exact:false};
-    }
-    function fit(id,driver,current,count){
-      const d=drivers[driver],i=d.currents.indexOf(current),p=point(id,current);
-      if(i&lt;0)return {ok:false,reason:&#x27;Такой номинальный ток не поддерживается&#x27;};
-      if(!p)return {ok:false,reason:&#x27;Нет данных платы для этого тока&#x27;};
-      const ldd=driver===&#x27;ldd&#x27;,voltage=p.voltage*(ldd?1:count),maxV=ldd?24*.97-3:d.maxV[i];
-      const watts=p.voltage*current/1000*count;
-      if(voltage&lt;d.minV || voltage&gt;maxV)return {ok:false,reason:`Нужно ${voltage.toFixed(2)} В; диапазон ${d.minV}–${maxV.toFixed(2)} В`,voltage,watts};
-      // LDD PSU budget is a declared design allowance, not measured efficiency.
-      const budget=ldd?watts/.85+2:watts;
-      if(budget&gt;d.power+1e-8)return {ok:false,reason:ldd?&#x27;Нужен более мощный БП: бюджет с запасом &gt;60 Вт&#x27;:&#x27;Превышена мощность драйвера&#x27;,voltage,watts,budget};
-      return {ok:true,voltage,watts,budget,headroom:maxV-voltage,reason:`По тип. Vf: ${voltage.toFixed(2)} В · запас сверху ${(maxV-voltage).toFixed(2)} В`};
-    }
-    function operate(s){
-      const m=modules[s.source],d=drivers[s.driver],base=point(s.source,s.current),check=fit(s.source,s.driver,s.current,s.count);
-      if(!check.ok)return {ok:false,reason:check.reason,check};
-      const pwm=s.driver===&#x27;ldd&#x27;,current=pwm?s.current:s.current*s.dim/100;
-      if(!pwm &amp;&amp; s.dim&gt;0 &amp;&amp; s.dim&lt;6)return {ok:false,reason:&#x27;LCM: ток при DIM между 0 и 6% не определён паспортом&#x27;,check};
-      const actual=current===0?{ppf:0,voltage:0,exact:true}:point(s.source,current);
-      if(!actual)return {ok:false,reason:`Нет PPF при ${current.toFixed(0)} мА. Для этой платы расчёт от ${m.rows[0][0]} мА; увеличь DIM или выбери LDD.`,check};
-      const totalV=actual.voltage*s.count;
-      if(!pwm &amp;&amp; current&gt;0 &amp;&amp; (totalV&lt;d.minV || totalV&gt;d.maxV[d.currents.indexOf(s.current)]))return {ok:false,reason:&#x27;Напряжение при уменьшенном токе вне диапазона LCM&#x27;,check};
-      const duties=Array.from({length:s.count},(_,i)=&gt;pwm?(i%2===0?s.dim:s.dim2)/100:1);
-      const fluxes=duties.map(duty=&gt;actual.ppf*duty),flux=fluxes.reduce((a,b)=&gt;a+b,0);
-      const watts=actual.voltage*current/1000*duties.reduce((a,b)=&gt;a+b,0);
-      return {ok:true,flux,fluxes,watts,current,voltage:pwm?actual.voltage:totalV,basePPF:base.ppf*s.count,exact:actual.exact,pwm,check};
-    }
-    return {modules,drivers,point,fit,operate};
-  })();
-  // HARDWARE MODEL END
-  // ESTIMATE MODEL START: conditional scenarios, not measured module PPF or statistical error bars.
-  const estimateModel = (() =&gt; {
-    const modules={
-      mf193:{name:&#x27;MiniFermer 1.9.3&#x27;,cct:3500,lumens:[34,35.75,37.5],url:&#x27;https://minifermer.ru/product_2511.html&#x27;},
-      mf194:{name:&#x27;MiniFermer 1.9.4&#x27;,cct:4000,lumens:[35,36.75,38.5],url:&#x27;https://minifermer.ru/product_2510.html&#x27;}
-    };
-    // Catalog flux ranges span the selected CRI80 VK/VL variants at 65mA, 25C.
-    // lm→PPF and heat factors are project assumptions, NOT digitized Samsung spectral/thermal data.
-    const ledCount=320,photonFactors=[.013,.015,.017],heatFactors=[.85,.925,1],angles=[110,120,130];
-    function output(id,count=1,dim=100){
-      const m=modules[id],base=m.lumens.map((lm,i)=&gt;ledCount*lm*photonFactors[i]*heatFactors[i]);
-      const fluxes=base.map(f=&gt;f*count*dim/100);
-      return {base,full:base.map(f=&gt;f*count),fluxes,flux:fluxes[1]};
-    }
-    function layout(count){
-      // Parallel boards, 40 mm clear gap. This is a design layout, not a vendor kit.
-      return Array.from({length:count},(_,i)=&gt;({x:0,y:(i-(count-1)/2)*.22,w:.39,d:.18}));
-    }
-    function summarize(groups,h,t,fluxes,density=1){
-      const shapes=angles.map(angle=&gt;photometry.summarize(groups,h,t,angle,1,density));
-      const scaled=(shape,flux)=&gt;({mean:shape.mean*flux,center:shape.center*flux});
-      const scenarios=shapes.flatMap((shape,j)=&gt;fluxes.map((flux,i)=&gt;({...scaled(shape,flux),angle:angles[j],flux,level:i})));
-      const span=key=&gt;[Math.min(...scenarios.map(s=&gt;s[key])),Math.max(...scenarios.map(s=&gt;s[key]))];
-      const nominal=shapes[1],flux=fluxes[1];
-      return {...nominal,...scaled(nominal,flux),samples:nominal.samples.map(s=&gt;({...s,value:s.value*flux})),range:{mean:span(&#x27;mean&#x27;),center:span(&#x27;center&#x27;)},scenarios};
-    }
-    return {modules,ledCount,photonFactors,heatFactors,angles,output,layout,summarize};
-  })();
-  // ESTIMATE MODEL END
-  // MINI36 MODEL START: Seoul is a substitute hypothesis, NOT a confirmed MiniFermer BOM.
-  const mini36Model = (() =&gt; {
-    const whiteCount=24,whiteReferencePPF=1.78,whiteCurrent=150,redCurrent=600;
-    const url=&#x27;https://minifermer.ru/product_3950.html&#x27;;
-    const seoulURL=&#x27;https://www.neumueller.com/datenblatt/seoulsemiconductor/STD_Datasheet_STWSC12S-E1H10000_231025_R1_2.pdf&#x27;;
-    const osramURL=&#x27;https://look.ams-osram.com/m/1c76048636e1819b/original/GH-CSSRM3-24.pdf&#x27;;
-    // Approximate readings from Seoul E1 rev1.2 pp6,8 and Osram rev1.7 pp9,10.
-    // Current-factor brackets are chosen rounding sensitivity, not manufacturer tolerances.
-    // Transfer luminous/radiant relative factors to PPF assuming invariant spectral shape.
-    const scenarios=[
-      {name:&#x27;нижний&#x27;,tj:85,whiteI:.50,whiteT:.87,redReference:5.05,redI:.85,redT:.94},
-      {name:&#x27;базовый&#x27;,tj:55,whiteI:.51,whiteT:.94,redReference:5.42,redI:.86,redT:.98},
-      {name:&#x27;верхний&#x27;,tj:25,whiteI:.52,whiteT:1,redReference:5.65,redI:.87,redT:1}
-    ];
-    const components=scenarios.map(s=&gt;({white:whiteCount*whiteReferencePPF*s.whiteI*s.whiteT,red:s.redReference*s.redI*s.redT}));
-    // Approximate LED centres from the vendor&#x27;s board illustration, in metres.
-    const whitePoints=[-.045,-.022,.022,.045].flatMap(y=&gt;[-.05,-.03,-.01,.01,.03,.05].map(x=&gt;[x,y]));
-    function output(_id=&#x27;mf36&#x27;,count=1,dim=100){
-      const base=components.map(c=&gt;c.white+c.red),full=base.map(f=&gt;f*count),fluxes=full.map(f=&gt;f*dim/100);
-      return {base,full,fluxes,flux:fluxes[1],components};
-    }
-    function layout(count){return Array.from({length:count},(_,i)=&gt;({x:0,y:(i-(count-1)/2)*.16,w:.12,d:.12}));}
-    function weightedGroups(groups,level){
-      const c=components[level],total=c.white+c.red;
-      return groups.map(g=&gt;({...g,points:[...whitePoints.map(([x,y])=&gt;[x,y,c.white/whiteCount/total]),[0,0,c.red/total]]}));
-    }
-    function summarize(groups,h,t,fluxes,density=1){
-      const results=fluxes.map((flux,i)=&gt;photometry.summarize(weightedGroups(groups,i),h,t,120,flux,density));
-      const span=key=&gt;[Math.min(...results.map(s=&gt;s[key])),Math.max(...results.map(s=&gt;s[key]))];
-      return {...results[1],range:{mean:span(&#x27;mean&#x27;),center:span(&#x27;center&#x27;)},scenarios:results};
-    }
-    const measurements=[{height:20,ppfd:244},{height:30,ppfd:120},{height:40,ppfd:75},{height:50,ppfd:50}];
-    let reference=null;
-    function comparison(){
-      // Fixed reference: one board at 100%, no tilt/optics/reflections. Never fit to measurements.
-      if(!reference)reference=measurements.map(m=&gt;{
-        const result=summarize(layout(1),m.height/100,0,output().fluxes);
-        return {...m,calculated:result.center,range:result.range.center,delta:100*(result.center/m.ppfd-1),equivalentPPF:output().flux*m.ppfd/result.center};
-      });
-      return reference;
-    }
-    return {whiteCount,whiteReferencePPF,whiteCurrent,redCurrent,scenarios,components,whitePoints,url,seoulURL,osramURL,output,layout,weightedGroups,summarize,measurements,comparison};
-  })();
-  // MINI36 MODEL END
-  // PLANT MODEL START: broad light groups, explicit scenario thresholds (not injury limits).
-  const plantModel = (() =&gt; {
-    const groups={low:{L:3,U:6},medium:{L:6,U:10},high:{L:12,U:16}};
-    const plants={
-      monstera:{name:&#x27;Монстера деликатесная&#x27;,size:&#x27;крупномер&#x27;,group:&#x27;medium&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/monstera-deliciosa/&#x27;},
-      elastica:{name:&#x27;Фикус эластика&#x27;,size:&#x27;крупномер&#x27;,group:&#x27;medium&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/ficus-elastica/&#x27;},
-      lyrata:{name:&#x27;Фикус лирата&#x27;,size:&#x27;крупномер&#x27;,group:&#x27;medium&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/ficus-lyrata/&#x27;},
-      strelitzia:{name:&#x27;Стрелиция Николая&#x27;,size:&#x27;крупномер&#x27;,group:&#x27;high&#x27;,url:&#x27;https://www.rhs.org.uk/plants/82161/strelitzia-nicolai/details&#x27;},
-      dracaena:{name:&#x27;Драцена душистая&#x27;,size:&#x27;крупномер&#x27;,group:&#x27;low&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/dracaena-fragrans/&#x27;},
-      peace:{name:&#x27;Спатифиллум&#x27;,size:&#x27;среднее&#x27;,group:&#x27;low&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/spathiphyllum/&#x27;},
-      aglaonema:{name:&#x27;Аглаонема&#x27;,size:&#x27;среднее&#x27;,group:&#x27;low&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/aglaonema/&#x27;},
-      zz:{name:&#x27;Замиокулькас&#x27;,size:&#x27;среднее&#x27;,group:&#x27;low&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/zamioculcas-zamiifolia/&#x27;},
-      spider:{name:&#x27;Хлорофитум&#x27;,size:&#x27;среднее&#x27;,group:&#x27;medium&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/chlorophytum-comosum/&#x27;},
-      jade:{name:&#x27;Толстянка овальная&#x27;,size:&#x27;среднее&#x27;,group:&#x27;high&#x27;,url:&#x27;https://plants.ces.ncsu.edu/plants/crassula-ovata/&#x27;}
-    };
-    const categories=[
-      {label:&#x27;Света не хватает&#x27;,color:&#x27;var(--pbe-blue)&#x27;},
-      {label:&#x27;Условно хватает&#x27;,color:&#x27;var(--pbe-yellow)&#x27;},
-      {label:&#x27;Оптимально*&#x27;,color:&#x27;var(--pbe-green)&#x27;},
-      {label:&#x27;Слишком много*&#x27;,color:&#x27;var(--pbe-red)&#x27;},
-      {label:&#x27;Опасно*&#x27;,color:&#x27;var(--pbe-burgundy)&#x27;}
-    ];
-    const dli=(ppfd,hours)=&gt;ppfd*hours*.0036;
-    function classify(value,group){const {L,U}=groups[group];return value&lt;L*.5?0:value&lt;L?1:value&lt;=U?2:value&lt;U*2?3:4;}
-    function evaluate(values,hours,group){const counts=[0,0,0,0,0],classes=values.map(v=&gt;{const c=classify(dli(v,hours),group);counts[c]++;return c;});return {classes,counts,percentages:counts.map(c=&gt;values.length?100*c/values.length:0)};}
-    return {groups,plants,categories,dli,classify,evaluate};
-  })();
-  // PLANT MODEL END
-  let state = {source:&#x27;square50&#x27;,angle:60,height:40,tilt:0,dim:70,dim2:70,ppf:50,plant:&#x27;monstera&#x27;,hours:12,count:2,driver:&#x27;ldd&#x27;,current:700};
-  const bounded=(v,a,b,f)=&gt;Number.isFinite(Number(v))?Math.min(b,Math.max(a,Number(v))):f;
-  function restore(saved) {
-    if (!saved || ![&#x27;phyto-beams-v1&#x27;,&#x27;phyto-beams-v2&#x27;,&#x27;phyto-beams-v3&#x27;,&#x27;phyto-beams-v4&#x27;,&#x27;phyto-beams-v5&#x27;,&#x27;phyto-beams-v6&#x27;].includes(saved.schema)) return;
-    const driver=hardware.drivers[saved.driver]?saved.driver:&#x27;ldd&#x27;;
-    state={source:profiles[saved.source]?saved.source:&#x27;square50&#x27;,angle:bounded(saved.angle,30,120,60),height:bounded(saved.height,20,100,40),tilt:bounded(saved.tilt,-20,20,0),dim:bounded(saved.dim,0,100,70),dim2:bounded(saved.dim2,0,100,70),ppf:bounded(saved.ppf,0,400,50),plant:plantModel.plants[saved.plant]?saved.plant:&#x27;monstera&#x27;,hours:bounded(saved.hours,6,16,12),count:[1,2,4].includes(Number(saved.count))?Number(saved.count):2,driver,current:hardware.drivers[driver].currents.includes(Number(saved.current))?Number(saved.current):700};
-  }
-  restore(window.openai?.widgetState?.modelContent ?? window.openai?.widgetState);
-  const ns=&#x27;http://www.w3.org/2000/svg&#x27;;
-  function el(svg,tag,attrs={},label) {
-    const n=document.createElementNS(ns,tag);
-    for(const [k,v] of Object.entries(attrs)) n.setAttribute(k,String(v));
-    if(label!==undefined)n.textContent=label;
-    svg.appendChild(n);return n;
-  }
-  function groups(p) {
-    if(p.kind===&#x27;estimate&#x27;)return (state.source===&#x27;mf36&#x27;?mini36Model:estimateModel).layout(state.count);
-    if(p.kind===&#x27;catalog&#x27;){
-      if(state.source===&#x27;linear98&#x27;)return Array.from({length:state.count},(_,i)=&gt;({x:0,y:(i-(state.count-1)/2)*.12,w:p.w,d:p.d}));
-      if(state.count===1)return [{x:0,y:0,w:p.w,d:p.d}];
-      return Array.from({length:state.count},(_,i)=&gt;({x:i%2===0?-.18:.18,y:state.count===4?(i&lt;2?-.06:.06):0,w:p.w,d:p.d}));
-    }
-    if(p.kind===&#x27;pair&#x27;)return [{x:-.18,y:0,w:p.w,d:p.d},{x:.18,y:0,w:p.w,d:p.d}];
-    if(p.kind===&#x27;petal&#x27;)return Array.from({length:p.n},(_,i)=&gt;{const a=i*2*Math.PI/p.n;return{x:.085*Math.cos(a),y:.085*Math.sin(a),w:.075,d:.06};});
-    return [{x:0,y:0,w:p.w,d:p.d,disc:p.kind===&#x27;disc&#x27;}];
-  }
-  // PHOTOMETRY START: normalized photon intensity, finite emitters, horizontal receiver.
-  const photometry = (() =&gt; {
-    // Digitized Samsung LM301B CRI80 Rev.10.1, p.15, Ts25C/If65mA.
-    // Average of left/right graph samples; rotational symmetry and angular spectral invariance assumed.
-    const lm301b=[1,.995,.985,.965,.941,.908,.869,.826,.774,.711,.642,.566,.484,.397,.306,.211,.126,.055,0];
-    function relative(theta){const x=Math.max(0,Math.min(18,theta*180/Math.PI/5)),i=Math.min(17,Math.floor(x));return lm301b[i]+(lm301b[i+1]-lm301b[i])*(x-i);}
-    let integral=0;const da=Math.PI/2/1800;
-    for(let i=0;i&lt;1800;i++){const a=(i+.5)*da;integral+=relative(a)*Math.sin(a)*da;}
-    const curveNorm=1/(2*Math.PI*integral),nativeAngle=2*(55+5*(.566-.5)/(.566-.484));
-    function sampleEmitters(groups,h,t,density=1) {
-      const result=[];
-      for(const a of groups) {
-        const local=[];
-        if(a.points) {
-          local.push(...a.points);
-        } else if(a.disc) {
-          const nr=4*density,na=24*density;
-          for(let i=0;i&lt;nr;i++)for(let j=0;j&lt;na;j++) {
-            const r=Math.sqrt((i+.5)/nr),p=2*Math.PI*(j+.5)/na;
-            local.push([a.w/2*r*Math.cos(p),a.d/2*r*Math.sin(p)]);
-          }
-        } else {
-          const nx=Math.max(4,Math.ceil(a.w/.01))*density,ny=Math.max(3,Math.ceil(a.d/.01))*density;
-          for(let i=0;i&lt;nx;i++)for(let j=0;j&lt;ny;j++)local.push([a.w*((i+.5)/nx-.5),a.d*((j+.5)/ny-.5)]);
-        }
-        for(const [u,v,weight] of local)result.push({x:a.x+u*Math.cos(t),y:a.y+v,z:h+u*Math.sin(t),weight:(a.weight??(1/groups.length))*(weight??1/local.length)});
-      }
-      return result;
-    }
-    function fieldAt(x,y,emitters,angle,t,flux) {
-      if(flux===0)return 0;
-      const n=Math.log(.5)/Math.log(Math.cos(angle*Math.PI/360));
-      const norm=flux*(n+1)/(2*Math.PI),st=Math.sin(t),ct=Math.cos(t);
-      let value=0;
-      for(const a of emitters) {
-        const dx=x-a.x,dy=y-a.y,r2=dx*dx+dy*dy+a.z*a.z,r=Math.sqrt(r2);
-        const c=(st*dx+ct*a.z)/r;
-        if(c&gt;0 &amp;&amp; a.z&gt;0){const intensity=angle===&#x27;lm301b&#x27;?flux*curveNorm*relative(Math.acos(Math.min(1,c))):norm*Math.pow(Math.min(1,c),n);value+=intensity*a.weight*a.z/(r2*r);}
-      }
-      return value;
-    }
-    function summarize(groups,h,t,angle,flux,density=1) {
-      const emitters=sampleEmitters(groups,h,t,density),nr=12*density,na=48*density;
-      let sum=0;const samples=[];
-      for(let i=0;i&lt;nr;i++)for(let j=0;j&lt;na;j++) {
-        const r=Math.sqrt((i+.5)/nr),p=2*Math.PI*(j+.5+(i%2)*.5)/na;
-        const value=fieldAt(.28*r*Math.cos(p),.22*r*Math.sin(p),emitters,angle,t,flux);
-        sum+=value;samples.push({i,j,value});
-      }
-      return {mean:sum/(nr*na),center:fieldAt(0,0,emitters,angle,t,flux),samples,nr,na};
-    }
-    return {sampleEmitters,fieldAt,summarize,relative,curveNorm,nativeAngle};
-  })();
-  // PHOTOMETRY END
-  let metricKey=&#x27;&#x27;,metrics={mean:0,center:0,samples:[],nr:12,na:48};
-  const legendItems=plantModel.categories.map(c=&gt;{
-    const item=document.createElement(&#x27;span&#x27;);item.className=&#x27;beam-key&#x27;;
-    const dot=document.createElement(&#x27;span&#x27;);dot.className=&#x27;plant-dot&#x27;;dot.style.background=c.color;dot.setAttribute(&#x27;aria-hidden&#x27;,&#x27;true&#x27;);
-    const label=document.createElement(&#x27;span&#x27;);item.append(dot,label);q(&#x27;pbe-legend&#x27;).appendChild(item);return label;
-  });
-  const comparisonRows=Object.entries(plantModel.plants).map(([id,p])=&gt;{
-    const tr=document.createElement(&#x27;tr&#x27;),name=document.createElement(&#x27;td&#x27;),range=document.createElement(&#x27;td&#x27;),status=document.createElement(&#x27;td&#x27;);
-    const title=document.createElement(&#x27;div&#x27;);title.textContent=p.name;name.appendChild(title);
-    const size=document.createElement(&#x27;div&#x27;);size.className=&#x27;text-small&#x27;;size.textContent=p.size;name.appendChild(size);
-    const {L,U}=plantModel.groups[p.group];range.textContent=L+&#x27;–&#x27;+U;range.className=&#x27;tabular-nums&#x27;;
-    const wrap=document.createElement(&#x27;span&#x27;);wrap.className=&#x27;beam-key&#x27;;
-    const dot=document.createElement(&#x27;span&#x27;);dot.className=&#x27;plant-dot&#x27;;dot.setAttribute(&#x27;aria-hidden&#x27;,&#x27;true&#x27;);const label=document.createElement(&#x27;span&#x27;);wrap.append(dot,label);status.appendChild(wrap);
-    tr.append(name,range,status);q(&#x27;pbe-comparison&#x27;).appendChild(tr);return {id,p,tr,dot,label};
-  });
-  function setup(svg,w) {
-    svg.replaceChildren();svg.setAttribute(&#x27;viewBox&#x27;,`0 0 ${w} 300`);
-    const defs=el(svg,&#x27;defs&#x27;);const cp=el(defs,&#x27;clipPath&#x27;,{id:svg.id+&#x27;-clip&#x27;});el(cp,&#x27;rect&#x27;,{x:8,y:12,width:w-16,height:265});
-    return el(svg,&#x27;g&#x27;,{&#x27;clip-path&#x27;:`url(#${svg.id}-clip)`});
-  }
-  function hardwareDetails(op){
-    const m=hardware.modules[state.source],d=hardware.drivers[state.driver],pwm=state.driver===&#x27;ldd&#x27;;
-    q(&#x27;pbe-module-description&#x27;).textContent=`${m.name} · ${m.size} · ${m.cct} K · белые LED без отдельных УФ/ИК. ${m.price} за плату на 12.11.2026; заказ у LED-TECH, доставка в РФ не проверена.`;
-    q(&#x27;pbe-evidence&#x27;).textContent=&#x27;PPF: таблица изготовителя платы. Пучок: оцифрованная диаграмма отдельного LM301B, не измерение готового светильника. Плата заменена равномерно светящейся поверхностью; спектр по углам считается неизменным.&#x27;;
-    q(&#x27;pbe-circuit&#x27;).textContent=pwm?`Питание: 230 В → GST60A24-P1J (24 В, 60 Вт) → ${state.count} × LDD-${state.current}H → по одной плате на канал. Бюджет БП: P_LED / 0,85 + 2 Вт; КПД 85% и 2 Вт контроллера — проектные допущения.`:`Питание: 230 В → ${d.name} → ${state.count} плат последовательно. Драйвер напрямую питает LED; дополнительный токовый драйвер в эту цепь не добавляется.`;
-    q(&#x27;pbe-controller&#x27;).textContent=pwm?&#x27;Наш блок: питание контроллера через DC/DC 24 → 3,3 В; MCU → PWM 500 Гц → DIM каждого LDD. Логический HIGH 3,3 В, LOW &lt;0,8 В относительно −Vin; при старте DIM удерживается в LOW. Отдельные каналы позволяют разделить яркость двух групп. Это архитектура, не готовая электрическая схема.&#x27;:&#x27;Наш блок: MCU → изолированный интерфейс 0–10 В (или 10 В PWM 500 Гц) → DIM+/DIM−. GPIO 3,3 В напрямую не подходит; DIM− не соединяется с −V LED. Питание контроллера — отдельное. LCM изменяет ток: 70% DIM не означает ровно 70% PPF. Это архитектура, не готовая электрическая схема.&#x27;;
-    q(&#x27;pbe-driver-comparison&#x27;).innerHTML=Object.entries(hardware.drivers).map(([id,driver])=&gt;{const f=hardware.fit(state.source,id,state.current,state.count);return `&lt;tr&gt;&lt;td&gt;${driver.name}${id===&#x27;ldd&#x27;?&#x27; × &#x27;+state.count:&#x27;&#x27;}&lt;/td&gt;&lt;td&gt;${driver.size}&lt;/td&gt;&lt;td&gt;${f.ok?&#x27;В пределах по тип. данным. &#x27;:&#x27;&#x27;}${f.reason}&lt;/td&gt;&lt;/tr&gt;`;}).join(&#x27;&#x27;);
-    q(&#x27;pbe-ppf-table&#x27;).innerHTML=m.rows.map(r=&gt;`&lt;tr&gt;&lt;td&gt;${r[0]}&lt;/td&gt;&lt;td&gt;${r[1].toLocaleString(&#x27;ru-RU&#x27;)}&lt;/td&gt;&lt;td&gt;${r[2].toLocaleString(&#x27;ru-RU&#x27;)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;);
-    q(&#x27;pbe-module-link&#x27;).href=m.url;q(&#x27;pbe-driver-link&#x27;).href=d.url;
-    q(&#x27;pbe-operating&#x27;).textContent=op.ok?`${pwm?&#x27;LDD-&#x27;+state.current+&#x27;H · импульсный ток&#x27;:&#x27;LCM · ток сейчас&#x27;} ${Math.round(op.current)} мА · ${op.voltage.toFixed(2)} В ${pwm?&#x27;на плату&#x27;:&#x27;цепочка&#x27;} · ≈ ${op.watts.toFixed(1)} Вт на LED. ${op.exact?&#x27;Опорная точка PPF&#x27;:&#x27;PPF интерполирован по току&#x27;}. Совместимость предварительная: типичный Vf, без проверки нагрева и разброса.`:&#x27;&#x27;;
-  }
-  const formatRange=(values,digits=0)=&gt;{
-    const k=10**digits,format=v=&gt;v.toLocaleString(&#x27;ru-RU&#x27;,{minimumFractionDigits:digits,maximumFractionDigits:digits});
-    const lo=Math.floor(values[0]*k+1e-9)/k,hi=Math.ceil(values.at(-1)*k-1e-9)/k;
-    return lo===hi?format(lo):format(lo)+&#x27;–&#x27;+format(hi);
-  };
-  function estimateDetails(output){
-    if(state.source===&#x27;mf36&#x27;){mini36Details(output);return;}
-    const m=estimateModel.modules[state.source];
-    q(&#x27;pbe-estimate-description&#x27;).textContent=`${m.name} · ${m.cct} K. По карточке продавца: 320 Samsung LM281B+ Pro; плата 390 × 180 мм; 44 В, 1,3 А. Полный артикул и бин текущей партии неизвестны.`;
-    const rows=[
-      [&#x27;Исполнение LED · допущение&#x27;,`CRI 80, группы VK–VL. Каталожный поток при 65 мА и 25 °C: ${m.lumens[0]}–${m.lumens[2]} лм/LED. База: ${m.lumens[1]} лм/LED. Наличие именно этих исполнений на плате не подтверждено.`],
-      [&#x27;Ток · допущение&#x27;,&#x27;16 LED последовательно × 20 параллельных ветвей; равномерное деление 1,3 А → 65 мА/LED. Ток не варьируется внутри диапазона; схема платы пока не подтверждена.&#x27;],
-      [&#x27;Спектр → PPF · допущение&#x27;,&#x27;0,013 / 0,015 / 0,017 мкмоль/с на люмен для трёх сценариев. Это выбранный диапазон чувствительности, не пересчёт измеренного спектра Samsung. PPF: 400–700 нм.&#x27;],
-      [&#x27;Нагрев · допущение&#x27;,&#x27;Сохраняется 85% / 92,5% / 100% потока относительно каталожных условий. Рабочая температура неизвестна; поправки выбраны для сценариев и не являются температурной кривой LED.&#x27;],
-      [&#x27;PPF одной платы · расчёт&#x27;,`${formatRange(output.base)} мкмоль/с при 100%; база ≈ ${Math.round(output.base[1])}. Формула: 320 × лм/LED × пересчёт в фотоны × поправка на нагрев.`],
-      [&#x27;Пучок · допущение&#x27;,&#x27;Осесимметричный cosⁿ-профиль; полные углы 110° / 120° / 130° по половине максимума. База — 120°. Каждый профиль нормирован на тот же PPF. Это не измеренная диаграмма LM281B+ Pro.&#x27;],
-      [&#x27;Геометрия · допущение&#x27;,&#x27;Равномерно светящаяся поверхность 390 × 180 мм; точная раскладка LED не моделируется. Несколько плат — параллельные ряды с зазором 40 мм. Высота — от центра платы до горизонтальной кроны.&#x27;],
-      [&#x27;Яркость · допущение&#x27;,&#x27;Идеальный PWM при фиксированных 65 мА/LED: PPF пропорционален проценту яркости; отдельного эффекта охлаждения при DIM нет. Конкретный драйвер не выбран и не проверен. LCM/LDD из другого режима сюда не перенесены.&#x27;],
-      [&#x27;Границы диапазона&#x27;,&#x27;Минимум и максимум среднего и центрального PPFD среди 3 уровней PPF × 3 углов. Не доверительный интервал и не гарантия покрытия всех реальных значений. Купол, отражения комнаты, свет окна и затенение листьями не учтены.&#x27;]
-    ];
-    q(&#x27;pbe-estimate-table&#x27;).replaceChildren(...rows.map(([a,b])=&gt;{const tr=document.createElement(&#x27;tr&#x27;);for(const value of [a,b]){const td=document.createElement(&#x27;td&#x27;);td.textContent=value;tr.appendChild(td);}return tr;}));
-    q(&#x27;pbe-estimate-link&#x27;).href=m.url;
-    q(&#x27;pbe-estimate-limits&#x27;).textContent=&#x27;Диапазон условен: CRI 80, выбранные группы потока и 65 мА на LED ещё не подтверждены. Другая партия, схема питания или оптика могут дать результат за его пределами. Карты MiniFermer в отражающем гроубоксе не использованы как замер света в комнате.&#x27;;
-    q(&#x27;pbe-estimate-sources&#x27;).innerHTML=&#x27; · &lt;a href=&quot;https://www1.futureelectronics.com/doc/Samsung%20LED/SPHWHAHDNG28YZR2D2.pdf&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Каталог Samsung · LM281B+ Pro&lt;/a&gt; · &lt;a href=&quot;https://minifermer.ru/page_422.html&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Измерения MiniFermer в гроубоксе&lt;/a&gt;&#x27;;
-    q(&#x27;pbe-operating&#x27;).textContent=`MiniFermer · ${state.count} плат(ы) · принято CRI 80 и 65 мА/LED в импульсе · условный PWM ${state.dim}%. Драйвер требует отдельного подбора.`;
-  }
-  function mini36Details(output){
-    const m=mini36Model,c=output.components[1],decimal=v=&gt;v.toLocaleString(&#x27;ru-RU&#x27;,{maximumFractionDigits:2});
-    q(&#x27;pbe-estimate-description&#x27;).textContent=&#x27;По MiniFermer: 24 Sunlike 4000 K + 1 Osram GH CSSRM3.24 660 нм; 120 × 120 × 2 мм, 19,2 В, 600 мА, 11–12 Вт. Производитель и артикул белого LED не указаны. В расчёте вместо него принят Seoul SunLike STWSC12S-E1H10000, 4000 K, CRI ≥95.&#x27;;
-    const rows=[
-      [&#x27;Белый LED · гипотеза Seoul&#x27;,&#x27;Паспорт E1, стр. 3: типичный PPF 1,78 мкмоль/с при 300 мА, Tj = 25 °C. Это данные отдельного Seoul, не готовой платы MiniFermer. E2 с меньшим допустимым током здесь не используется.&#x27;],
-      [&#x27;Ток · гипотеза схемы&#x27;,&#x27;24 белых: 6 последовательно × 4 параллельные ветви; общий ток 600 мА делится поровну → 150 мА/белый LED. Один красный последовательно с этим блоком → 600 мА. Внутренняя схема платы не подтверждена.&#x27;],
-      [&#x27;Красный LED · паспорт Osram&#x27;,&#x27;GH CSSRM3.24: типичный PPF 5,42 мкмоль/с при 700 мА, Tj = 25 °C. Для крайних сценариев приняты 5,05–5,65 мкмоль/с группы V5–V7; фактический бин неизвестен.&#x27;],
-      [&#x27;Поправка на ток · оценка по графикам&#x27;,&#x27;Seoul 150/300 мА: коэффициенты 0,50 / 0,51 / 0,52; Osram 600/700 мА: 0,85 / 0,86 / 0,87. Средние — приближённое чтение графиков; ±0,01 — выбранная чувствительность к чтению, не паспортный допуск.&#x27;],
-      [&#x27;Температура · три сценария&#x27;,&#x27;Нижний / базовый / верхний поток: Tj = 85 / 55 / 25 °C. Поправки Seoul: 0,87 / 0,94 / 1; Osram: 0,94 / 0,98 / 1, приблизительно по графикам. Это температура кристалла, не воздуха; теплового расчёта платы нет.&#x27;],
-      [&#x27;Перенос кривых · допущение&#x27;,&#x27;Относительные световые/радиометрические поправки перенесены на PPF при неизменном спектре. Температурные кривые сняты при паспортном токе, а здесь применены к 150/600 мА.&#x27;],
-      [&#x27;PPF одной платы · расчёт&#x27;,`${formatRange(output.base,1)} мкмоль/с; база ${decimal(output.base[1])} = белые ${decimal(c.white)} + красный ${decimal(c.red)}. Красный даёт ≈ ${Math.round(100*c.red/output.base[1])}% фотонов базы. PPF: 400–700 нм; люмены в PPF не переводятся.`],
-      [&#x27;Пучок и геометрия · допущение&#x27;,&#x27;Оба типа LED заменены ламбертовыми источниками 120°, каждый нормирован на свой PPF. Это приближение паспортных диаграмм, не их точная оцифровка. 24 точки по иллюстрации платы + красный в центре. Несколько плат — ряды с зазором 40 мм. Линзы и отражения не учтены.&#x27;],
-      [&#x27;Яркость · допущение&#x27;,&#x27;Общий идеальный PWM: оба цвета меняются пропорционально яркости, ток в импульсе фиксирован. Охлаждение при снижении яркости не моделируется. Драйвер и раздельное управление цветами не подтверждены.&#x27;],
-      [&#x27;Границы диапазона&#x27;,&#x27;Три совместных сценария температуры, чтения кривых и бина красного. Типичный PPF Seoul фиксирован: неизвестный разброс белых LED, их возможная замена и ошибка формы пучка в диапазон не включены. Он не гарантирует охват реальной платы.&#x27;]
-    ];
-    q(&#x27;pbe-estimate-table&#x27;).replaceChildren(...rows.map(([a,b])=&gt;{const tr=document.createElement(&#x27;tr&#x27;);for(const value of [a,b]){const td=document.createElement(&#x27;td&#x27;);td.textContent=value;tr.appendChild(td);}return tr;}));
-    q(&#x27;pbe-estimate-link&#x27;).href=m.url;
-    q(&#x27;pbe-estimate-limits&#x27;).textContent=&#x27;Seoul — согласованное допущение. Сравнение с замерами не подтверждает производителя белых LED, схему платы или точность модели. Отличия условий измерения пока не позволяют выделить причину расхождения.&#x27;;
-    q(&#x27;pbe-estimate-sources&#x27;).innerHTML=` · &lt;a href=&quot;${m.seoulURL}&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Seoul E1 · PPF и графики&lt;/a&gt; · &lt;a href=&quot;${m.osramURL}&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Osram · паспорт&lt;/a&gt;`;
-    q(&#x27;pbe-operating&#x27;).textContent=`MiniFermer 3.6 · ${state.count} плат(ы) · гипотеза: Seoul 150 мА + Osram 600 мА · базовая Tj 55 °C · условный PWM ${state.dim}%. Драйвер требует отдельного подбора.`;
-    const comparison=m.comparison();
-    q(&#x27;pbe-vendor-rows&#x27;).innerHTML=comparison.map(row=&gt;`&lt;tr&gt;&lt;td&gt;${row.height}&lt;/td&gt;&lt;td class=&quot;tabular-nums&quot;&gt;${row.ppfd}&lt;/td&gt;&lt;td class=&quot;tabular-nums&quot;&gt;≈ ${Math.round(row.calculated)}&lt;div class=&quot;text-small&quot;&gt;${formatRange(row.range)}&lt;/div&gt;&lt;/td&gt;&lt;td class=&quot;tabular-nums&quot;&gt;${row.delta&gt;0?&#x27;+&#x27;:&#x27;&#x27;}${Math.round(row.delta)}%&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;);
-    const differences=comparison.map(row=&gt;Math.abs(row.delta));
-    q(&#x27;pbe-vendor-result&#x27;).textContent=`Базовый расчёт ниже замеров примерно на ${Math.round(Math.min(...differences))}–${Math.round(Math.max(...differences))}%. Все четыре замера выше выбранного диапазона. Гипотеза Seoul и принятые условия пока не воспроизводят замеры продавца. Разница: (расчёт − замер) / замер.`;
-    q(&#x27;pbe-vendor-model-check&#x27;).textContent=`Проверка гипотезы: при неизменных пучке и долях цветов для совпадения на 20 см потребовалось бы ≈ ${Math.round(comparison[0].equivalentPPF)} мкмоль/с, а на 50 см — ≈ ${Math.round(comparison[3].equivalentPPF)}. Одной заменой PPF все точки не совместить. Эти значения не использованы в расчёте и не являются измерением полного потока.`;
-  }
-  function scenarioStatus(dailyRange,group){
-    const lo=plantModel.classify(dailyRange[0],group),hi=plantModel.classify(dailyRange[1],group);
-    return {label:lo===hi?plantModel.categories[lo].label+&#x27; во всех сценариях&#x27;:plantModel.categories[lo].label+&#x27; → &#x27;+plantModel.categories[hi].label+&#x27; · зависит от сценария&#x27;,color:lo===hi?plantModel.categories[lo].color:&#x27;var(--muted-foreground)&#x27;};
-  }
-  function render() {
-    const p=profiles[state.source],catalog=p.kind===&#x27;catalog&#x27;,estimated=p.kind===&#x27;estimate&#x27;,mini36=state.source===&#x27;mf36&#x27;,estimateEngine=mini36?mini36Model:estimateModel,dim=p.fixed?100:state.dim;
-    const driver=hardware.drivers[state.driver];
-    if(!driver.currents.includes(state.current))state.current=700;
-    if(controls.current.dataset.driver!==state.driver){controls.current.replaceChildren(...driver.currents.map(i=&gt;{const o=document.createElement(&#x27;option&#x27;);o.value=i;o.textContent=state.driver===&#x27;ldd&#x27;?`LDD-${i}H · ${i} мА`:`${i} мА`;return o;}));controls.current.dataset.driver=state.driver;}
-    for(const [key,c] of Object.entries(controls))c.value=String(state[key]);
-    controls.dim.disabled=!!p.fixed;
-    controls.angle.disabled=catalog||estimated;controls.ppf.disabled=catalog||estimated;
-    controls.angle.step=catalog?&#x27;any&#x27;:&#x27;5&#x27;;controls.ppf.step=catalog||estimated?&#x27;any&#x27;:&#x27;5&#x27;;
-    q(&#x27;pbe-hardware&#x27;).hidden=!catalog&amp;&amp;!estimated;q(&#x27;pbe-data-details&#x27;).hidden=!catalog;
-    controls.driver.parentElement.hidden=!catalog;controls.current.parentElement.hidden=!catalog;
-    q(&#x27;pbe-estimate-details&#x27;).hidden=!estimated;q(&#x27;pbe-estimate-notice&#x27;).hidden=!estimated;
-    q(&#x27;pbe-vendor-comparison&#x27;).hidden=!mini36;
-    q(&#x27;pbe-channel2&#x27;).hidden=!catalog||state.driver!==&#x27;ldd&#x27;||state.count===1;
-    const op=catalog?hardware.operate(state):null;
-    const estimate=estimated?estimateEngine.output(state.source,state.count,dim):null;
-    const angle=catalog?photometry.nativeAngle:estimated?120:state.angle;
-    if(catalog){controls.angle.value=String(angle);hardwareDetails(op);}else if(estimated){controls.angle.value=String(angle);estimateDetails(estimate);}else q(&#x27;pbe-operating&#x27;).textContent=&#x27;&#x27;;
-    q(&#x27;pbe-validation&#x27;).hidden=!catalog||op.ok;
-    q(&#x27;pbe-validation&#x27;).textContent=catalog&amp;&amp;!op.ok?op.reason:&#x27;&#x27;;
-    q(&#x27;pbe-height-value&#x27;).textContent=state.height+&#x27; см&#x27;;
-    q(&#x27;pbe-angle-label&#x27;).textContent=catalog?&#x27;Пучок LM301B · без оптики&#x27;:estimated?&#x27;Пучок · принятый базовый сценарий&#x27;:&#x27;Условный полный угол пучка&#x27;;
-    q(&#x27;pbe-angle-value&#x27;).textContent=catalog?&#x27;≈ &#x27;+Math.round(angle)+&#x27;° · фиксирован&#x27;:mini36?&#x27;120° · приближение без линз&#x27;:estimated?&#x27;120° · сценарии 110–130°&#x27;:state.angle+&#x27;°&#x27;;
-    const base=catalog?hardware.point(state.source,state.current):null;
-    q(&#x27;pbe-ppf-value&#x27;).textContent=(estimated?&#x27;≈ &#x27;+formatRange(estimate.full):catalog?(base.ppf*state.count).toLocaleString(&#x27;ru-RU&#x27;,{maximumFractionDigits:2}):state.ppf)+&#x27; мкмоль/с&#x27;;
-    controls.ppf.max=String(estimated?Math.max(400,Math.ceil(estimate.full[2])):400);
-    if(catalog)controls.ppf.value=String(base.ppf*state.count);
-    if(estimated)controls.ppf.value=String(estimate.full[1]);
-    q(&#x27;pbe-hours-value&#x27;).textContent=state.hours+&#x27; ч&#x27;;
-    q(&#x27;pbe-tilt-value&#x27;).textContent=(state.tilt&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+state.tilt+&#x27;°&#x27;;
-    q(&#x27;pbe-dim-label&#x27;).textContent=estimated?&#x27;Яркость · условный PWM&#x27;:catalog?(state.driver===&#x27;ldd&#x27;?(state.count&gt;1?(state.source===&#x27;linear98&#x27;?&#x27;Нечётные ряды · PWM&#x27;:&#x27;Левые платы · PWM&#x27;):&#x27;Яркость · PWM&#x27;):&#x27;DIM · доля номинального тока&#x27;):&#x27;Яркость источника&#x27;;
-    q(&#x27;pbe-dim2-label&#x27;).textContent=state.source===&#x27;linear98&#x27;?&#x27;Чётные ряды · PWM&#x27;:&#x27;Правые платы · PWM&#x27;;
-    q(&#x27;pbe-dim-value&#x27;).textContent=p.fixed?&#x27;Не подтверждено&#x27;:dim+&#x27;%&#x27;;
-    q(&#x27;pbe-dim2-value&#x27;).textContent=state.dim2+&#x27;%&#x27;;
-    q(&#x27;pbe-capability&#x27;).textContent=p.cap;
-    q(&#x27;pbe-method&#x27;).textContent=(mini36?&#x27;PPF — сумма белых Seoul и красного Osram с приближёнными поправками по графикам. Состав белых LED и их ток — гипотеза; температуры заданы сценариями. Кривые обоих пучков приближены ламбертовыми. &#x27;:estimated?&#x27;PPF и PPFD оценены при принятых спектральных, тепловых и угловых сценариях. Каталожный поток отдельного LED не является измерением платы. Поправка на нагрев условная; теплового расчёта нет. &#x27;:catalog?&#x27;PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. &#x27;:&#x27;PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. &#x27;)+ &#x27;Купол, отражения и затенение листьями не учтены. Карта — расчёт на плоскости, не измерения листьев.&#x27;;
-    if(catalog&amp;&amp;!op.ok){
-      for(const id of [&#x27;pbe-mean&#x27;,&#x27;pbe-center&#x27;,&#x27;pbe-dli&#x27;])q(id).textContent=&#x27;—&#x27;;
-      q(&#x27;pbe-status&#x27;).textContent=&#x27;Расчёт недоступен для этой комбинации&#x27;;q(&#x27;pbe-status-dot&#x27;).style.background=&#x27;var(--muted)&#x27;;
-      for(const id of [&#x27;pbe-flow&#x27;,&#x27;pbe-target&#x27;,&#x27;pbe-geometric-value&#x27;])q(id).textContent=&#x27;&#x27;;
-      for(const svg of [side,plan]){const w=Math.max(260,svg.getBoundingClientRect().width);setup(svg,w);el(svg,&#x27;text&#x27;,{x:14,y:145},&#x27;Измени ток, DIM или драйвер&#x27;);svg.setAttribute(&#x27;aria-label&#x27;,&#x27;Нет расчёта: &#x27;+op.reason);}
-      for(let i=0;i&lt;legendItems.length;i++)legendItems[i].textContent=plantModel.categories[i].label+&#x27; · —&#x27;;
-      for(const row of comparisonRows){row.dot.style.background=&#x27;var(--muted)&#x27;;row.label.textContent=&#x27;Нет расчёта&#x27;;}
-      return;
-    }
-    const h=state.height/100,b=angle*Math.PI/360,t=state.tilt*Math.PI/180;
-    const g=groups(p),flux=estimated?estimate.flux:catalog?op.flux:state.ppf*dim/100;
-    if(catalog)g.forEach((a,i)=&gt;a.weight=flux&gt;0?op.fluxes[i]/flux:1/g.length);
-    const curve=catalog?&#x27;lm301b&#x27;:angle,key=JSON.stringify([state.source,state.height,curve,state.tilt,flux,g]);
-    if(key!==metricKey){metrics=estimated?estimateEngine.summarize(g,h,t,estimate.fluxes):photometry.summarize(g,h,t,curve,flux);metricKey=key;}
-    const number=v=&gt;v&gt;0&amp;&amp;v&lt;1?&#x27;&lt;1&#x27;:Math.round(v).toLocaleString(&#x27;ru-RU&#x27;);
-    q(&#x27;pbe-mean&#x27;).textContent=&#x27;≈ &#x27;+(estimated?formatRange(metrics.range.mean):number(metrics.mean));
-    q(&#x27;pbe-center&#x27;).textContent=&#x27;≈ &#x27;+(estimated?formatRange(metrics.range.center):number(metrics.center));
-    const selected=plantModel.plants[state.plant],target=plantModel.groups[selected.group];
-    const daily=plantModel.dli(metrics.mean,state.hours),meanClass=plantModel.classify(daily,selected.group);
-    const assessment=plantModel.evaluate(metrics.samples.map(s=&gt;s.value),state.hours,selected.group);
-    const decimal=v=&gt;v.toLocaleString(&#x27;ru-RU&#x27;,{maximumFractionDigits:1,minimumFractionDigits:1});
-    const dailyRange=estimated?metrics.range.mean.map(v=&gt;plantModel.dli(v,state.hours)):null;
-    q(&#x27;pbe-dli&#x27;).textContent=&#x27;≈ &#x27;+(estimated?formatRange(dailyRange,1):decimal(daily));
-    const status=estimated?scenarioStatus(dailyRange,selected.group):{label:plantModel.categories[meanClass].label+&#x27; по среднему DLI&#x27;,color:plantModel.categories[meanClass].color};
-    q(&#x27;pbe-status&#x27;).textContent=selected.name+&#x27; · &#x27;+status.label;
-    q(&#x27;pbe-status-dot&#x27;).style.background=status.color;
-    if(estimated)q(&#x27;pbe-estimate-notice&#x27;).textContent=(mini36?&#x27;Гипотеза Seoul + Osram: диапазон по 3 сценариям температуры и потока; пучок принят 120°. &#x27;:&#x27;Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. &#x27;)+`Это не измерение и не доверительный интервал. Карта и проценты площади — базовый сценарий: средний PPFD ≈ ${number(metrics.mean)} мкмоль/(м²·с), DLI ≈ ${decimal(daily)}.`;
-    q(&#x27;pbe-target&#x27;).textContent=`Зелёная цель: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: средний PPFD ${Math.round(target.L/(state.hours*.0036))}–${Math.round(target.U/(state.hours*.0036))} мкмоль/(м²·с)`;
-    q(&#x27;pbe-plant-source&#x27;).href=selected.url;
-    for(let i=0;i&lt;legendItems.length;i++)legendItems[i].textContent=plantModel.categories[i].label+&#x27; · &#x27;+decimal(assessment.percentages[i])+&#x27;%&#x27;;
-    for(const row of comparisonRows){const c=estimated?scenarioStatus(dailyRange,row.p.group):plantModel.categories[plantModel.classify(daily,row.p.group)];row.dot.style.background=c.color;row.label.textContent=c.label;}
-    q(&#x27;pbe-flow&#x27;).textContent=`Общий поток сейчас: ${estimated?&#x27;≈ &#x27;+formatRange(estimate.fluxes):Number(flux.toFixed(1)).toLocaleString(&#x27;ru-RU&#x27;)} мкмоль/с · ${g.length===1?&#x27;одна плата&#x27;:`${g.length} плат(ы)`}`+(catalog||estimated?&#x27; · без купола&#x27;: &#x27; · при смене угла поток постоянный&#x27;);
-    const beam=&#x27;var(--muted-foreground)&#x27;,plant=&#x27;var(--foreground)&#x27;,desk=&#x27;var(--muted-foreground)&#x27;,edge=&#x27;var(--muted-foreground)&#x27;;
-    side.setAttribute(&#x27;aria-label&#x27;,&#x27;Прямые пучки над зоной кроны и рабочей поверхностью, без купола&#x27;);
-    const sw=Math.max(260,side.getBoundingClientRect().width),pw=Math.max(260,plan.getBoundingClientRect().width);
-    const sg=setup(side,sw),pg=setup(plan,pw);
-    const s=(sw-28)/2.05,x0=14+.70*s,z0=253;
-    const sx=x=&gt;x0+x*s,sy=z=&gt;z0-z*s;
-    el(sg,&#x27;line&#x27;,{x1:14,y1:z0,x2:sw-14,y2:z0,stroke:edge,&#x27;stroke-width&#x27;:1});
-    for(const [idx,a] of g.entries()){
-      const alpha=catalog?op.fluxes[idx]/base.ppf:dim/100;
-      const ex=a.w/2*Math.cos(t),ez=a.w/2*Math.sin(t);
-      const left=a.x-ex+(h-ez)*Math.tan(t-b),right=a.x+ex+(h+ez)*Math.tan(t+b);
-      el(sg,&#x27;path&#x27;,{d:`M${sx(a.x-ex)} ${sy(h-ez)} L${sx(a.x+ex)} ${sy(h+ez)} L${sx(right)} ${z0} L${sx(left)} ${z0} Z`,fill:beam,&#x27;fill-opacity&#x27;:.08*alpha,stroke:beam,&#x27;stroke-opacity&#x27;:.6*alpha,&#x27;stroke-width&#x27;:1});
-      el(sg,&#x27;line&#x27;,{x1:sx(a.x-ex),y1:sy(h-ez),x2:sx(a.x+ex),y2:sy(h+ez),stroke:&#x27;var(--foreground)&#x27;,&#x27;stroke-width&#x27;:4});
-      el(sg,&#x27;line&#x27;,{x1:sx(a.x),y1:sy(h),x2:sx(a.x+h*Math.tan(t)),y2:z0,stroke:beam,&#x27;stroke-opacity&#x27;:alpha*.5,&#x27;stroke-dasharray&#x27;:&#x27;3 4&#x27;,&#x27;stroke-width&#x27;:1});
-    }
-    el(sg,&#x27;line&#x27;,{x1:sx(-.28),y1:z0,x2:sx(.28),y2:z0,stroke:plantModel.categories[meanClass].color,&#x27;stroke-width&#x27;:5});
-    el(sg,&#x27;line&#x27;,{x1:sx(.43),y1:z0,x2:sx(1.03),y2:z0,stroke:desk,&#x27;stroke-width&#x27;:3});
-    el(side,&#x27;text&#x27;,{x:sx(0),y:278,&#x27;text-anchor&#x27;:&#x27;middle&#x27;},&#x27;Крона&#x27;);
-    el(side,&#x27;text&#x27;,{x:sx(.73),y:278,&#x27;text-anchor&#x27;:&#x27;middle&#x27;},&#x27;Стол&#x27;);
-    el(side,&#x27;text&#x27;,{x:14,y:296,class:&#x27;text-small&#x27;},estimated?&#x27;Линия кроны — базовый сценарий&#x27;:&#x27;Линия кроны — средняя оценка&#x27;);
-    const ps=(pw-28)/2.05,px=x=&gt;14+(x+.70)*ps,py=y=&gt;145+y*ps;
-    const A=Math.cos(b)**2-Math.sin(t)**2;
-    const center=h*Math.sin(t)*Math.cos(t)/A,rx=h*Math.sin(b)*Math.cos(b)/A,ry=h*Math.sin(b)/Math.sqrt(A);
-    for(const [idx,a] of g.entries()){
-      const alpha=catalog?op.fluxes[idx]/base.ppf:dim/100;
-      if(a.disc){el(pg,&#x27;ellipse&#x27;,{cx:px(a.x+center),cy:py(a.y),rx:(rx+a.w/2)*ps,ry:(ry+a.d/2)*ps,fill:beam,&#x27;fill-opacity&#x27;:.10*alpha,stroke:beam,&#x27;stroke-width&#x27;:1,&#x27;stroke-opacity&#x27;:alpha*.7});}
-      else{
-        const X=px(a.x+center-a.w/2-rx),Y=py(a.y-a.d/2-ry),W=(a.w+2*rx)*ps,H=(a.d+2*ry)*ps;
-        el(pg,&#x27;rect&#x27;,{x:X,y:Y,width:W,height:H,rx:rx*ps,ry:ry*ps,fill:beam,&#x27;fill-opacity&#x27;:.10*alpha,stroke:beam,&#x27;stroke-opacity&#x27;:alpha*.7,&#x27;stroke-width&#x27;:1});
-      }
-      if(a.disc)el(pg,&#x27;ellipse&#x27;,{cx:px(a.x),cy:py(a.y),rx:a.w*ps/2,ry:a.d*ps/2,fill:&#x27;var(--background)&#x27;,stroke:edge,&#x27;stroke-width&#x27;:1});
-      else el(pg,&#x27;rect&#x27;,{x:px(a.x-a.w/2),y:py(a.y-a.d/2),width:a.w*ps,height:a.d*ps,fill:&#x27;var(--background)&#x27;,stroke:edge,&#x27;stroke-width&#x27;:1});
-    }
-    const coloredAreas=plantModel.categories.map(()=&gt;[]);
-    for(let k=0;k&lt;metrics.samples.length;k++){
-      const sample=metrics.samples[k],r0=Math.sqrt(sample.i/metrics.nr),r1=Math.sqrt((sample.i+1)/metrics.nr);
-      const a0=2*Math.PI*(sample.j+(sample.i%2)*.5)/metrics.na,a1=a0+2*Math.PI/metrics.na;
-      const at=(r,a)=&gt;`${px(.28*r*Math.cos(a))} ${py(.22*r*Math.sin(a))}`;
-      const path=r0===0?`M${px(0)} ${py(0)} L${at(r1,a0)} A${.28*r1*ps} ${.22*r1*ps} 0 0 1 ${at(r1,a1)} Z`:`M${at(r0,a0)} L${at(r1,a0)} A${.28*r1*ps} ${.22*r1*ps} 0 0 1 ${at(r1,a1)} L${at(r0,a1)} A${.28*r0*ps} ${.22*r0*ps} 0 0 0 ${at(r0,a0)} Z`;
-      coloredAreas[assessment.classes[k]].push(path);
-    }
-    for(let k=0;k&lt;coloredAreas.length;k++){
-      if(!coloredAreas[k].length)continue;
-      const category=plantModel.categories[k];
-      el(pg,&#x27;path&#x27;,{d:coloredAreas[k].join(&#x27; &#x27;),fill:category.color,&#x27;data-tooltip&#x27;:`${category.label} · ${decimal(assessment.percentages[k])}% площади условной кроны`});
-    }
-    el(pg,&#x27;ellipse&#x27;,{cx:px(0),cy:py(0),rx:.28*ps,ry:.22*ps,fill:&#x27;none&#x27;,stroke:plant,&#x27;stroke-width&#x27;:1});
-    el(pg,&#x27;circle&#x27;,{cx:px(0),cy:py(0),r:6,fill:&#x27;var(--background)&#x27;});
-    el(pg,&#x27;line&#x27;,{x1:px(0)-4,y1:py(0)-4,x2:px(0)+4,y2:py(0)+4,stroke:plant,&#x27;stroke-width&#x27;:2});
-    el(pg,&#x27;line&#x27;,{x1:px(0)-4,y1:py(0)+4,x2:px(0)+4,y2:py(0)-4,stroke:plant,&#x27;stroke-width&#x27;:2});
-    el(pg,&#x27;rect&#x27;,{x:px(.43),y:py(-.20),width:.60*ps,height:.40*ps,fill:&#x27;none&#x27;,stroke:desk,&#x27;stroke-width&#x27;:1,&#x27;stroke-dasharray&#x27;:&#x27;4 3&#x27;});
-    el(plan,&#x27;text&#x27;,{x:px(0),y:278,&#x27;text-anchor&#x27;:&#x27;middle&#x27;},&#x27;Крона&#x27;);
-    el(plan,&#x27;text&#x27;,{x:px(.73),y:278,&#x27;text-anchor&#x27;:&#x27;middle&#x27;},&#x27;Стол&#x27;);
-    el(plan,&#x27;text&#x27;,{x:14,y:296,class:&#x27;text-small&#x27;},estimated?&#x27;Крона — DLI базового сценария&#x27;:&#x27;Крона — локальные оценки DLI&#x27;);
-    plan.setAttribute(&#x27;aria-label&#x27;,`${estimated?&#x27;Базовый сценарий. &#x27;:&#x27;&#x27;}${selected.name}. По среднему DLI: ${plantModel.categories[meanClass].label}. Доли площади: ${plantModel.categories.map((c,i)=&gt;c.label+&#x27; &#x27;+decimal(assessment.percentages[i])+&#x27;%&#x27;).join(&#x27;, &#x27;)}.`);
-    const diameter=2*h*Math.tan(b)*100;
-    q(&#x27;pbe-geometric-value&#x27;).textContent=`Для точечного источника без наклона: ≈ ${Math.round(angle)}° на высоте ${state.height} см → контур половинной силы излучения ≈ ${Math.round(diameter)} см. За контуром тоже есть свет.`;
-  }
-  function save(){const f=window.openai?.setWidgetState;if(f)Promise.resolve(f.call(window.openai,{modelContent:{schema:&#x27;phyto-beams-v6&#x27;,...state},privateContent:null})).catch(()=&gt;{});}
-  for(const [key,c] of Object.entries(controls)){
-    c.addEventListener(&#x27;input&#x27;,()=&gt;{if(key===&#x27;source&#x27;&amp;&amp;profiles[c.value]?.kind===&#x27;estimate&#x27;&amp;&amp;profiles[state.source].kind!==&#x27;estimate&#x27;)state.count=1;state[key]=[&#x27;source&#x27;,&#x27;plant&#x27;,&#x27;driver&#x27;].includes(key)?c.value:Number(c.value);render();});
-    c.addEventListener(&#x27;change&#x27;,save);
-  }
-  window.addEventListener(&#x27;openai:set_globals&#x27;,event=&gt;{const saved=event.detail?.globals?.widgetState;restore(saved?.modelContent??saved);render();});
-  new ResizeObserver(render).observe(root);
-  render();
-})();
-&lt;/script&gt;
-
-&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  if (window.FloatingUIDOM == null) {
-    return;
-  }
-  const { autoUpdate, computePosition, flip, offset, shift, size } =
-    window.FloatingUIDOM;
-  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
-  const tooltipId = `codex-visualization-tooltip-${
-    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
-  }`;
-  const tooltipGap = 5;
-  const hoverDelay = 700;
-  const skipDelay = 300;
-  let activeTrigger = null;
-  let pendingTrigger = null;
-  let tooltip = null;
-  let openTimeout = null;
-  let autoUpdateCleanup = null;
-  let positionRequest = 0;
-  let skipDelayUntil = 0;
-  let lastPointerWasTouch = false;
-  let pinnedByTouch = false;
-
-  const getTrigger = (event) =&gt; {
-    for (const target of event.composedPath()) {
-      if (target?.nodeType === Node.ELEMENT_NODE) {
-        const trigger = target.closest(&quot;[data-tooltip]&quot;);
-        if (trigger) return trigger;
-      }
-    }
-    return null;
-  };
-  const containsTarget = (trigger, target) =&gt;
-    target?.nodeType != null &amp;&amp; trigger.contains(target);
-  const getContent = (trigger) =&gt;
-    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
-  const getPlacement = (trigger) =&gt; {
-    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
-    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
-  };
-  const getTooltip = () =&gt; {
-    if (tooltip == null) {
-      tooltip = document.createElement(&quot;div&quot;);
-      tooltip.id = tooltipId;
-      tooltip.className = &quot;tooltip&quot;;
-      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
-    }
-    return tooltip;
-  };
-  const setDescribedBy = (trigger, described) =&gt; {
-    const ids = new Set(
-      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
-        .split(/\s+/)
-        .filter(Boolean),
-    );
-    if (described) {
-      ids.add(tooltipId);
-    } else {
-      ids.delete(tooltipId);
-    }
-    if (ids.size === 0) {
-      trigger.removeAttribute(&quot;aria-describedby&quot;);
-    } else {
-      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
-    }
-  };
-  const clearOpenTimeout = () =&gt; {
-    if (openTimeout != null) {
-      window.clearTimeout(openTimeout);
-      openTimeout = null;
-    }
-    pendingTrigger = null;
-  };
-  const closeTooltip = (activateSkipDelay = true) =&gt; {
-    clearOpenTimeout();
-    pinnedByTouch = false;
-    positionRequest += 1;
-    autoUpdateCleanup?.();
-    autoUpdateCleanup = null;
-    if (activeTrigger == null) {
-      return;
-    }
-    setDescribedBy(activeTrigger, false);
-    activeTrigger = null;
-    tooltip?.remove();
-    if (activateSkipDelay) {
-      skipDelayUntil = Date.now() + skipDelay;
-    }
-  };
-  const updatePosition = (trigger, floating) =&gt; {
-    const request = ++positionRequest;
-    void computePosition(trigger, floating, {
-      middleware: [
-        offset(tooltipGap),
-        flip({ padding: tooltipGap }),
-        shift({ padding: tooltipGap }),
-        size({
-          padding: tooltipGap,
-          apply({ availableHeight, availableWidth, elements }) {
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-width&quot;,
-              `${Math.max(0, availableWidth)}px`,
-            );
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-height&quot;,
-              `${Math.max(0, availableHeight)}px`,
-            );
-          },
-        }),
-      ],
-      placement: getPlacement(trigger),
-      strategy: &quot;fixed&quot;,
-    })
-      .then(({ x, y }) =&gt; {
-        if (activeTrigger !== trigger || request !== positionRequest) {
-          return;
-        }
-        const scale = window.devicePixelRatio || 1;
-        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
-        floating.style.visibility = &quot;visible&quot;;
-      })
-      .catch(() =&gt; {
-        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
-          closeTooltip(false);
-        }
-      });
-  };
-  const openTooltip = (trigger) =&gt; {
-    const content = getContent(trigger);
-    if (!trigger.isConnected || content.length === 0) {
-      return;
-    }
-    clearOpenTimeout();
-    if (activeTrigger === trigger) {
-      return;
-    }
-    closeTooltip();
-    const floating = getTooltip();
-    floating.textContent = content;
-    floating.style.visibility = &quot;hidden&quot;;
-    floating.style.transform = &quot;translate(0, 0)&quot;;
-    document.body.appendChild(floating);
-    activeTrigger = trigger;
-    setDescribedBy(trigger, true);
-    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
-      updatePosition(trigger, floating);
-    });
-  };
-  const requestOpen = (trigger, immediate = false) =&gt; {
-    if (
-      getContent(trigger).length === 0 ||
-      activeTrigger === trigger ||
-      pendingTrigger === trigger
-    ) {
-      return;
-    }
-    clearOpenTimeout();
-    pendingTrigger = trigger;
-    const delay =
-      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
-        ? 0
-        : hoverDelay;
-    if (delay === 0) {
-      openTooltip(trigger);
-      return;
-    }
-    openTimeout = window.setTimeout(() =&gt; {
-      openTimeout = null;
-      pendingTrigger = null;
-      openTooltip(trigger);
-    }, delay);
-  };
-  const handlePointerOpen = (event) =&gt; {
-    if (event.pointerType === &quot;touch&quot;) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    requestOpen(trigger);
-  };
-  const handlePointer = (event) =&gt; {
-    lastPointerWasTouch =
-      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
-  };
-  const handleTouchClick = (event) =&gt; {
-    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
-    lastPointerWasTouch = false;
-    if (!isTouch || event.detail === 0) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (
-      trigger == null ||
-      !trigger.isConnected ||
-      getContent(trigger).length === 0 ||
-      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
-    ) {
-      if (pinnedByTouch) {
-        closeTooltip();
-      }
-      return;
-    }
-    openTooltip(trigger);
-    pinnedByTouch = activeTrigger === trigger;
-    window.setTimeout(() =&gt; {
-      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
-        closeTooltip(false);
-      }
-    }, 0);
-  };
-  const handleLeave = (event) =&gt; {
-    if (pinnedByTouch) {
-      return;
-    }
-    const trigger = getTrigger(event);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handleFocusIn = (event) =&gt; {
-    const trigger = getTrigger(event);
-    if (trigger?.matches(&quot;:focus-visible&quot;)) {
-      requestOpen(trigger, true);
-    }
-  };
-  const handleKeyDown = (event) =&gt; {
-    if (event.key === &quot;Escape&quot;) {
-      closeTooltip();
-    }
-  };
-  const handleContextMenu = (event) =&gt; {
-    lastPointerWasTouch = false;
-    const trigger = getTrigger(event);
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handlers = {
-    pointerover: handlePointerOpen,
-    pointerdown: handlePointer,
-    pointercancel: handlePointer,
-    click: handleTouchClick,
-    pointerout: handleLeave,
-    focusin: handleFocusIn,
-    focusout: handleLeave,
-    keydown: handleKeyDown,
-    contextmenu: handleContextMenu,
-  };
-  const roots = new Map();
-  const handledEvents = new WeakSet();
-  const handleEvent = (event) =&gt; {
-    if (handledEvents.has(event)) return;
-    handledEvents.add(event);
-    handlers[event.type](event);
-  };
-  const discoverRoots = (node) =&gt; {
-    if (node.shadowRoot) listen(node.shadowRoot);
-    for (const element of node.querySelectorAll(&quot;*&quot;)) {
-      if (element.shadowRoot) listen(element.shadowRoot);
-    }
-  };
-  const listen = (root) =&gt; {
-    if (roots.has(root)) return;
-    for (const type of Object.keys(handlers)) root.addEventListener(type, handleEvent);
-    const observer = new window.MutationObserver((records) =&gt; {
-      for (const { addedNodes } of records) {
-        for (const node of addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) discoverRoots(node);
-        }
-      }
-      for (const [root, cleanup] of roots) {
-        if (root.host &amp;&amp; !root.host.isConnected) {
-          cleanup();
-          roots.delete(root);
-        }
-      }
-      if (activeTrigger &amp;&amp; !activeTrigger.isConnected) closeTooltip(false);
-    });
-    observer.observe(root, { childList: true, subtree: true });
-    roots.set(root, () =&gt; {
-      observer.disconnect();
-      for (const type of Object.keys(handlers)) root.removeEventListener(type, handleEvent);
-    });
-    discoverRoots(root);
-  };
-  const destroy = () =&gt; {
-    closeTooltip(false);
-    lastPointerWasTouch = false;
-    for (const cleanup of roots.values()) cleanup();
-    roots.clear();
-    tooltip = null;
-  };
-
-  // Events between children of one shadow root never reach the document.
-  listen(document);
-  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
-(() =&gt; {
-  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
-  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
-  const selectTab = (selected) =&gt; {
-    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
-    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
-      const active = tab === selected;
-      tab.classList.toggle(&quot;active&quot;, active);
-      tab.setAttribute(&quot;aria-selected&quot;, String(active));
-      const id = tab.getAttribute(&quot;aria-controls&quot;);
-      const panel = id &amp;&amp; document.getElementById(id);
-      if (panel != null) {
-        panel.hidden = id !== panelId;
-        if (!panel.hidden &amp;&amp; selected.id) {
-          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
-        }
-      }
-    }
-  };
-  const interact = (event) =&gt; {
-    const tab = event.target?.closest?.(selector);
-    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
-      return;
-    }
-    if (event.type === &quot;click&quot;) {
-      selectTab(tab);
-      return;
-    }
-    const tabs = Array.from(
-      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
-    ).filter((candidate) =&gt; !candidate.matches(disabled));
-    const current = tabs.indexOf(tab);
-    let next;
-    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
-      next = (current + 1) % tabs.length;
-    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
-      next = (current + tabs.length - 1) % tabs.length;
-    } else if (event.key === &quot;Home&quot;) {
-      next = 0;
-    } else if (event.key === &quot;End&quot;) {
-      next = tabs.length - 1;
-    } else {
-      return;
-    }
-    event.preventDefault();
-    tabs[next].focus();
-    selectTab(tabs[next]);
-  };
-
-  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
-    const selected =
-      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
-    if (selected != null) {
-      selectTab(selected);
-    }
-  }
-  document.addEventListener(&quot;click&quot;, interact);
-  document.addEventListener(&quot;keydown&quot;, interact);
-  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
-    document.removeEventListener(&quot;click&quot;, interact);
-    document.removeEventListener(&quot;keydown&quot;, interact);
-  }, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-carousel&quot;&gt;
-  (() =&gt; {
-    for (const root of document.querySelectorAll(&quot;.viz-carousel&quot;)) {
-      const panels = Array.from(
-        root.querySelectorAll(&quot;:scope &gt; [data-variant]&quot;),
-      );
-      if (panels.length === 0) {
-        continue;
-      }
-      root.setAttribute(&quot;role&quot;, &quot;group&quot;);
-      panels.forEach((panel, index) =&gt; {
-        panel.hidden = index !== 0;
-        panel.setAttribute(&quot;role&quot;, &quot;group&quot;);
-        if (!panel.hasAttribute(&quot;aria-label&quot;)) {
-          panel.setAttribute(&quot;aria-label&quot;, panel.dataset.variant);
-        }
-      });
-      root.dataset.activeVariant = panels[0].dataset.variant;
-      if (panels.length === 1) {
-        continue;
-      }
-
-      const controls = document.createElement(&quot;div&quot;);
-      controls.className = &quot;viz-carousel-controls&quot;;
-      // Portable copy of the settings dropdown&#x27;s legacy glyph; no 14px icon-package preset matches it.
-      // https://github.com/openai/openai/blob/master/codex/codex-apps/webview/src/icons/chevron.svg
-      controls.innerHTML = `
-      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-previous cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-left&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;
-      &lt;details class=&quot;viz-carousel-picker&quot;&gt;
-        &lt;summary class=&quot;cursor-interaction&quot;&gt;
-          &lt;span class=&quot;viz-carousel-count tabular-nums&quot;&gt;&lt;/span&gt;
-          &lt;span class=&quot;viz-carousel-name&quot;&gt;&lt;/span&gt;
-          &lt;svg class=&quot;viz-carousel-caret&quot; width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 20 21&quot; fill=&quot;none&quot; aria-hidden=&quot;true&quot; focusable=&quot;false&quot;&gt;
-            &lt;path d=&quot;M15.2793 7.71101C15.539 7.45131 15.961 7.45131 16.2207 7.71101C16.4804 7.97071 16.4804 8.39272 16.2207 8.65242L10.4707 14.4024C10.211 14.6621 9.78902 14.6621 9.52932 14.4024L3.77932 8.65242L3.69436 8.54792C3.52385 8.28979 3.55205 7.93828 3.77932 7.71101C4.00659 7.48374 4.3581 7.45554 4.61623 7.62605L4.72073 7.71101L10 12.9903L15.2793 7.71101Z&quot; fill=&quot;currentColor&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;0.6&quot; /&gt;
-          &lt;/svg&gt;
-        &lt;/summary&gt;
-        &lt;div class=&quot;viz-carousel-options&quot;&gt;&lt;/div&gt;
-      &lt;/details&gt;
-      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-next cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-right&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;`;
-      const previous = controls.querySelector(&quot;.viz-carousel-previous&quot;);
-      const next = controls.querySelector(&quot;.viz-carousel-next&quot;);
-      const picker = controls.querySelector(&quot;.viz-carousel-picker&quot;);
-      const summary = picker.querySelector(&quot;summary&quot;);
-      const count = controls.querySelector(&quot;.viz-carousel-count&quot;);
-      const name = controls.querySelector(&quot;.viz-carousel-name&quot;);
-      const options = controls.querySelector(&quot;.viz-carousel-options&quot;);
-      const status = document.createElement(&quot;span&quot;);
-      status.className = &quot;sr-only&quot;;
-      status.setAttribute(&quot;role&quot;, &quot;status&quot;);
-      status.setAttribute(&quot;aria-live&quot;, &quot;polite&quot;);
-      status.setAttribute(&quot;aria-atomic&quot;, &quot;true&quot;);
-      previous.setAttribute(
-        &quot;aria-label&quot;,
-        root.dataset.previousLabel ?? &quot;Previous variant&quot;,
-      );
-      next.setAttribute(&quot;aria-label&quot;, root.dataset.nextLabel ?? &quot;Next variant&quot;);
-
-      let active = 0;
-      let mousePointerId = null;
-      let summaryPointerHandled = false;
-      summary.addEventListener(&quot;pointerdown&quot;, (event) =&gt; {
-        summaryPointerHandled =
-          event.pointerType === &quot;mouse&quot; &amp;&amp; event.button === 0 &amp;&amp; !event.ctrlKey;
-        if (!summaryPointerHandled) {
-          return;
-        }
-        event.preventDefault();
-        summary.focus({ preventScroll: true });
-        picker.open = !picker.open;
-        mousePointerId = picker.open ? event.pointerId : null;
-      });
-      summary.addEventListener(&quot;click&quot;, (event) =&gt; {
-        if (summaryPointerHandled &amp;&amp; event.detail &gt; 0) {
-          event.preventDefault();
-        }
-      });
-      const choices = panels.map((panel, index) =&gt; {
-        const choice = document.createElement(&quot;button&quot;);
-        choice.type = &quot;button&quot;;
-        choice.className = &quot;cursor-interaction&quot;;
-        choice.textContent = panel.dataset.variant;
-        choice.addEventListener(&quot;click&quot;, () =&gt; {
-          select(index);
-          summary.focus();
-        });
-        choice.addEventListener(&quot;pointerup&quot;, (event) =&gt; {
-          if (
-            picker.open &amp;&amp;
-            event.pointerType === &quot;mouse&quot; &amp;&amp;
-            event.button === 0 &amp;&amp;
-            event.pointerId === mousePointerId
-          ) {
-            choice.click();
-          }
-        });
-        options.appendChild(choice);
-        return choice;
-      });
-      const select = (index) =&gt; {
-        const changed = active !== index;
-        active = index;
-        panels.forEach((panel, position) =&gt; {
-          panel.hidden = position !== active;
-          choices[position].setAttribute(
-            &quot;aria-current&quot;,
-            String(position === active),
-          );
-        });
-        root.dataset.activeVariant = panels[active].dataset.variant;
-        count.textContent = `${active + 1} / ${panels.length}`;
-        name.textContent = panels[active].dataset.variant;
-        picker.open = false;
-        mousePointerId = null;
-        if (changed) {
-          status.textContent = `${count.textContent}: ${name.textContent}`;
-        }
-      };
-      previous.addEventListener(&quot;click&quot;, () =&gt;
-        select((active + panels.length - 1) % panels.length),
-      );
-      next.addEventListener(&quot;click&quot;, () =&gt;
-        select((active + 1) % panels.length),
-      );
-      picker.addEventListener(&quot;keydown&quot;, (event) =&gt; {
-        if (event.key === &quot;Escape&quot; &amp;&amp; picker.open) {
-          event.preventDefault();
-          picker.open = false;
-          mousePointerId = null;
-          summary.focus();
-          return;
-        }
-        if (event.altKey || event.ctrlKey || event.metaKey) {
-          return;
-        }
-        const index = choices.indexOf(document.activeElement);
-        let nextIndex;
-        if (event.key === &quot;ArrowDown&quot;) {
-          nextIndex = index &lt; 0 ? active : (index + 1) % choices.length;
-        } else if (event.key === &quot;ArrowUp&quot;) {
-          nextIndex = index &lt; 0 ? active : (index + choices.length - 1) % choices.length;
-        } else if (picker.open &amp;&amp; event.key === &quot;Home&quot;) {
-          nextIndex = 0;
-        } else if (picker.open &amp;&amp; event.key === &quot;End&quot;) {
-          nextIndex = choices.length - 1;
-        } else {
-          return;
-        }
-        event.preventDefault();
-        picker.open = true;
-        choices[nextIndex].focus();
-      });
-      picker.addEventListener(&quot;focusout&quot;, (event) =&gt; {
-        if (!picker.contains(event.relatedTarget)) {
-          picker.open = false;
-          mousePointerId = null;
-        }
-      });
-      const dismiss = (event) =&gt; {
-        if (!summary.contains(event.target)) {
-          mousePointerId = null;
-        }
-        if (!picker.contains(event.target)) {
-          picker.open = false;
-        }
-      };
-      const endPointerSelection = () =&gt; {
-        mousePointerId = null;
-      };
-      const sizePicker = () =&gt; {
-        root.style.setProperty(
-          &quot;--viz-carousel-picker-height&quot;,
-          `${picker.open ? options.offsetHeight : 0}px`,
-        );
-      };
-      picker.addEventListener(&quot;toggle&quot;, sizePicker);
-      window.addEventListener(&quot;resize&quot;, sizePicker);
-      document.addEventListener(&quot;pointerdown&quot;, dismiss);
-      document.addEventListener(&quot;pointerup&quot;, endPointerSelection);
-      document.addEventListener(&quot;pointercancel&quot;, endPointerSelection);
-      window.addEventListener(&quot;blur&quot;, endPointerSelection);
-      window.addEventListener(
-        &quot;pagehide&quot;,
-        () =&gt; {
-          document.removeEventListener(&quot;pointerdown&quot;, dismiss);
-          document.removeEventListener(&quot;pointerup&quot;, endPointerSelection);
-          document.removeEventListener(&quot;pointercancel&quot;, endPointerSelection);
-          window.removeEventListener(&quot;blur&quot;, endPointerSelection);
-          window.removeEventListener(&quot;resize&quot;, sizePicker);
-        },
-        { once: true },
-      );
-      root.append(controls, status);
-      select(0);
-    }
-  })();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  const initialize = () =&gt; {
-    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
-  };
-  if (globalThis.lucide != null) {
-    initialize();
-    return;
-  }
-  document
-    .getElementById(&quot;codex-visualization-lucide&quot;)
-    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
-})();
-&lt;/script&gt;
-
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
-
-<script>(() => {
-  const frame = document.getElementById("codex-visualization");
-  if (!(frame instanceof HTMLIFrameElement)) {
-    return;
-  }
-  const isShare = document.documentElement.classList.contains(
-    "visualization-share-root",
-  );
-  let viewportHeight = globalThis.innerHeight;
-  let sizeFingerprint = null;
-  let sizeWriteTimeout;
-  let lastSize = null;
-  let pendingSize = null;
-  const storageKey = `codex:visualization-widget-state-v2:${JSON.stringify([
-    globalThis.location.pathname,
-    globalThis.location.search,
-  ])}`;
-  const sizeStorageKey = `${storageKey}:share-size-v1`;
-  const parseState = (serializedState) => {
-    if (
-      typeof serializedState !== "string" ||
-      new TextEncoder().encode(serializedState).length > 16 * 1024
-    ) {
-      throw new TypeError(
-        "Widget state must be a JSON object of at most 16 KiB",
-      );
-    }
-    /** @type {unknown} */
-    const state = JSON.parse(serializedState);
-    if (
-      state == null ||
-      typeof state !== "object" ||
-      Array.isArray(state) ||
-      ("imageIds" in state &&
-        (!Array.isArray(state.imageIds) || state.imageIds.length > 0))
-    ) {
-      throw new TypeError("Widget state must be a JSON object");
-    }
-    const storedState = { modelContent: null, privateContent: null, ...state };
-    const canonicalState = JSON.stringify(
-      storedState,
-      (_key, /** @type {unknown} */ value) => {
-        if (typeof value === "number" && !Number.isFinite(value)) {
-          throw new TypeError("Widget state must contain finite numbers");
-        }
-        return value;
-      },
-    );
-    if (new TextEncoder().encode(canonicalState).length > 16 * 1024) {
-      throw new TypeError(
-        "Widget state must be a JSON object of at most 16 KiB",
-      );
-    }
-    return storedState;
-  };
-  let storage = null;
-  let state = null;
-  try {
-    const localStorage = globalThis.localStorage;
-    const probeKey = `${storageKey}:probe`;
-    localStorage.setItem(probeKey, "1");
-    localStorage.removeItem(probeKey);
-    storage = localStorage;
-    const savedState = storage.getItem(storageKey);
-    if (savedState != null) {
-      try {
-        state = parseState(savedState);
-      } catch {
-        // Invalid saved state does not disable future writes.
-      }
-    }
-  } catch {
-    storage = null;
-  }
-  const persistSize = () => {
-    globalThis.clearTimeout(sizeWriteTimeout);
-    if (pendingSize == null) {
-      return;
-    }
-    try {
-      storage?.setItem(sizeStorageKey, pendingSize);
-    } catch {
-      // A denied or full cache must not affect the visualization.
-    }
-    pendingSize = null;
-  };
-  if (isShare) {
-    globalThis.addEventListener("pagehide", persistSize);
-  }
-  const initialGlobals = {
-    widgetState: state,
-    statePersistence: storage == null ? "none" : "local",
-  };
-
-  const channel = new MessageChannel();
-  channel.port1.addEventListener("message", (event) => {
-    const data = event.data;
-    if (typeof data !== "object" || data == null) {
-      return;
-    }
-    if (data.type === "widget-state-write") {
-      if (!Number.isSafeInteger(data.id) || data.id <= 0) {
-        return;
-      }
-      let ok = false;
-      try {
-        if (storage != null) {
-          const state = parseState(data.state);
-          storage.setItem(storageKey, JSON.stringify(state));
-          ok = true;
-        }
-      } catch {
-        // Storage denial, quota limits, and invalid state return a failed receipt.
-      }
-      channel.port1.postMessage({
-        type: "widget-state-result",
-        id: data.id,
-        ok,
-      });
-      return;
-    }
-    if (data.type === "height") {
-      const height = data.height;
-      if (
-        typeof height !== "number" ||
-        !Number.isFinite(height) ||
-        height < 0
-      ) {
-        return;
-      }
-      if (height <= 10_000) {
-        const width = isShare && storage != null ? frame.clientWidth : null;
-        frame.style.height = Math.ceil(height) + "px";
-        if (isShare && storage != null) {
-          const size = JSON.stringify({
-            fingerprint: sizeFingerprint,
-            width,
-            viewportHeight: globalThis.innerHeight,
-            dark: globalThis.matchMedia("(prefers-color-scheme: dark)").matches,
-            scale: globalThis.devicePixelRatio,
-            height: Math.ceil(height),
-          });
-          if (size !== lastSize) {
-            lastSize = size;
-            pendingSize = size;
-            globalThis.clearTimeout(sizeWriteTimeout);
-            sizeWriteTimeout = globalThis.setTimeout(persistSize, 100);
-          }
-        }
-      }
-      if (isShare) {
-        // Keep unusually tall content accessible without accepting an unbounded height.
-        if (height > 10_000 && Number.parseFloat(frame.style.height) === 0) {
-          frame.style.removeProperty("height");
-        }
-        frame.scrolling = height > 10_000 ? "auto" : "no";
-        document.documentElement.classList.add("visualization-share-ready");
-      }
-      return;
-    }
-    if (data.type === "scroll-to") {
-      const top = data.top;
-      if (
-        typeof top === "number" &&
-        Number.isFinite(top) &&
-        top >= 0 &&
-        globalThis.navigator.userActivation?.isActive === true
-      ) {
-        globalThis.scrollTo({
-          top: Math.ceil(
-            globalThis.scrollY + frame.getBoundingClientRect().top + top,
-          ),
-        });
-      }
-      return;
-    }
-    if (data.type === "open-external") {
-      const rawHref = data.href;
-      if (typeof rawHref !== "string") {
-        return;
-      }
-      let href;
-      try {
-        const url = new URL(rawHref, document.baseURI);
-        if (url.protocol !== "https:") {
-          return;
-        }
-        href = url.href;
-      } catch {
-        return;
-      }
-      if (globalThis.navigator.userActivation?.isActive === true) {
-        const anchor = document.createElement("a");
-        anchor.href = href;
-        anchor.rel = "noopener noreferrer";
-        anchor.target = "_blank";
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-      }
-      return;
-    }
-    if (data.type === "follow-up") {
-      const prompt = data.prompt;
-      if (
-        typeof prompt !== "string" ||
-        globalThis.navigator.userActivation?.isActive !== true
-      ) {
-        return;
-      }
-      const title = data.title;
-      globalThis.prompt(typeof title === "string" ? title : prompt, prompt);
-    }
-  });
-  channel.port1.start();
-  const srcdoc = frame.dataset.srcdoc;
-  if (srcdoc == null) {
-    return;
-  }
-  globalThis.addEventListener("resize", () => {
-    const height = Number.parseFloat(frame.style.height);
-    if (!isShare && (!Number.isFinite(height) || height <= viewportHeight)) {
-      frame.style.removeProperty("height");
-    }
-    viewportHeight = globalThis.innerHeight;
-    channel.port1.postMessage({ type: "measure" });
-  });
-  frame.addEventListener(
-    "load",
-    () => {
-      frame.contentWindow?.postMessage(
-        { type: "codex-visualization-initialize" },
-        "*",
-        [channel.port2],
-      );
-    },
-    { once: true },
-  );
-  // Match the trusted bootstrap element, not the same text in an authored title.
-  const frameHtml = srcdoc.replace(
-    '<script type="application/json" id="codex-visualization-widget-state">__CODEX_VISUALIZATION_WIDGET_STATE__<\/script>',
-    () =>
-      '<script type="application/json" id="codex-visualization-widget-state">' +
-      JSON.stringify(initialGlobals).replaceAll("<", "\\u003c") +
-      "<\/script>",
-  );
-  if (isShare && storage != null) {
-    // Fingerprint the rendered document, including restored widget state, without
-    // storing its content. This is a layout cache, not a security identity.
-    let hash = 5381;
-    for (let index = 0; index < frameHtml.length; index += 1) {
-      hash = (hash * 33 + frameHtml.charCodeAt(index)) % 4_294_967_296;
-    }
-    sizeFingerprint = hash.toString(36);
-    try {
-      const size = JSON.parse(storage.getItem(sizeStorageKey) ?? "null");
-      if (
-        size?.fingerprint === sizeFingerprint &&
-        size.width === frame.clientWidth &&
-        size.viewportHeight === globalThis.innerHeight &&
-        size.dark ===
-          globalThis.matchMedia("(prefers-color-scheme: dark)").matches &&
-        size.scale === globalThis.devicePixelRatio &&
-        typeof size.height === "number" &&
-        Number.isFinite(size.height) &&
-        size.height >= 0 &&
-        size.height <= 10_000
-      ) {
-        frame.style.height = size.height + "px";
-      }
-    } catch {
-      // Ignore missing or invalid cache entries and measure the live frame.
-    }
-  }
-  frame.srcdoc = frameHtml;
-  delete frame.dataset.srcdoc;
-})();
-</script>
-</body>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Калькулятор PPFD и DLI для комнатных растений: модули Samsung и MiniFermer, диапазоны с допущениями и сравнение с замерами."
+    />
+    <title>Свет для растений — модули и диапазон PPFD</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/controls.css" />
+    <link rel="stylesheet" href="./styles/calculator.css" />
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <noscript>Для расчёта света включите JavaScript в браузере.</noscript>
+    <main>
+      <div id="phyto-beam-explorer">
+        <div>
+          <h2>Источник, пучок и две полезные зоны</h2>
+          <div class="text-small">
+            Samsung и MiniFermer · диммирование · 10 растений
+          </div>
+        </div>
+        <div class="viz-controls">
+          <label class="form-label beam-field" for="pbe-plant"
+            >Растение
+            <select class="form-select" id="pbe-plant">
+              <optgroup label="Крупномеры">
+                <option value="monstera" selected>Монстера деликатесная</option>
+                <option value="elastica">Фикус эластика</option>
+                <option value="lyrata">Фикус лирата</option>
+                <option value="strelitzia">Стрелиция Николая</option>
+                <option value="dracaena">Драцена душистая</option>
+              </optgroup>
+              <optgroup label="Средние растения">
+                <option value="peace">Спатифиллум</option>
+                <option value="aglaonema">Аглаонема</option>
+                <option value="zz">Замиокулькас</option>
+                <option value="spider">Хлорофитум</option>
+                <option value="jade">Толстянка овальная</option>
+              </optgroup>
+            </select>
+          </label>
+          <label class="form-label beam-field" for="pbe-hours"
+            ><span class="beam-label"
+              ><span>Лампа работает в сутки</span
+              ><output id="pbe-hours-value" class="tabular-nums"
+                >12 ч</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-hours"
+              type="range"
+              min="6"
+              max="16"
+              step="1"
+              value="12"
+            />
+          </label>
+        </div>
+        <div class="viz-controls">
+          <label class="form-label beam-field" for="pbe-source"
+            >Источник
+            <select class="form-select" id="pbe-source">
+              <optgroup label="PPF платы + диаграмма диода Samsung">
+                <option value="square50" selected>
+                  Square 50 · LM301B · 4000 K
+                </option>
+                <option value="compact21">COMPACT 21 · LM301B · 4000 K</option>
+                <option value="linear98">Линейка 98 · LM301B · 3500 K</option>
+              </optgroup>
+              <optgroup label="MiniFermer · оценка с допущениями">
+                <option value="mf193">
+                  MiniFermer 1.9.3 · 3500 K · диапазон PPFD
+                </option>
+                <option value="mf194">
+                  MiniFermer 1.9.4 · 4000 K · диапазон PPFD
+                </option>
+                <option value="mf36">
+                  MiniFermer 3.6 · гипотеза Seoul + Osram 660 нм
+                </option>
+              </optgroup>
+              <optgroup label="Условные сценарии · PPF вручную">
+                <option value="mini">Quantum Board Mini · 120 × 120 мм</option>
+                <option value="qb30">Quantum Board 30 Вт · 390 × 120 мм</option>
+                <option value="qb60">Quantum Board 60 Вт · 390 × 180 мм</option>
+                <option value="qb120">
+                  Quantum Board 120 Вт · пример 580 × 280 мм
+                </option>
+                <option value="arlight">Arlight · линейка 500 × 20 мм</option>
+                <option value="compact">Samsung COMPACT · 149 × 24 мм</option>
+                <option value="e27small">E27 12W · корпус Ø95 мм</option>
+                <option value="e27big">E27 25W · корпус Ø124 мм</option>
+                <option value="petal2">
+                  «Лепесток ×2» · условная компоновка
+                </option>
+                <option value="petal3">
+                  «Лепесток ×3» · условная компоновка
+                </option>
+                <option value="petal4">
+                  «Лепесток ×4» · условная компоновка
+                </option>
+                <option value="b3">Б3 · два модуля, без расчёта купола</option>
+              </optgroup>
+            </select>
+          </label>
+          <label class="form-label beam-field" for="pbe-ppf"
+            ><span class="beam-label"
+              ><span>PPF всех модулей при 100%</span
+              ><output id="pbe-ppf-value" class="tabular-nums"
+                >50 мкмоль/с</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-ppf"
+              type="range"
+              min="0"
+              max="400"
+              step="5"
+              value="50"
+            />
+          </label>
+        </div>
+        <div id="pbe-hardware" class="viz-controls">
+          <label class="form-label beam-field" for="pbe-count"
+            >Количество плат
+            <select id="pbe-count" class="form-select">
+              <option value="1">1 плата</option>
+              <option value="2" selected>2 платы</option>
+              <option value="4">4 платы</option>
+            </select>
+          </label>
+          <label class="form-label beam-field" for="pbe-driver"
+            >Питание и управление
+            <select id="pbe-driver" class="form-select">
+              <option value="lcm25">Mean Well LCM-25 · общий DIM</option>
+              <option value="lcm40">Mean Well LCM-40 · общий DIM</option>
+              <option value="ldd" selected>
+                24 В + LDD-H · наш контроллер
+              </option>
+            </select>
+          </label>
+          <label class="form-label beam-field" for="pbe-current"
+            >Ток при 100% / модель драйвера
+            <select id="pbe-current" class="form-select"></select>
+          </label>
+          <label class="form-label beam-field" for="pbe-dim2" id="pbe-channel2"
+            ><span class="beam-label"
+              ><span id="pbe-dim2-label">Вторая группа · PWM</span
+              ><output id="pbe-dim2-value" class="tabular-nums"
+                >70%</output
+              ></span
+            >
+            <input
+              id="pbe-dim2"
+              class="form-range"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value="70"
+            />
+          </label>
+        </div>
+        <div class="viz-controls">
+          <label class="form-label beam-field" for="pbe-height"
+            ><span class="beam-label"
+              ><span>Высота над плоскостью</span
+              ><output id="pbe-height-value" class="tabular-nums"
+                >40 см</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-height"
+              type="range"
+              min="20"
+              max="100"
+              step="5"
+              value="40"
+            />
+          </label>
+          <label class="form-label beam-field" for="pbe-angle"
+            ><span class="beam-label"
+              ><span id="pbe-angle-label">Полный угол пучка</span
+              ><output id="pbe-angle-value" class="tabular-nums"
+                >60°</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-angle"
+              type="range"
+              min="30"
+              max="120"
+              step="5"
+              value="60"
+            />
+          </label>
+        </div>
+        <div class="viz-controls">
+          <label class="form-label beam-field" for="pbe-tilt"
+            ><span class="beam-label"
+              ><span>Наклон вправо, к столу</span
+              ><output id="pbe-tilt-value" class="tabular-nums"
+                >0°</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-tilt"
+              type="range"
+              min="-20"
+              max="20"
+              step="5"
+              value="0"
+            />
+          </label>
+          <label class="form-label beam-field" for="pbe-dim"
+            ><span class="beam-label"
+              ><span id="pbe-dim-label">Яркость источника</span
+              ><output id="pbe-dim-value" class="tabular-nums"
+                >70%</output
+              ></span
+            >
+            <input
+              class="form-range"
+              id="pbe-dim"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value="70"
+            />
+          </label>
+        </div>
+        <div
+          id="pbe-validation"
+          class="text-small text-destructive"
+          role="alert"
+          hidden
+        ></div>
+        <div id="pbe-operating" class="text-small" aria-live="polite"></div>
+        <div id="pbe-estimate-notice" class="text-small" hidden>
+          Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. Это не
+          измерение и не доверительный интервал. Цветная карта и проценты
+          площади — базовый сценарий.
+        </div>
+        <div class="viz-grid" aria-live="polite">
+          <div class="card viz-stat">
+            <div>Средний PPFD в зоне кроны</div>
+            <div class="viz-stat-value tabular-nums" id="pbe-mean">—</div>
+            <div class="text-small">
+              мкмоль/(м²·с) · горизонтальный овал 56 × 44 см
+            </div>
+          </div>
+          <div class="card viz-stat">
+            <div>PPFD в центре зоны</div>
+            <div class="viz-stat-value tabular-nums" id="pbe-center">—</div>
+            <div class="text-small">мкмоль/(м²·с) · точка × на схеме</div>
+          </div>
+          <div class="card viz-stat">
+            <div>Средняя суточная доза · DLI</div>
+            <div class="viz-stat-value tabular-nums" id="pbe-dli">—</div>
+            <div class="text-small">моль/(м²·сут) · только от лампы</div>
+          </div>
+        </div>
+        <div class="plant-status" aria-live="polite">
+          <span id="pbe-status-dot" class="plant-dot" aria-hidden="true"></span
+          ><span id="pbe-status">—</span>
+        </div>
+        <div class="text-small" id="pbe-target" aria-live="polite"></div>
+        <div class="text-small" id="pbe-flow" aria-live="polite"></div>
+        <div class="text-small" id="pbe-capability" aria-live="polite"></div>
+        <section
+          id="pbe-vendor-comparison"
+          class="beam-field"
+          aria-labelledby="pbe-vendor-title"
+          hidden
+        >
+          <h3 id="pbe-vendor-title">
+            MiniFermer 3.6: расчёт и замеры продавца
+          </h3>
+          <div class="text-small">
+            Отдельное сравнение: 1 плата, 100% яркости, без наклона. Ползунки
+            выше не меняют эту таблицу. PPFD — мкмоль/(м²·с).
+          </div>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">см</th>
+                <th scope="col">Замер</th>
+                <th scope="col">
+                  Расчёт<br /><span class="text-small">база · диапазон</span>
+                </th>
+                <th scope="col">Δ, %</th>
+              </tr>
+            </thead>
+            <tbody id="pbe-vendor-rows"></tbody>
+          </table>
+          <div class="text-small" id="pbe-vendor-result"></div>
+          <div class="text-small" id="pbe-vendor-model-check"></div>
+          <div class="text-small">
+            У продавца указано 12 Вт и изображён бокс; положение датчика,
+            отражения, температура и наличие линз не описаны. Здесь условно
+            сравниваем с точкой под центром открытой платы в свободном
+            пространстве, а не со средним по кроне. Подгонки PPF под замеры нет.
+          </div>
+          <div class="text-small">
+            <a
+              href="https://minifermer.ru/data/111%20sasa/qb-mini-36-specs.jpg"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Исходная картинка MiniFermer: 244 / 120 / 75 / 50</a
+            >
+          </div>
+        </section>
+        <details id="pbe-data-details">
+          <summary class="cursor-interaction">
+            Плата, драйверы и наш контроллер
+          </summary>
+          <div class="beam-field">
+            <div class="text-small" id="pbe-module-description"></div>
+            <div class="text-small" id="pbe-evidence"></div>
+            <div class="text-small" id="pbe-circuit"></div>
+            <div class="text-small" id="pbe-controller"></div>
+            <div class="text-small">
+              Сравнение при выбранном токе и 100% яркости · типичные напряжения
+            </div>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Драйвер</th>
+                  <th>Габариты, мм</th>
+                  <th>Предварительная проверка</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-driver-comparison"></tbody>
+            </table>
+            <div class="text-small">PPF одной платы · данные производителя</div>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Ток, мА</th>
+                  <th>Напряжение, В</th>
+                  <th>PPF, мкмоль/с</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-ppf-table"></tbody>
+            </table>
+            <div class="text-small">
+              <a id="pbe-module-link" target="_blank" rel="noopener noreferrer"
+                >Плата и PPF · LED-TECH</a
+              >
+              ·
+              <a
+                href="https://uploadcdn.oneyac.com/attachments/files/brand_pdf/samsungsemiconductor/B4/C9/Data_Sheet_LM301B_CRI80_Rev.10.1.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Диаграмма Samsung · стр. 15</a
+              >
+              ·
+              <a id="pbe-driver-link" target="_blank" rel="noopener noreferrer"
+                >Паспорт драйвера</a
+              >
+            </div>
+          </div>
+        </details>
+        <details id="pbe-estimate-details" hidden>
+          <summary class="cursor-interaction">
+            MiniFermer: данные и принятые допущения
+          </summary>
+          <div class="beam-field">
+            <div class="text-small" id="pbe-estimate-description"></div>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Параметр</th>
+                  <th scope="col">Что принято в расчёте</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-estimate-table"></tbody>
+            </table>
+            <div class="text-small" id="pbe-estimate-limits"></div>
+            <div class="text-small">
+              <a
+                id="pbe-estimate-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Плата · MiniFermer</a
+              ><span id="pbe-estimate-sources"></span>
+            </div>
+          </div>
+        </details>
+        <div class="beam-columns">
+          <div>
+            <h3>Сбоку</h3>
+            <svg
+              id="pbe-side"
+              class="beam-svg"
+              role="img"
+              aria-label="Условные пучки над зоной кроны и рабочей поверхностью"
+            ></svg>
+          </div>
+          <div>
+            <h3>Свет на кроне и столе</h3>
+            <svg
+              id="pbe-plan"
+              class="beam-svg"
+              role="img"
+              aria-label="Цветовая оценка суточной дозы по участкам условной кроны"
+            ></svg>
+          </div>
+        </div>
+        <div
+          class="plant-legend text-small"
+          id="pbe-legend"
+          aria-label="Доли площади кроны в пяти категориях"
+        ></div>
+        <div class="text-small">
+          Цвета и проценты — по площади условной кроны. «Оптимально*» — рабочая
+          цель; «опасно*» — условный сигнал риска, не установленный порог ожога.
+        </div>
+        <details>
+          <summary class="cursor-interaction">
+            Все 10 растений при этих настройках
+          </summary>
+          <div class="plant-comparison">
+            <div class="text-small">
+              Цели DLI в моль/(м²·сут); оценка по среднему по кроне
+            </div>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Растение</th>
+                  <th scope="col">Цель DLI</th>
+                  <th scope="col">По среднему</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-comparison"></tbody>
+            </table>
+          </div>
+        </details>
+        <div class="text-small">
+          Диапазоны — по световым группам; границы цветов условные. Зона 56 × 44
+          см одинакова для всех видов. Свет окна, адаптация и быстрый световой
+          стресс не учтены.
+        </div>
+        <div class="text-small">
+          <a
+            href="https://yardandgarden.extension.iastate.edu/how-to/growing-indoor-plants-under-supplemental-lights/important-considerations-providing-supplemental-light-indoor-plants"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Диапазоны DLI · Iowa State</a
+          >
+          ·
+          <a
+            id="pbe-plant-source"
+            href="https://plants.ces.ncsu.edu/plants/monstera-deliciosa/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Свет для выбранного вида</a
+          >
+        </div>
+        <div class="beam-brief text-small">
+          <span>Растение: PPFD на листьях + суточная доза DLI</span>
+          <span>Человек: люксы на поверхности + цвет + блики</span>
+        </div>
+        <div
+          class="text-small"
+          id="pbe-geometric-value"
+          aria-live="polite"
+        ></div>
+        <div class="text-small" id="pbe-method">
+          Купол, отражения и затенение листьями не учтены. Цветная карта —
+          расчёт на плоскости, не измерения листьев.
+        </div>
+      </div>
+    </main>
+  </body>
 </html>

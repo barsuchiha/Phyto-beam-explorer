@@ -1,0 +1,73 @@
+export const modules = {
+  square50: {
+    name: "Square 50 · LT-3238",
+    size: "50 × 50 × 4,08 мм",
+    cct: 4000,
+    price: "12,90 €",
+    url: "https://www.led-tech.de/de/49x-Samsung-LM301B-Square-50-4000k",
+    rows: [
+      [100, 18.08, 5.59],
+      [350, 18.62, 19.15],
+      [700, 19.09, 36.98],
+      [1050, 19.46, 53.79],
+      [1400, 19.73, 69.73],
+    ],
+  },
+  compact21: {
+    name: "COMPACT 21 · LT-6469",
+    size: "149 × 24 × 4,08 мм",
+    cct: 4000,
+    price: "6,49 €",
+    url: "https://www.led-tech.de/en/21x-Samsung-COMPACT-LM301-stripe-4000k",
+    rows: [
+      [100, 7.76, 2.63],
+      [350, 8, 9.01],
+      [700, 8.21, 17.45],
+      [1050, 8.38, 25.45],
+      [1400, 8.54, 33.13],
+    ],
+  },
+  linear98: {
+    name: "Линейка 98 · LT-4015",
+    size: "499,9 × 16 × 5,4 мм",
+    cct: 3500,
+    price: "19,90 €",
+    url: "https://www.led-tech.de/de/50cm-Alustreifen-mit-98x-Samsung-LM301B-LEDs-3500k-und-Steckerbuchsen",
+    rows: [
+      [350, 18.59, 19.21],
+      [700, 18.99, 37.63],
+      [1050, 19.32, 55.36],
+      [1400, 19.6, 72.59],
+      [1750, 19.87, 89],
+      [2100, 20.1, 105.2],
+    ],
+  },
+};
+export const drivers = {
+  lcm25: {
+    name: "LCM-25",
+    size: "105 × 68 × 23",
+    currents: [350, 500, 600, 700, 900, 1050],
+    maxV: [54, 50, 42, 36, 28, 24],
+    minV: 6,
+    power: 25.2,
+    url: "https://www.meanwell.com/Upload/PDF/LCM-25/LCM-25-SPEC.PDF",
+  },
+  lcm40: {
+    name: "LCM-40",
+    size: "123,5 × 81,5 × 23",
+    currents: [350, 500, 600, 700, 900, 1050],
+    maxV: [100, 80, 67, 57, 45, 40],
+    minV: 2,
+    power: 42,
+    url: "https://www.mean-well.ru/uploads/files/datasheets/LCM-40.pdf",
+  },
+  ldd: {
+    name: "LDD-H + 24 В",
+    size: "31,8 × 20,3 × 12,2 / канал",
+    currents: [350, 500, 600, 700, 1000],
+    minV: 2,
+    power: 60,
+    url: "https://www.meanwell.com/Upload/PDF/LDD-H/LDD-H-SPEC.PDF",
+  },
+};
