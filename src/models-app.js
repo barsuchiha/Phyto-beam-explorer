@@ -20,6 +20,12 @@ import { createLuminaireView } from "./ui/luminaire-view.js";
 import { plantModel } from "./models/plants.js";
 import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
 import { lightWorkerFile } from "./data/worker-asset.js";
+import {
+  surfaceReadout,
+  percentText,
+  ppfdMapStops,
+  ppfdMapPosition,
+} from "./models/light-readout.js";
 
 const q = (id) => document.getElementById("lm-" + id),
   key = "phyto-luminaire-fitting-v1";
@@ -98,6 +104,22 @@ function setOptions(id, items, value) {
   }
   select.value = value;
 }
+function renderMapLegend() {
+  const continuous = state.colorMetric === "ppfd";
+  hide("ppfd-legend", !continuous);
+  hide("legend", continuous);
+  hide("dli-note", continuous);
+  q("ppfd-gradient").style.background =
+    `linear-gradient(to right,${ppfdMapStops.map(([v, c]) => `${c} ${ppfdMapPosition(v) * 100}%`).join(",")})`;
+  q("ppfd-ticks").replaceChildren(
+    ...ppfdMapStops.map(([value]) => {
+      const tick = document.createElement("span");
+      tick.style.left = ppfdMapPosition(value) * 100 + "%";
+      tick.textContent = value === 300 ? "300+" : String(value);
+      return tick;
+    }),
+  );
+}
 function renderControls(poses, geometry) {
   const m = luminaires[state.model],
     source = fittingSources[state.source],
@@ -123,6 +145,7 @@ function renderControls(poses, geometry) {
     if (el.type === "checkbox") el.checked = state[name];
     else el.value = state[name];
   }
+  renderMapLegend();
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
@@ -272,7 +295,7 @@ function renderResult(result, geometry, reference) {
     renderLeafDetail();
   }
   q("receiver-note").textContent = leafMode
-    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Это показатель распределения, не оценка достаточности света для растения. Форма и наклоны заданы по типу растения, но остаются допущениями; цвет маленьких участков может быть шумным. Синие обратные стороны не означают, что всё растение недосвечено.`
+    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее взвешено по площади и включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Второе число — среднее по самой освещённой стороне одного листа, не точечный пик. Это показатели распределения, не оценка достаточности света. Форма и наклоны — допущения; значения маленьких участков могут быть шумными.`
     : "Среднее включает всю оболочку и её теневую сторону. Это показатель распределения, не оценка достаточности света для растения. Его нельзя напрямую сравнивать с датчиком сверху или средним на первой странице. Рисованные листья в этом режиме не участвуют в расчёте.";
   const { metrics, range, middle } = result,
     b = metrics[middle].budget;
@@ -290,18 +313,66 @@ function renderResult(result, geometry, reference) {
       : format((values[0] + values[1]) / 2);
   const dliRange = (values) =>
     values.map((v) => plantModel.dli(v, state.hours));
-  q("metrics").innerHTML =
-    `<div><span>PPFD · датчик сверху</span><strong>${rangeText(reference.range)}</strong><small>мкмоль/(м²·с) · круг Ø10 см</small></div><div><span>DLI от лампы · ${state.hours} ч</span><strong>${rangeText(dliRange(reference.range), dose)}</strong><small>моль/(м²·сутки) · на датчике</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
+  const readout = surfaceReadout(result),
+    best = readout.brightest;
+  const captured = readout.emitting
+    ? Math.abs(readout.captureRange[1] - readout.captureRange[0]) > 0.0005
+      ? readout.captureRange.map(percentText).join("–")
+      : percentText(b.target)
+    : "—";
+  const cards = [
+    [
+      leafMode ? "PPFD · среднее по листьям" : "PPFD · среднее по оболочке",
+      rangeText(range),
+      leafMode ? "обе стороны · мкмоль/(м²·с)" : "вся оболочка · мкмоль/(м²·с)",
+    ],
+    leafMode
+      ? [
+          "Самая освещённая сторона листа",
+          rangeText(best.range),
+          `PPFD · лист ${best.leaf + 1}, сторона ${best.side === 0 ? "A" : "B"}`,
+        ]
+      : [
+          `DLI от лампы · ${state.hours} ч`,
+          rangeText(dliRange(range), dose),
+          "моль/(м²·сутки) · вся оболочка",
+        ],
+    [
+      leafMode ? "На листья" : "На крону",
+      captured,
+      readout.emitting ? "доля исходного PPF" : "лампа выключена",
+    ],
+  ];
+  q("metrics").replaceChildren(
+    ...cards.map(([title, value, note]) => {
+      const card = document.createElement("div");
+      for (const [tag, text] of [
+        ["span", title],
+        ["strong", value],
+        ["small", note],
+      ]) {
+        const el = document.createElement(tag);
+        el.textContent = text;
+        card.append(el);
+      }
+      return card;
+    }),
+  );
+  q("source-summary").textContent =
+    `PPF источников: ${ppfText} мкмоль/с · ${geometry.sources.length} шт. Это поток до взаимодействия с корпусом и растением.`;
+  q("reference-metrics").textContent =
+    `PPFD сверху: ${rangeText(reference.range)} мкмоль/(м²·с). DLI на этом датчике за ${state.hours} ч: ${rangeText(dliRange(reference.range), dose)} моль/(м²·сутки).`;
   const target = plantModel.groups[plants[state.plant].group];
   q("reference-note").textContent =
-    `Светлый круг в 3D — горизонтальный датчик на высоте ${fmt(reference.center[2] * 100)} см от пола, над центром растения. Считается только его верхняя сторона, отдельно от листьев; экран учитывается. При боковой подсветке показание сверху может быть низким — смотри также карту листьев.` +
+    `Светлый круг в 3D — горизонтальный датчик на высоте ${fmt(reference.center[2] * 100)} см от пола, над центром растения. Считается только верхняя сторона, отдельно от листьев. Свет снизу на обратную сторону не входит в показание. При боковой подсветке ноль здесь не означает нулевой свет на листьях.` +
     (reference.lowSample && ppfRange[1] > 0
       ? " Мало попаданий в датчик: значение нестабильно, ноль не доказывает отсутствия света."
       : "");
   q("daily-note").textContent =
     `Условный ориентир выбранной световой группы: DLI ${target.L}–${target.U} моль/(м²·сутки) за весь день. Здесь показана только добавка от лампы. Свет окна не задан, поэтому полная суточная доза и достаточность освещения не определены. Диапазон отражает сценарии источника, не все ошибки модели.`;
-  q("surface-summary").textContent =
-    `${leafMode ? "По листьям · обе стороны" : "По всей оболочке"}: средний PPFD ${rangeText(range)} мкмоль/(м²·с); DLI от лампы ${rangeText(dliRange(range), dose)} моль/(м²·сутки).`;
+  q("surface-summary").textContent = leafMode
+    ? `DLI от лампы за ${state.hours} ч: ${rangeText(dliRange(range), dose)} в среднем по обеим сторонам листьев; ${rangeText(dliRange(best.range), dose)} на самой освещённой стороне листа. Единица: моль/(м²·сутки).`
+    : `Среднее по всей оболочке включает её теневую сторону.`;
   const bar = document.createElement("div");
   bar.className = "model-budget";
   const labels = document.createElement("div");
@@ -311,12 +382,14 @@ function renderResult(result, geometry, reference) {
     part.style.cssText = `width:${b[id] * 100}%;background:${color}`;
     bar.append(part);
     const text = document.createElement("span");
-    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : id === "screen" && state.model === "olive" ? "В панелях" : label} ${fmt(b[id] * 100)}%`;
+    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : id === "screen" && state.model === "olive" ? "В панелях" : label} ${percentText(b[id])}`;
     labels.append(text);
   }
   q("budget").replaceChildren(bar, labels);
-  q("status").textContent =
-    `Из всего PPF на ${leafMode ? "листья" : "крону"} после отражений вернулось ${fmt(b.returned * 100)}%. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`;
+  hide("budget", !readout.emitting);
+  q("status").textContent = readout.emitting
+    ? `Всего на ${leafMode ? "листья" : "крону"}: ${percentText(b.target)} исходного PPF; в том числе после отражений: ${percentText(b.returned)} исходного PPF. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`
+    : "Лампа выключена: её вклад в PPFD и DLI равен нулю. Доля попавшего света не определяется без исходного потока.";
   view?.light(state, result);
 }
 let serial = 0,
@@ -351,6 +424,8 @@ async function render() {
     q("budget").replaceChildren();
     for (const id of [
       "reference-note",
+      "reference-metrics",
+      "source-summary",
       "daily-note",
       "surface-summary",
       "receiver-note",
@@ -420,6 +495,11 @@ for (const [name, control] of Object.entries(controls))
       history.replaceState(null, "", url);
     }
     save();
+    if (name === "colorMetric") {
+      renderMapLegend();
+      if (latestResult) view?.light(state, latestResult);
+      return;
+    }
     render();
   });
 for (const button of document.querySelectorAll("[data-view]"))
@@ -427,7 +507,11 @@ for (const button of document.querySelectorAll("[data-view]"))
     for (const other of document.querySelectorAll("[data-view]"))
       other.setAttribute("aria-pressed", String(other === button));
     view?.setMode(button.dataset.view);
+    hide("map-controls", button.dataset.view !== "map");
   });
+q("reference-details").addEventListener("toggle", () =>
+  view?.setReferenceVisible(q("reference-details").open),
+);
 q("leaf-select").addEventListener("input", () => {
   selectedLeaf = Number(q("leaf-select").value);
   renderLeafDetail();

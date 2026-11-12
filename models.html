@@ -10,7 +10,7 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=afbce70bb1f6" />
+    <link rel="stylesheet" href="./styles/models.css?v=358bf909e136" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -28,18 +28,19 @@
           "./src/data/plants.js": "./src/data/plants.js?v=ac1847f6b1e0",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
           "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=cf444792b04a",
-          "./src/models-app.js": "./src/models-app.js?v=5b553472c29d",
+          "./src/models-app.js": "./src/models-app.js?v=daf449c0286b",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=8ddb7d9b7bf4",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=cea297267d41",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=2c9ef572826a",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/layout.js": "./src/models/layout.js?v=08b53705b4d3",
           "./src/models/leaf-bvh.js": "./src/models/leaf-bvh.js?v=4c04ff2b48f5",
           "./src/models/leaf-collision.js": "./src/models/leaf-collision.js?v=d7e9ed2e991b",
           "./src/models/leaf-geometry.js": "./src/models/leaf-geometry.js?v=5461205619bf",
+          "./src/models/light-readout.js": "./src/models/light-readout.js?v=84e664dd8d02",
           "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=3a184fd9616b",
           "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=38a07b8ec53c",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
@@ -61,7 +62,7 @@
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=0e19432a781f",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=ed5d5df44b5c",
           "./src/ui/olive-view.js": "./src/ui/olive-view.js?v=d7a04319f710",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=79fa6cfb08cc",
           "./src/ui/results.js": "./src/ui/results.js?v=efc24d0a9431",
@@ -74,7 +75,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=5b553472c29d"></script>
+    <script type="module" src="./src/models-app.js?v=daf449c0286b"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -409,11 +410,43 @@
               ><button type="button" data-view="rays" aria-pressed="false">
                 Ход лучей</button
               ><button type="button" data-view="map" aria-pressed="false">
-                Карта PPFD
+                Карта света
               </button>
             </div>
             <button type="button" id="lm-focus">Головка крупно</button
             ><button type="button" id="lm-reset-view">Вся сцена</button>
+          </div>
+          <div id="lm-map-controls" hidden>
+            <label for="lm-colorMetric"
+              >Цвет карты
+              <select class="form-select" id="lm-colorMetric">
+                <option value="ppfd">PPFD · плавная шкала</option>
+                <option value="dli">DLI · условный ориентир растения</option>
+              </select>
+            </label>
+            <div id="lm-ppfd-legend" aria-label="Шкала PPFD от 0 до 300 и выше">
+              <div id="lm-ppfd-gradient"></div>
+              <div id="lm-ppfd-ticks"></div>
+              <p class="model-hint">
+                мкмоль/(м²·с) · общая логарифмическая шкала. Цвет показывает
+                количество света, а не достаточность для растения. 300+ —
+                верхний цвет.
+              </p>
+            </div>
+            <div class="model-legend" id="lm-legend">
+              <span style="--dot: #3b8fea">Значительно ниже ориентира</span
+              ><span style="--dot: #e6c64d">Ниже ориентира</span
+              ><span style="--dot: #56b879">В диапазоне ориентира</span
+              ><span style="--dot: #eb6b62">Выше ориентира</span
+              ><span style="--dot: #7e2748">Значительно выше ориентира</span>
+            </div>
+            <p class="model-hint" id="lm-dli-note">
+              Цвет — вклад лампы в DLI участка относительно условного ориентира
+              группы. Синий: менее половины нижней границы; бордовый: от двух
+              верхних границ. Это не оценка здоровья растения и не пороги ожога.
+              Теневой участок может быть синим при достаточном свете на других
+              листьях. Свет окна не добавлен.
+            </p>
           </div>
           <div id="lm-view">
             <p id="lm-loading">Загружаю сохранённую 3D-модель…</p>
@@ -429,7 +462,7 @@
             Расчёт после загрузки модели.
           </p>
           <div class="model-metrics" id="lm-metrics" aria-live="polite"></div>
-          <p class="model-hint" id="lm-reference-note"></p>
+          <p class="model-hint" id="lm-source-summary"></p>
           <p class="model-hint" id="lm-daily-note"></p>
           <p class="model-surface-summary" id="lm-surface-summary"></p>
           <div id="lm-budget"></div>
@@ -445,20 +478,14 @@
             </label>
             <p class="model-hint" id="lm-leaf-detail" aria-live="polite"></p>
           </div>
-          <div class="model-legend" id="lm-legend">
-            <span style="--dot: #3b8fea">Значительно ниже ориентира</span
-            ><span style="--dot: #e6c64d">Ниже ориентира</span
-            ><span style="--dot: #56b879">В диапазоне ориентира</span
-            ><span style="--dot: #eb6b62">Выше ориентира</span
-            ><span style="--dot: #7e2748">Значительно выше ориентира</span>
-          </div>
-          <p class="model-hint">
-            Цвет — вклад лампы в DLI участка относительно условного ориентира
-            группы. Синий: менее половины нижней границы; бордовый: от двух
-            верхних границ. Это не оценка здоровья растения и не пороги ожога.
-            Теневой участок может быть синим при достаточном свете на других
-            листьях. Свет окна не добавлен.
-          </p>
+          <details id="lm-reference-details" class="model-hint">
+            <summary>Датчик над растением · вспомогательный</summary>
+            <div
+              id="lm-reference-metrics"
+              class="model-reference-metrics"
+            ></div>
+            <p id="lm-reference-note"></p>
+          </details>
         </section>
       </div>
       <section class="model-detail">

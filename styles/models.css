@@ -361,3 +361,63 @@ a:focus-visible {
     grid-column: 1/-1;
   }
 }
+
+#lm-map-controls {
+  margin: 0 0 14px;
+}
+#lm-map-controls > label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+#lm-colorMetric {
+  width: auto;
+  max-width: 100%;
+  font-size: 12px;
+}
+#lm-ppfd-gradient {
+  height: 12px;
+  border-radius: 4px;
+}
+#lm-ppfd-ticks {
+  position: relative;
+  height: 24px;
+  margin-top: 5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+#lm-ppfd-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+#lm-ppfd-ticks span:first-child {
+  transform: none;
+}
+#lm-ppfd-ticks span:last-child {
+  transform: translateX(-100%);
+}
+#lm-reference-details {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 14px;
+}
+#lm-reference-details summary {
+  cursor: pointer;
+}
+.model-reference-metrics {
+  font-size: 13px;
+  color: var(--foreground);
+  margin-top: 12px;
+}
+@media (max-width: 680px) {
+  #lm-map-controls > label {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #lm-colorMetric {
+    width: 100%;
+  }
+}

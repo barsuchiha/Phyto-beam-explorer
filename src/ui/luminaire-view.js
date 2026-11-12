@@ -6,6 +6,7 @@ import { add, mul, surfacePoint } from "../models/crown.js";
 import { plantModel } from "../models/plants.js";
 import { referenceDetector } from "../models/reference-light.js";
 import { populateOlive } from "./olive-view.js";
+import { ppfdMapColor } from "../models/light-readout.js";
 
 const vector = (p) => new T.Vector3(...p),
   colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
@@ -122,6 +123,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     heatGroup = new T.Group();
   const selectedGroup = new T.Group(),
     referenceGroup = new T.Group();
+  referenceGroup.visible = false;
   scene.add(
     modelGroup,
     plantGroup,
@@ -433,6 +435,17 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     currentResult = result;
     dispose(rayGroup);
     dispose(heatGroup);
+    const lightColor = (ppfd) =>
+      state.colorMetric === "dli"
+        ? new T.Color(
+            colors[
+              plantModel.classify(
+                plantModel.dli(ppfd, state.hours),
+                plantModel.plants[state.plant].group,
+              )
+            ],
+          )
+        : new T.Color(ppfdMapColor(ppfd));
     for (const ray of result.rays)
       rayGroup.add(
         line(
@@ -453,11 +466,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
           for (const id of leaf.patches) {
             const patch = currentScene.leafGeometry.patches[id],
               bin = result.bins[id * 2 + side];
-            const k = plantModel.classify(
-              plantModel.dli(bin.ppfd, state.hours),
-              plantModel.plants[state.plant].group,
-            );
-            const color = new T.Color(colors[k]);
+            const color = lightColor(bin.ppfd);
             for (const tri of patch.triangles)
               for (const p of tri) {
                 positions.push(...p);
@@ -501,11 +510,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
             (2 * Math.PI * j) / result.na,
           ).p,
       );
-      const k = plantModel.classify(
-          plantModel.dli(bin.ppfd, state.hours),
-          plantModel.plants[state.plant].group,
-        ),
-        c = new T.Color(colors[k]);
+      const c = lightColor(bin.ppfd);
       for (const corner of [0, 1, 2, 0, 2, 3]) {
         positions.push(...corners[corner]);
         col.push(...c.toArray());
@@ -581,5 +586,9 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     );
     draw();
   }
-  return { update, light, fit, setMode, selectLeaf };
+  function setReferenceVisible(visible) {
+    referenceGroup.visible = visible;
+    draw();
+  }
+  return { update, light, fit, setMode, selectLeaf, setReferenceVisible };
 }
