@@ -54,7 +54,7 @@ test("fits enforce dimensions, clearance and mount type on every model switch", 
     screen: true,
   });
   assert.equal(bulb.dim, 100);
-  assert.equal(bulb.screen, false);
+  assert.equal(bulb.screen, true);
 });
 test("every CAD pose has emitters with valid dimensions and orthogonal unit frames", () => {
   for (const model of Object.keys(luminaires))
@@ -74,6 +74,81 @@ test("every CAD pose has emitters with valid dimensions and orthogonal unit fram
         );
       }
     }
+});
+test("Soltech screens fit both bulb sizes and panel heads without enclosing the body", () => {
+  for (const model of ["luna", "stello", "archetto", "pinocchio"])
+    for (const [pose, data] of cad(model).entries())
+      for (const [mount, source] of [
+        ["e27", "eraE27_18"],
+        ["e27", "eraE27_25"],
+        ["pendantPanel", "mf36"],
+      ])
+        for (const opening of [0, 120]) {
+          const state = normalizeFitting({
+            model,
+            pose,
+            mount,
+            source,
+            screen: true,
+            opening,
+            sector: 360,
+          });
+          const on = buildLuminaireScene(state, data);
+          const off = buildLuminaireScene({ ...state, screen: false }, data);
+          assert.deepEqual(on.sources, off.sources);
+          assert.equal(off.surfaces.length, 0);
+          assert.equal(off.screenSupports.length, 0);
+          assert.equal(on.screenSupports.length, 3);
+          const emitter = on.sources[0];
+          const radius =
+            (mount === "e27"
+              ? emitter.w / 2
+              : Math.hypot(...on.mount.body.slice(0, 2)) / 2000) + 0.01;
+          for (const face of on.surfaces)
+            for (const p of [face.a, face.b, face.c, face.d]) {
+              assert.ok(p.every(Number.isFinite));
+              assert.ok(
+                p[2] <= emitter.p[2] + 1e-10,
+                "screen stays forward of the light exit",
+              );
+              assert.ok(
+                Math.hypot(p[0] - emitter.p[0], p[1] - emitter.p[1]) >=
+                  radius - 1e-10,
+              );
+            }
+        }
+});
+test("Soltech screen changes photon paths while preserving PPF and the complete balance", () => {
+  const data = cad("luna")[0];
+  const state = normalizeFitting({
+    model: "luna",
+    mount: "e27",
+    source: "eraE27_25",
+    screen: true,
+    opening: 0,
+    sector: 360,
+    plantSize: 50,
+  });
+  const bare = calculateLuminaire(
+    state,
+    buildLuminaireScene({ ...state, screen: false }, data),
+    16384,
+  );
+  for (const material of ["absorb", "mirror", "diffuse"]) {
+    const s = { ...state, material },
+      scene = buildLuminaireScene(s, data);
+    assert.equal(scene.collision, false);
+    const result = calculateLuminaire(s, scene, 16384);
+    assert.equal(result.metrics[1].flux, bare.metrics[1].flux);
+    const b = result.metrics[1].budget;
+    assert.ok(
+      Math.abs(b.target + b.room + b.screen + b.housing + b.residual - 1) <
+        1e-9,
+    );
+    assert.ok(b.screen > 0);
+    assert.ok(b.returned <= b.target);
+    if (material === "absorb") assert.ok(b.room < bare.metrics[1].budget.room);
+  }
 });
 test("flexible canopy preserves arc length, published edge gaps and fixed emitter positions", () => {
   const data = cad("B3flex")[0];

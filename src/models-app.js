@@ -140,6 +140,14 @@ function renderControls(poses) {
   hide("flap-field", m.optic !== "flap");
   hide("screen-field", m.optic !== "cone");
   hide("cone-controls", !state.screen);
+  q("screen-label").textContent =
+    m.family === "Soltech"
+      ? "Выносной экран подвеса · проект"
+      : "Добавить экран головки · проект";
+  q("screen-note").textContent =
+    m.family === "Soltech"
+      ? `Экран начинается у светового выхода; стенка 60 мм, зазор 10 мм ${source.type === "bulb" ? "от края колбы" : "от габарита корпуса"}. Верх открыт. Крепление показано условно; нагрев и нагрузка не проверены.`
+      : "Стенка 60 мм, радиальный зазор 10 мм вокруг корпуса. Геометрический вариант, механизм регулировки не разработан.";
   hide(
     "material-controls",
     m.optic === "none" || (m.optic === "cone" && !state.screen),

@@ -100,7 +100,8 @@ export function buildLuminaireScene(state, pose) {
   crown.center = add(crown.center, [plantX, plantY, potHeight]);
   crown.soil = [plantX, plantY, potHeight];
   crown.potHeight = potHeight;
-  const surfaces = [];
+  const surfaces = [],
+    screenSupports = [];
   if (model.optic === "flex") {
     const f = flexibleSection(state.canopy);
     for (const side of [-1, 1])
@@ -150,7 +151,11 @@ export function buildLuminaireScene(state, pose) {
       depth = length * Math.cos(half),
       expand = length * Math.sin(half);
     for (const s of sources) {
-      const r = Math.hypot(mount.body[0], mount.body[1]) / 2000 + 0.01;
+      // The shade starts at the emitting plane and extends forward. The bulb
+      // and its radiator remain behind it, with no rear cap around the socket.
+      const r =
+        (s.disc ? s.w / 2 : Math.hypot(mount.body[0], mount.body[1]) / 2000) +
+        0.01;
       const point = (a, r, z) =>
         add(
           s.p,
@@ -172,6 +177,21 @@ export function buildLuminaireScene(state, pose) {
             point(a, r + expand, depth),
           ),
         );
+      }
+      if (model.family === "Soltech") {
+        // Open supports are an illustrative mounting proposal, not optical
+        // surfaces. They attach above the body and stay outside its envelope.
+        const back = dot(sub(s.anchor, s.p), s.n) - 0.012;
+        const angles =
+          state.sector === 360
+            ? [-120, 0, 120]
+            : [-state.sector / 2, 0, state.sector / 2];
+        for (const angle of angles)
+          screenSupports.push([
+            point(rad(angle), 0.008, back),
+            point(rad(angle), r, back),
+            point(rad(angle), r, 0),
+          ]);
       }
     }
   }
@@ -213,6 +233,7 @@ export function buildLuminaireScene(state, pose) {
     sources,
     crown,
     surfaces,
+    screenSupports,
     boards,
     zShift,
     collision,

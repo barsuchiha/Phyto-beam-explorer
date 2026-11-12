@@ -356,6 +356,8 @@ export function createLuminaireView(host) {
       sourceGroup.add(group);
     });
     const positions = [];
+    for (const points of geometry.screenSupports)
+      opticGroup.add(line(points, 0x9ea695));
     for (const q of geometry.surfaces)
       positions.push(...q.a, ...q.b, ...q.c, ...q.a, ...q.c, ...q.d);
     if (positions.length) {
