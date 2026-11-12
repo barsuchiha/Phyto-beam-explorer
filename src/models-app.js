@@ -62,6 +62,8 @@ for (const [id, p] of Object.entries(plants))
   q("plant").append(option(id, p.name));
 let view,
   latestResult = null,
+  latestGeometry = null,
+  latestReference = null,
   selectedLeaf = -1;
 try {
   view = createLuminaireView(q("view"), (id) => {
@@ -306,8 +308,10 @@ function renderSurfaceMetrics(result) {
     }),
   );
 }
-function renderResult(result, geometry, reference) {
+function renderResult(result, geometry, reference, updateView = true) {
   latestResult = result;
+  latestGeometry = geometry;
+  latestReference = reference;
   const leafMode = result.receiver === "leaves";
   hide("leaf-panel", !leafMode);
   if (leafMode) {
@@ -421,7 +425,7 @@ function renderResult(result, geometry, reference) {
         ". Это части категории «В комнату», не дополнительные потоки. Ноль попаданий не доказывает отсутствие слабого света. Повторные отражения от комнаты не учтены; яркость дымки и пятен условная.";
   }
   hide("status", true);
-  view?.light(state, result);
+  if (updateView) view?.light(state, result);
 }
 let serial = 0,
   timer,
@@ -530,6 +534,15 @@ for (const [name, control] of Object.entries(controls))
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
     state = changeFitting(state, name, value);
+    if (name === "hours") {
+      // Duration changes DLI only. Keep the sun and slider visible while dragging,
+      // and reuse the current PPFD rather than restarting the ray calculation.
+      q("hours-value").textContent = fmt(state.hours) + " ч";
+      save();
+      if (latestResult)
+        renderResult(latestResult, latestGeometry, latestReference, false);
+      return;
+    }
     if (name === "plant" || name === "model") selectedLeaf = -1;
     if (name === "model") {
       const url = new URL(location.href);

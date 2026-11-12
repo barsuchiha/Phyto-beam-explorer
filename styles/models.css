@@ -441,10 +441,41 @@ a:focus-visible {
   margin-top: 12px;
 }
 
-.daily-report {
+.daily-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-areas: "summary hours";
+  align-items: start;
+  gap: 20px;
   border-top: 1px solid var(--border);
   padding: 22px 0 18px;
   margin-top: 16px;
+}
+.daily-report {
+  grid-area: summary;
+  min-width: 0;
+}
+.daily-hours {
+  grid-area: hours;
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+.daily-hours > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.daily-hours output {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 680px), (min-width: 1041px) and (max-width: 1160px) {
+  .daily-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "hours" "summary";
+  }
 }
 .daily-overview {
   display: grid;
