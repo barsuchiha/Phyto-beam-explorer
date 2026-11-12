@@ -18,6 +18,8 @@ import { calculateLuminaire, lightOutput } from "./models/luminaire-light.js";
 import { calculateReferenceLight } from "./models/reference-light.js";
 import { createLuminaireView } from "./ui/luminaire-view.js";
 import { renderDailyLight } from "./ui/daily-light.js";
+import { dailyFaceLight } from "./models/daily-light.js";
+import { calculateWindowLight, windowSettings } from "./models/window-light.js";
 import { plantModel } from "./models/plants.js";
 import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
 import { lightWorkerFile } from "./data/worker-asset.js";
@@ -121,7 +123,28 @@ function renderMapLegend() {
     }),
   );
   q("continuous-note").textContent =
-    "PPFD · мкмоль/(м²·с). Цвет показывает, куда попадает свет сейчас. Суточная досветка — в значке солнца под сценой. Шкала общая, логарифмическая; 300+ — верхний цвет.";
+    "PPFD от лампы · мкмоль/(м²·с). Свет окна + лампы за день — в значке солнца под сценой. Шкала общая, логарифмическая; 300+ — верхний цвет.";
+}
+function renderWindowControls() {
+  for (const name of [
+    "windowWeather",
+    "windowLevel",
+    "daylightHours",
+    "sunHours",
+  ])
+    q(name).value = state[name];
+  for (const [name, unit] of [
+    ["windowLevel", "%"],
+    ["daylightHours", " ч"],
+    ["sunHours", " ч"],
+  ])
+    q(name + "-value").textContent = fmt(state[name]) + unit;
+  hide("window-settings", state.windowWeather === "off");
+  hide("sun-hours-field", state.windowWeather !== "sunny");
+  q("sunHours").max = Math.min(8, state.daylightHours);
+  const s = windowSettings(state);
+  q("window-assumptions").textContent =
+    `Окно 140 × 160 см на задней стене, подоконник 70 см. При 100% яркости: пасмурно — средний рассеянный PPFD 80; солнечно — 200 плюс прямой поток 600 мкмоль/(м²·с). Рассеянный свет задан на вертикальном датчике в 50 см от центра окна, прямой — на перпендикулярной лучу поверхности, оба уже после стекла. Сейчас: рассеянный ${fmt(s.diffuse)} × ${s.hours} ч; прямой ${fmt(s.beam)} × ${s.sunHours} ч. Диапазон яркости 0,6–1,4 от сценария — допущение, не доверительный интервал. Солнце представлено тремя направлениями: высоты 25°/35°/25°, азимуты −15°/0°/15° относительно окна, равные доли времени. Учтены наклоны и взаимные тени листьев. Экраны и корпус затеняют окно как непрозрачные; отражения от комнаты, экрана и листьев, пропускание через листья, оконная рама и движение солнца по дате не рассчитаны. Положение окна фиксировано; текущая сцена не является обмером квартиры.`;
 }
 function renderControls(poses, geometry) {
   const m = luminaires[state.model],
@@ -149,6 +172,7 @@ function renderControls(poses, geometry) {
     else el.value = state[name];
   }
   renderMapLegend();
+  renderWindowControls();
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
@@ -281,10 +305,10 @@ function renderLeafDetail() {
     return;
   }
   view?.selectLeaf(leaf.id);
-  const values = leaf.sides.map(
-    (side, i) =>
-      `Сторона ${i === 0 ? "A" : "B"}: PPFD ${fmt(side.range[0])}–${fmt(side.range[1])}, DLI ${dose(plantModel.dli(side.range[0], state.hours))}–${dose(plantModel.dli(side.range[1], state.hours))}`,
-  );
+  const values = leaf.sides.map((side, i) => {
+    const day = dailyFaceLight(latestResult, state, leaf, i);
+    return `Сторона ${i === 0 ? "A" : "B"}: PPFD лампы ${fmt(side.range[0])}–${fmt(side.range[1])}; DLI окна ${dose(day.window)} + лампы ${dose(day.lamp)} = ${dose(day.value)} (сценарии ${dose(day.range[0])}–${dose(day.range[1])})`;
+  });
   q("leaf-detail").textContent =
     `Лист ${leaf.id + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A — лицевая сторона модели, B — обратная; положение настоящего листа не измерено.` +
     (leaf.sides.some((s) => s.hits === 0)
@@ -362,7 +386,7 @@ function renderResult(result, geometry, reference, updateView = true) {
       ? " Мало попаданий в датчик: значение нестабильно, ноль не доказывает отсутствия света."
       : "");
   q("daily-note").textContent =
-    `Условный ориентир выбранной световой группы: DLI ${target.L}–${target.U} моль/(м²·сутки) за весь день. Здесь показана только добавка от лампы. Свет окна не задан, поэтому полная суточная доза и достаточность освещения не определены. Диапазон отражает сценарии источника, не все ошибки модели.`;
+    `Условный ориентир выбранной световой группы: DLI ${target.L}–${target.U} моль/(м²·сутки) за весь день. Солнце и оценка листа учитывают окно + лампу. Карта PPFD, датчик сверху и баланс ниже относятся к лампе. Диапазон суммарного DLI учитывает сценарии лампы и яркости окна, но не все ошибки модели. Дозы складываются независимо от совпадения часов работы; режим дня и ночи отдельно не оценивается.`;
   q("surface-summary").textContent = leafMode
     ? `DLI от лампы за ${state.hours} ч: ${rangeText(dliRange(range), dose)} в среднем по обеим сторонам листьев; ${rangeText(dliRange(best.range), dose)} на самой освещённой стороне листа. Единица: моль/(м²·сутки).`
     : `Среднее по всей оболочке включает её теневую сторону.`;
@@ -513,7 +537,10 @@ async function render() {
           worker.postMessage({ state, pose });
           return;
         }
-        const result = calculateLuminaire(state, geometry);
+        const result = {
+          ...calculateLuminaire(state, geometry),
+          windowLight: calculateWindowLight(geometry),
+        };
         const reference = calculateReferenceLight(state, geometry);
         if (run === serial) renderResult(result, geometry, reference);
       } catch (error) {
@@ -534,10 +561,30 @@ for (const [name, control] of Object.entries(controls))
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
     state = changeFitting(state, name, value);
-    if (name === "hours") {
+    if (
+      [
+        "hours",
+        "windowWeather",
+        "windowLevel",
+        "daylightHours",
+        "sunHours",
+      ].includes(name)
+    ) {
       // Duration changes DLI only. Keep the sun and slider visible while dragging,
       // and reuse the current PPFD rather than restarting the ray calculation.
       q("hours-value").textContent = fmt(state.hours) + " ч";
+      renderWindowControls();
+      view?.daylight(state);
+      if (
+        name === "windowWeather" &&
+        state.windowWeather !== "off" &&
+        state.receiver !== "leaves"
+      ) {
+        state = changeFitting(state, "receiver", "leaves");
+        save();
+        render();
+        return;
+      }
       save();
       if (latestResult)
         renderResult(latestResult, latestGeometry, latestReference, false);

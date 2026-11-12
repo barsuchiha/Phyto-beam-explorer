@@ -48,6 +48,10 @@ export const modelDefaults = {
   chairOffset: 0,
   dim: 70,
   hours: 12,
+  windowWeather: "off",
+  windowLevel: 100,
+  daylightHours: 10,
+  sunHours: 3,
   receiver: "crown",
   colorMetric: "ppfd",
   canopy: 105,
@@ -95,6 +99,12 @@ export function normalizeFitting(input = {}) {
   s.chairOffset = clamp(s.chairOffset, -60, 80, 0);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.hours = clamp(s.hours, 6, 16, 12);
+  s.windowWeather = ["off", "cloudy", "sunny"].includes(s.windowWeather)
+    ? s.windowWeather
+    : "off";
+  s.windowLevel = clamp(s.windowLevel, 0, 200, 100);
+  s.daylightHours = clamp(s.daylightHours, 4, 16, 10);
+  s.sunHours = clamp(s.sunHours, 0, Math.min(8, s.daylightHours), 3);
   s.receiver = s.receiver === "leaves" ? "leaves" : "crown";
   // Migrate saved DLI maps to the single PPFD map.
   s.colorMetric = "ppfd";

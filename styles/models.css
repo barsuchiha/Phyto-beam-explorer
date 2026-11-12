@@ -443,7 +443,7 @@ a:focus-visible {
 
 .daily-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-columns: minmax(0, 1fr) 200px;
   grid-template-areas: "summary hours";
   align-items: start;
   gap: 20px;
@@ -455,8 +455,30 @@ a:focus-visible {
   grid-area: summary;
   min-width: 0;
 }
-.daily-hours {
+.daily-controls {
   grid-area: hours;
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.window-settings {
+  font-size: 13px;
+  min-width: 0;
+}
+.window-settings summary {
+  cursor: pointer;
+  color: var(--muted-foreground);
+}
+.window-settings .daily-hours {
+  margin-top: 16px;
+}
+.daily-controls .form-select {
+  padding: 12px 14px;
+  font-size: 13px;
+  width: 100%;
+  min-width: 0;
+}
+.daily-hours {
   display: grid;
   gap: 8px;
   font-size: 13px;

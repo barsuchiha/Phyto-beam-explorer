@@ -8,6 +8,7 @@ import { populateOlive } from "./olive-view.js";
 import { ppfdMapColor } from "../models/light-readout.js";
 import { populateRoom, populateRoomLight } from "./room-view.js";
 import { populateRayLight } from "./ray-view.js";
+import { populateWindow } from "./window-view.js";
 
 const vector = (p) => new T.Vector3(...p);
 function material(color, options = {}) {
@@ -122,7 +123,8 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     opticGroup = new T.Group(),
     rayGroup = new T.Group(),
     heatGroup = new T.Group();
-  const roomGroup = new T.Group(),
+  const windowGroup = new T.Group(),
+    roomGroup = new T.Group(),
     roomLightGroup = new T.Group(),
     pathGroup = new T.Group(),
     warmGroup = new T.Group();
@@ -139,6 +141,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     selectedGroup,
     referenceGroup,
     roomGroup,
+    windowGroup,
     roomLightGroup,
     pathGroup,
     warmGroup,
@@ -234,6 +237,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     ])
       dispose(group);
     if (geometry.room) populateRoom(roomGroup, geometry.room);
+    daylight(state);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
     if (geometry.olive) populateOlive(modelGroup, pose, geometry, state);
     for (const m of pose.meshes) {
@@ -655,6 +659,11 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     showPaths = visible;
     setMode(viewMode);
   }
+  function daylight(state) {
+    dispose(windowGroup);
+    populateWindow(windowGroup, state);
+    draw();
+  }
   return {
     update,
     light,
@@ -663,5 +672,6 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     selectLeaf,
     setReferenceVisible,
     setPaths,
+    daylight,
   };
 }
