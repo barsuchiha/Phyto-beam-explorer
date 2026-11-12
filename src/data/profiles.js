@@ -1,4 +1,20 @@
+import { eraModules } from "./era.js";
+
 export const profiles = {
+  ...Object.fromEntries(
+    Object.entries(eraModules).map(([id, m]) => [
+      id,
+      {
+        w: m.w,
+        d: m.d,
+        kind: "era",
+        fixed: true,
+        cap: m.ies
+          ? "ЭРА GREEN LINE 18 Вт: опубликованные PPF и IES, с приближением ближнего поля. Штатного диммирования нет."
+          : "ЭРА E27: PPF изготовителя, предполагаемый пучок и геометрия. Диапазон показывает чувствительность к форме пучка. Штатного диммирования нет.",
+      },
+    ]),
+  ),
   square50: {
     w: 0.05,
     d: 0.05,

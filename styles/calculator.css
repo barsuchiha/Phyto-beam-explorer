@@ -99,3 +99,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+#pbe-era-details th:first-child {
+  width: 36%;
+}

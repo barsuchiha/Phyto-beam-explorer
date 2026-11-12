@@ -69,7 +69,14 @@ function fieldAt(x, y, emitters, angle, t, flux) {
       r2 = dx * dx + dy * dy + a.z * a.z,
       r = Math.sqrt(r2);
     const c = (st * dx + ct * a.z) / r;
-    if (c > 0 && a.z > 0) {
+    if (typeof angle === "object" && a.z > 0) {
+      const theta = Math.acos(Math.max(-1, Math.min(1, c)));
+      const phi = Math.atan2(dy, ct * dx - st * a.z);
+      // IES includes the upper hemisphere. Do not renormalize it into the
+      // forward beam or discard rearward directions when the source is tilted.
+      const intensity = flux * angle.normalizedIntensity(theta, phi);
+      value += (intensity * a.weight * a.z) / (r2 * r);
+    } else if (c > 0 && a.z > 0) {
       const intensity =
         angle === "lm301b"
           ? flux * curveNorm * relative(Math.acos(Math.min(1, c)))

@@ -62,6 +62,8 @@ export function createResults(q) {
     const {
       catalog,
       estimated,
+      era,
+      ranged,
       mini36,
       op,
       estimate,
@@ -91,14 +93,13 @@ export function createResults(q) {
       return;
     }
     q("pbe-mean").textContent =
-      "≈ " +
-      (estimated ? formatRange(metrics.range.mean) : number(metrics.mean));
+      "≈ " + (ranged ? formatRange(metrics.range.mean) : number(metrics.mean));
     q("pbe-center").textContent =
       "≈ " +
-      (estimated ? formatRange(metrics.range.center) : number(metrics.center));
+      (ranged ? formatRange(metrics.range.center) : number(metrics.center));
     q("pbe-dli").textContent =
-      "≈ " + (estimated ? formatRange(dailyRange, 1) : decimal(daily));
-    const status = estimated
+      "≈ " + (ranged ? formatRange(dailyRange, 1) : decimal(daily));
+    const status = ranged
       ? scenarioStatus(dailyRange, selected.group)
       : {
           label: plantModel.categories[meanClass].label + " по среднему DLI",
@@ -122,15 +123,15 @@ export function createResults(q) {
         decimal(assessment.percentages[i]) +
         "%";
     for (const row of comparisonRows) {
-      const c = estimated
+      const c = ranged
         ? scenarioStatus(dailyRange, row.p.group)
         : plantModel.categories[plantModel.classify(daily, row.p.group)];
       row.dot.style.background = c.color;
       row.label.textContent = c.label;
     }
     q("pbe-flow").textContent =
-      `Общий поток сейчас: ${estimated ? "≈ " + formatRange(estimate.fluxes) : Number(flux.toFixed(1)).toLocaleString("ru-RU")} мкмоль/с · ${g.length === 1 ? "одна плата" : `${g.length} плат(ы)`}` +
-      (catalog || estimated
+      `Общий поток сейчас: ${estimated ? "≈ " + formatRange(estimate.fluxes) : Number(flux.toFixed(1)).toLocaleString("ru-RU")} мкмоль/с · ${era ? `${g.length} светильник(а)` : g.length === 1 ? "одна плата" : `${g.length} плат(ы)`}` +
+      (catalog || estimated || era
         ? " · без купола"
         : " · при смене угла поток постоянный");
   };

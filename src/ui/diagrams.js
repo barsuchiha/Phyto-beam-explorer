@@ -23,7 +23,7 @@ export function renderDiagrams(q, state, scene) {
     plan = q("pbe-plan");
   const {
     catalog,
-    estimated,
+    ranged: estimated,
     op,
     base,
     dim,

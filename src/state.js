@@ -55,8 +55,8 @@ export function updateState(state, key, value) {
   const next = { ...state };
   if (
     key === "source" &&
-    profiles[value]?.kind === "estimate" &&
-    profiles[state.source].kind !== "estimate"
+    ["estimate", "era"].includes(profiles[value]?.kind) &&
+    profiles[state.source].kind !== profiles[value]?.kind
   )
     next.count = 1;
   next[key] = ["source", "plant", "driver"].includes(key)

@@ -5,6 +5,7 @@ import { plantModel } from "./models/plants.js";
 import { estimateModel } from "./models/minifermer.js";
 import { mini36Model } from "./models/mini36.js";
 import { layout } from "./models/layout.js";
+import { eraModel } from "./models/era.js";
 
 // A calculator instance keeps only the last optical result. Plant and duration
 // changes reuse that result, while updating the DLI assessment immediately.
@@ -16,23 +17,31 @@ export function createCalculator() {
     const catalog = p.kind === "catalog",
       estimated = p.kind === "estimate";
     const mini36 = state.source === "mf36";
+    const era = p.kind === "era",
+      eraData = era ? eraModel.modules[state.source] : null;
+    const ranged = estimated || (era && !eraData.ies);
     const engine = mini36 ? mini36Model : estimateModel;
     const dim = p.fixed ? 100 : state.dim;
     const op = catalog ? hardware.operate(state) : null;
     const estimate = estimated
       ? engine.output(state.source, state.count, dim)
       : null;
-    const angle = catalog
-      ? photometry.nativeAngle
-      : estimated
-        ? 120
-        : state.angle;
+    const angle = era
+      ? eraModel.angle(state.source)
+      : catalog
+        ? photometry.nativeAngle
+        : estimated
+          ? 120
+          : state.angle;
     const base = catalog ? hardware.point(state.source, state.current) : null;
     const scene = {
       p,
       catalog,
       estimated,
       mini36,
+      era,
+      eraData,
+      ranged,
       dim,
       op,
       estimate,
@@ -45,11 +54,13 @@ export function createCalculator() {
       b = (angle * Math.PI) / 360,
       t = (state.tilt * Math.PI) / 180;
     const g = layout(state);
-    const flux = estimated
-      ? estimate.flux
-      : catalog
-        ? op.flux
-        : (state.ppf * dim) / 100;
+    const flux = era
+      ? eraData.ppf * state.count
+      : estimated
+        ? estimate.flux
+        : catalog
+          ? op.flux
+          : (state.ppf * dim) / 100;
     if (catalog)
       g.forEach(
         (a, i) => (a.weight = flux > 0 ? op.fluxes[i] / flux : 1 / g.length),
@@ -64,9 +75,11 @@ export function createCalculator() {
       g,
     ]);
     if (key !== metricKey) {
-      metrics = estimated
-        ? engine.summarize(g, h, t, estimate.fluxes)
-        : photometry.summarize(g, h, t, curve, flux);
+      metrics = era
+        ? eraModel.summarize(state.source, g, h, t, flux)
+        : estimated
+          ? engine.summarize(g, h, t, estimate.fluxes)
+          : photometry.summarize(g, h, t, curve, flux);
       metricKey = key;
     }
     const selected = plantModel.plants[state.plant],
@@ -78,7 +91,7 @@ export function createCalculator() {
       state.hours,
       selected.group,
     );
-    const dailyRange = estimated
+    const dailyRange = ranged
       ? metrics.range.mean.map((v) => plantModel.dli(v, state.hours))
       : null;
     return {

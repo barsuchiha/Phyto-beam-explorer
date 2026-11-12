@@ -2,6 +2,7 @@ import { hardware } from "../models/hardware.js";
 import { estimateModel } from "../models/minifermer.js";
 import { mini36Model } from "../models/mini36.js";
 import { formatRange } from "./format.js";
+import { renderEraDetails } from "./era-details.js";
 
 function hardwareDetails(q, state, op) {
   const m = hardware.modules[state.source],
@@ -180,7 +181,12 @@ function mini36Details(q, state, output) {
     `Проверка гипотезы: при неизменных пучке и долях цветов для совпадения на 20 см потребовалось бы ≈ ${Math.round(comparison[0].equivalentPPF)} мкмоль/с, а на 50 см — ≈ ${Math.round(comparison[3].equivalentPPF)}. Одной заменой PPF все точки не совместить. Эти значения не использованы в расчёте и не являются измерением полного потока.`;
 }
 
-export function renderDetails(q, state, { catalog, estimated, op, estimate }) {
+export function renderDetails(q, state, scene) {
+  const { catalog, estimated, era, op, estimate } = scene;
+  if (era) {
+    renderEraDetails(q, state, scene);
+    return;
+  }
   if (catalog) hardwareDetails(q, state, op);
   else if (estimated) estimateDetails(q, state, estimate);
   else q("pbe-operating").textContent = "";

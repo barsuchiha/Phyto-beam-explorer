@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Калькулятор PPFD и DLI для комнатных растений: модули Samsung и MiniFermer, диапазоны с допущениями и сравнение с замерами."
+      content="Калькулятор PPFD и DLI для комнатных растений: модули Samsung, MiniFermer и ЭРА, диапазоны с допущениями и сравнение с замерами."
     />
     <title>Свет для растений — модули и диапазон PPFD</title>
     <link rel="stylesheet" href="./styles/base.css" />
@@ -19,9 +19,7 @@
       <div id="phyto-beam-explorer">
         <div>
           <h2>Источник, пучок и две полезные зоны</h2>
-          <div class="text-small">
-            Samsung и MiniFermer · диммирование · 10 растений
-          </div>
+          <div class="text-small">Samsung · MiniFermer · ЭРА · 10 растений</div>
         </div>
         <div class="viz-controls">
           <label class="form-label beam-field" for="pbe-plant"
@@ -83,6 +81,17 @@
                   MiniFermer 3.6 · гипотеза Seoul + Osram 660 нм
                 </option>
               </optgroup>
+              <optgroup label="ЭРА · PPF изделия и данные о пучке">
+                <option value="eraGreen18">
+                  ЭРА GREEN LINE 18 Вт · PPF + IES
+                </option>
+                <option value="eraE27_18">
+                  ЭРА E27 18 Вт · PPF + допущения
+                </option>
+                <option value="eraE27_25">
+                  ЭРА E27 25 Вт · PPF + допущения
+                </option>
+              </optgroup>
               <optgroup label="Условные сценарии · PPF вручную">
                 <option value="mini">Quantum Board Mini · 120 × 120 мм</option>
                 <option value="qb30">Quantum Board 30 Вт · 390 × 120 мм</option>
@@ -109,7 +118,7 @@
           </label>
           <label class="form-label beam-field" for="pbe-ppf"
             ><span class="beam-label"
-              ><span>PPF всех модулей при 100%</span
+              ><span>PPF всех источников при 100%</span
               ><output id="pbe-ppf-value" class="tabular-nums"
                 >50 мкмоль/с</output
               ></span
@@ -127,7 +136,7 @@
         </div>
         <div id="pbe-hardware" class="viz-controls">
           <label class="form-label beam-field" for="pbe-count"
-            >Количество плат
+            ><span id="pbe-count-label">Количество плат</span>
             <select id="pbe-count" class="form-select">
               <option value="1">1 плата</option>
               <option value="2" selected>2 платы</option>
@@ -394,6 +403,24 @@
                 >Плата · MiniFermer</a
               ><span id="pbe-estimate-sources"></span>
             </div>
+          </div>
+        </details>
+        <details id="pbe-era-details" hidden>
+          <summary class="cursor-interaction">
+            ЭРА: опубликованные данные и допущения
+          </summary>
+          <div class="beam-field">
+            <div class="text-small" id="pbe-era-description"></div>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Параметр</th>
+                  <th scope="col">Что использовано</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-era-table"></tbody>
+            </table>
+            <div class="text-small" id="pbe-era-links"></div>
           </div>
         </details>
         <div class="beam-columns">

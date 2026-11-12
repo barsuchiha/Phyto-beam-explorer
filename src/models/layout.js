@@ -1,9 +1,11 @@
 import { profiles } from "../data/profiles.js";
 import { estimateModel } from "./minifermer.js";
 import { mini36Model } from "./mini36.js";
+import { eraModel } from "./era.js";
 
 export function layout(state) {
   const p = profiles[state.source];
+  if (p.kind === "era") return eraModel.layout(state.source, state.count);
   if (p.kind === "estimate")
     return (state.source === "mf36" ? mini36Model : estimateModel).layout(
       state.count,
