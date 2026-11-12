@@ -1,5 +1,6 @@
 import { hardware } from "../models/hardware.js";
 import { formatRange } from "./format.js";
+import { plantShapes } from "../data/plant-shapes.js";
 
 export function renderControls(q, controls, state, scene) {
   const {
@@ -29,7 +30,22 @@ export function renderControls(q, controls, state, scene) {
     );
     controls.current.dataset.driver = state.driver;
   }
+  const shape = plantShapes[state.plant];
+  controls.plantSize.min = shape.min;
+  controls.plantSize.max = shape.max;
+  controls.screenDepth.max = Math.min(40, state.height - 5);
   for (const [key, c] of Object.entries(controls)) c.value = String(state[key]);
+  q("pbe-plantSize-value").textContent = state.plantSize + " см";
+  q("pbe-orbit-value").textContent =
+    state.orbit +
+    "°" +
+    (state.orbit === 0 ? " · сверху" : state.orbit === 90 ? " · сбоку" : "");
+  q("pbe-screenDepth-value").textContent = state.screenDepth + " см";
+  q("pbe-screenTurn-value").textContent = state.screenTurn + "°";
+  q("pbe-screen-controls").hidden = !state.screenSector;
+  controls.screenTurn.disabled = state.screenSector === 360;
+  q("pbe-size-note").textContent =
+    `Для этого вида: ${shape.min}–${shape.max} см от грунта. Это диапазон комнатных экземпляров для моделирования; пропорции кроны условные.`;
   controls.dim.disabled = !!p.fixed;
   controls.angle.disabled = catalog || estimated || era;
   controls.ppf.disabled = catalog || estimated || era;
@@ -95,8 +111,6 @@ export function renderControls(q, controls, state, scene) {
   if (estimated) controls.ppf.value = String(estimate.full[1]);
   if (era) controls.ppf.value = String(flux);
   q("pbe-hours-value").textContent = state.hours + " ч";
-  q("pbe-tilt-value").textContent =
-    (state.tilt > 0 ? "+" : "") + state.tilt + "°";
   q("pbe-dim-label").textContent = estimated
     ? "Яркость · условный PWM"
     : catalog
@@ -129,5 +143,5 @@ export function renderControls(q, controls, state, scene) {
           : catalog
             ? "PPF (400–700 нм) — по току выбранной платы; ниже опубликованного диапазона экстраполяции нет. Диаграмма диода нормирована на PPF; её перенос на плату — допущение. "
             : "PPF задан вручную и сохраняется при смене условного источника. Угол — по уровню 50% силы излучения; за контуром тоже есть свет. ") +
-    "Купол, отражения и затенение листьями не учтены. Карта — расчёт на плоскости, не измерения листьев.";
+    "Карта — на обращённой к лампе поверхности эллипсоидной кроны. Экран — поглощающая стенка вокруг источников, без отражения и перенаправления потока. Свет окна и внутренние листья не рассчитаны. Это не измерения листьев или проверка нагрева экрана.";
 }

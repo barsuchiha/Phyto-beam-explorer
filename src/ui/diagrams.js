@@ -1,272 +1,446 @@
 import { plantModel } from "../models/plants.js";
-import { decimal } from "./format.js";
+import {
+  add,
+  sub,
+  mul,
+  dot,
+  toWorld,
+  surfacePoint,
+  screenHit,
+  rayCrown,
+} from "../models/crown.js";
 
 const ns = "http://www.w3.org/2000/svg";
-function el(svg, tag, attrs = {}, label) {
+function el(parent, tag, attrs = {}, label) {
   const n = document.createElementNS(ns, tag);
   for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
   if (label !== undefined) n.textContent = label;
-  svg.appendChild(n);
+  parent.append(n);
   return n;
 }
-function setup(svg, w) {
+const points = (arr) => arr.map((p) => p.join(",")).join(" ");
+function setup(svg) {
   svg.replaceChildren();
-  svg.setAttribute("viewBox", `0 0 ${w} 300`);
-  const defs = el(svg, "defs");
-  const cp = el(defs, "clipPath", { id: svg.id + "-clip" });
-  el(cp, "rect", { x: 8, y: 12, width: w - 16, height: 265 });
-  return el(svg, "g", { "clip-path": `url(#${svg.id}-clip)` });
+  svg.setAttribute("viewBox", "0 0 520 440");
 }
-
+function plantDrawing(svg, c, P) {
+  const line = (a, b, attrs = {}) =>
+    el(svg, "line", {
+      x1: P(a)[0],
+      y1: P(a)[1],
+      x2: P(b)[0],
+      y2: P(b)[1],
+      stroke: "var(--plant-ink)",
+      "stroke-width": 2,
+      ...attrs,
+    });
+  const stem = [0, 0, c.height * 0.75];
+  if (c.spec.form === "grass") {
+    for (let i = -7; i <= 7; i++) {
+      const x = ((c.rx * i) / 7) * 0.96,
+        z = c.height * (0.32 + 0.22 * (1 - Math.abs(i) / 7));
+      const A = P([0, 0, c.height * 0.07]),
+        B = P([x * 0.2, 0, c.height]),
+        C = P([x * 0.85, 0, c.height * (0.95 - Math.abs(i) * 0.025)]),
+        D = P([x, 0, z]),
+        E = P([x * 0.4 + c.rx * 0.045, 0, c.height * 0.78]);
+      el(svg, "path", {
+        d: `M${A} C${B} ${C} ${D} Q${E} ${A}Z`,
+        fill: "var(--plant-fill)",
+        stroke: "var(--plant-ink)",
+        "stroke-width": 1.1,
+      });
+    }
+  } else {
+    line([0, 0, 0], stem);
+    for (let i = 0; i < 11; i++) {
+      const z = c.center[2] - c.rz * 0.65 + (i / 10) * c.rz * 1.35;
+      const side = i % 2 ? -1 : 1,
+        spread = Math.sqrt(Math.max(0.1, 1 - ((z - c.center[2]) / c.rz) ** 2));
+      const x = side * c.rx * 0.53 * spread;
+      const center = P([x, 0, z]);
+      line([0, 0, Math.max(0.05, z - c.rz * 0.3)], [x, 0, z]);
+      const scale = Math.abs(P([1, 0, 0])[0] - P([0, 0, 0])[0]);
+      const narrow = ["ribbon", "lance"].includes(c.spec.form),
+        round = c.spec.form === "round";
+      const w = c.rx * (narrow ? 0.23 : 0.36) * scale,
+        h = c.rz * (round ? 0.13 : 0.21) * scale;
+      const g = el(svg, "g", {
+        transform: `translate(${center[0]} ${center[1]}) rotate(${side * (narrow ? 35 : 25)})`,
+      });
+      el(g, "path", {
+        d: `M0 ${h} C${-w * 1.5} ${h * 0.25} ${-w} ${-h * 0.9} 0 ${-h} C${w} ${-h * 0.9} ${w * 1.5} ${h * 0.25} 0 ${h}Z`,
+        fill: "var(--plant-fill)",
+        stroke: "var(--plant-ink)",
+        "stroke-width": 1.2,
+      });
+      el(g, "path", {
+        d: `M0 ${h} Q${-w * 0.12} 0 0 ${-h * 0.85}`,
+        fill: "none",
+        stroke: "var(--plant-ink)",
+        "stroke-width": 0.7,
+      });
+      if (c.spec.form === "split")
+        for (const y of [-0.45, 0, 0.45])
+          for (const side of [-1, 1])
+            el(g, "path", {
+              d: `M${side * w * 0.25} ${y * h + h * 0.15} Q${side * w * 0.6} ${y * h} ${side * w * 0.85} ${y * h - h * 0.15}`,
+              stroke: "var(--background)",
+              "stroke-width": 2.2,
+              fill: "none",
+            });
+      if (c.spec.form === "pinnate")
+        for (const y of [-0.4, 0.2])
+          for (const side of [-1, 1])
+            el(g, "ellipse", {
+              cx: side * w * 0.43,
+              cy: y * h,
+              rx: w * 0.42,
+              ry: h * 0.25,
+              fill: "var(--plant-fill)",
+              stroke: "var(--plant-ink)",
+              "stroke-width": 0.6,
+            });
+    }
+  }
+  const pot = Math.min(0.34, Math.max(0.12, c.rx * 0.65));
+  el(svg, "polygon", {
+    points: points([
+      P([-pot / 2, 0, 0]),
+      P([pot / 2, 0, 0]),
+      P([pot * 0.36, 0, -pot * 0.8]),
+      P([-pot * 0.36, 0, -pot * 0.8]),
+    ]),
+    fill: "var(--muted)",
+    stroke: "var(--muted-foreground)",
+    "stroke-width": 1,
+  });
+  line([-pot * 0.53, 0, 0], [pot * 0.53, 0, 0], {
+    stroke: "var(--muted-foreground)",
+    "stroke-width": 2,
+  });
+}
+function sceneDrawing(svg, state, scene) {
+  const { crown: c, rig, groups } = scene.metrics;
+  // One frame for the entire orbit: moving the lamp does not make the camera pan.
+  const r = Math.max(c.rx, c.rz) + state.height / 100 + rig.radius;
+  const xMin = -c.rx - 0.2,
+    xMax = Math.max(c.rx + 0.2, r + 0.12);
+  const zMin = -Math.max(0.16, c.rx * 0.55),
+    zMax = c.center[2] + r + 0.12;
+  const scale = Math.min(465 / (xMax - xMin), 355 / (zMax - zMin));
+  const ox = 28 - xMin * scale,
+    oy = 395 + zMin * scale;
+  const P = ([x, y, z]) => [
+    ox + (x + 0.16 * y) * scale,
+    oy - (z + 0.06 * y) * scale,
+  ];
+  const path = (arr, attrs) =>
+    el(svg, "path", {
+      d: arr.map((p, i) => (i ? "L" : "M") + P(p).join(" ")).join(" "),
+      fill: "none",
+      ...attrs,
+    });
+  for (let z = 0; z < zMax; z += 0.5) {
+    const y = P([0, 0, z])[1];
+    el(svg, "line", {
+      x1: 18,
+      x2: 500,
+      y1: y,
+      y2: y,
+      stroke: "var(--border)",
+      "stroke-dasharray": "2 5",
+    });
+    el(
+      svg,
+      "text",
+      { x: 20, y: y - 5, "font-size": 10, fill: "var(--muted-foreground)" },
+      `${Math.round(z * 100)} см`,
+    );
+  }
+  const arc = [];
+  for (let degree = 0; degree <= 90; degree += 3) {
+    const a = (degree * Math.PI) / 180,
+      n = [Math.sin(a), 0, Math.cos(a)];
+    arc.push(
+      add(
+        c.center,
+        mul(n, Math.hypot(c.rx * n[0], c.rz * n[2]) + state.height / 100),
+      ),
+    );
+  }
+  path(arc, {
+    stroke: "var(--muted-foreground)",
+    "stroke-dasharray": "3 6",
+    "stroke-opacity": 0.5,
+  });
+  for (const [index, label] of [
+    [0, "0°"],
+    [arc.length - 1, "90°"],
+  ]) {
+    if (
+      (index === 0 && state.orbit === 0) ||
+      (index === arc.length - 1 && state.orbit === 90)
+    )
+      continue;
+    const p = P(arc[index]);
+    el(svg, "text", { x: p[0] + 10, y: p[1] - 10, "font-size": 11 }, label);
+  }
+  // A small fan of illustrative rays; the percentages use full-sphere integration.
+  for (let i = -5; i <= 5; i++) {
+    const a = (i * 14 * Math.PI) / 180,
+      local = [Math.sin(a), 0, Math.cos(a)];
+    const d = add(mul(rig.u, local[0]), mul(rig.f, local[2]));
+    const shield = screenHit([0, 0, 0], local, rig),
+      hit = rayCrown(rig.origin, d, c);
+    const distance = Math.min(shield, hit, r * 1.8),
+      blocked = shield < hit;
+    path([rig.origin, add(rig.origin, mul(d, distance))], {
+      stroke: blocked ? "var(--muted-foreground)" : "var(--beam-ink)",
+      "stroke-opacity": scene.flux ? 0.45 : 0,
+      "stroke-width": 1,
+      "stroke-dasharray": Number.isFinite(hit) || blocked ? "none" : "4 5",
+    });
+  }
+  const cp = P(c.center);
+  el(svg, "ellipse", {
+    cx: cp[0],
+    cy: cp[1],
+    rx: c.rx * scale,
+    ry: c.rz * scale,
+    fill: "none",
+    stroke: "var(--plant-ink)",
+    "stroke-dasharray": "3 5",
+    "stroke-opacity": 0.35,
+  });
+  plantDrawing(svg, c, P);
+  // Cylinder-sector wall shared by the whole source assembly.
+  if (rig.sector) {
+    const panels = [];
+    for (
+      let d = rig.turn - rig.sector / 2;
+      d < rig.turn + rig.sector / 2;
+      d += 7.5
+    ) {
+      const end = Math.min(d + 7.5, rig.turn + rig.sector / 2),
+        a = (d * Math.PI) / 180,
+        b = (end * Math.PI) / 180;
+      const raw = [
+        [rig.radius * Math.cos(a), rig.radius * Math.sin(a), 0],
+        [rig.radius * Math.cos(b), rig.radius * Math.sin(b), 0],
+        [rig.radius * Math.cos(b), rig.radius * Math.sin(b), rig.depth],
+        [rig.radius * Math.cos(a), rig.radius * Math.sin(a), rig.depth],
+      ];
+      panels.push({ raw, depth: Math.sin((a + b) / 2) });
+    }
+    panels.sort((a, b) => b.depth - a.depth);
+    for (const panel of panels)
+      el(svg, "polygon", {
+        points: points(panel.raw.map((p) => P(toWorld(rig, p)))),
+        fill: "var(--screen-fill)",
+        "fill-opacity": 0.8,
+        stroke: "var(--muted-foreground)",
+        "stroke-width": 0.5,
+      });
+  }
+  for (const g of groups) {
+    const vertices = [
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ].map(([x, y]) =>
+      P(toWorld(rig, [g.x + (x * g.w) / 2, g.y + (y * g.d) / 2, 0])),
+    );
+    el(svg, "polygon", {
+      points: points(vertices),
+      fill: "var(--foreground)",
+      stroke: "var(--foreground)",
+      "stroke-width": 3,
+    });
+  }
+  const source = P(rig.origin);
+  el(svg, "circle", {
+    cx: source[0],
+    cy: source[1],
+    r: 3,
+    fill: "var(--background)",
+    stroke: "var(--foreground)",
+  });
+  el(
+    svg,
+    "text",
+    { x: source[0] + 10, y: source[1] - 14, "font-size": 12 },
+    `${state.orbit}°`,
+  );
+  el(
+    svg,
+    "text",
+    { x: 20, y: 425, "font-size": 12 },
+    `Высота ${state.plantSize} см · крона ≈ ${Math.round(c.rx * 200)} × ${Math.round(c.ry * 200)} см`,
+  );
+  // Facing the lamp, this inset makes the screen sector and its rotation explicit.
+  if (rig.sector) {
+    const g = el(svg, "g", { transform: "translate(465 44)" });
+    el(g, "circle", {
+      r: 21,
+      fill: "none",
+      stroke: "var(--border)",
+      "stroke-width": 6,
+    });
+    const arc = [];
+    for (
+      let a = rig.turn - rig.sector / 2;
+      a <= rig.turn + rig.sector / 2;
+      a += 5
+    )
+      arc.push([
+        21 * Math.cos((a * Math.PI) / 180),
+        21 * Math.sin((a * Math.PI) / 180),
+      ]);
+    el(g, "polyline", {
+      points: points(arc),
+      fill: "none",
+      stroke: "var(--foreground)",
+      "stroke-width": 6,
+    });
+    el(
+      g,
+      "text",
+      { x: 0, y: 4, "text-anchor": "middle", "font-size": 10 },
+      `${rig.sector}°`,
+    );
+  }
+}
+function mapDrawing(svg, state, scene) {
+  const { crown: c, rig, samples, nz, na, centerPoint } = scene.metrics;
+  const horizontal = c.ry,
+    vertical = Math.hypot(c.rx * rig.u[0], c.rz * rig.u[2]);
+  const scale = Math.min(210 / horizontal, 170 / vertical);
+  const P = (p) => {
+    const q = sub(p, c.center);
+    return [260 + dot(q, rig.v) * scale, 215 + dot(q, rig.u) * scale];
+  };
+  const ordered = samples
+    .map((s, k) => ({ ...s, k }))
+    .sort(
+      (a, b) => dot(sub(a.p, c.center), rig.n) - dot(sub(b.p, c.center), rig.n),
+    );
+  for (const s of ordered) {
+    const mu0 = -1 + (2 * s.i) / nz,
+      mu1 = -1 + (2 * (s.i + 1)) / nz,
+      a0 = (2 * Math.PI * s.j) / na,
+      a1 = (2 * Math.PI * (s.j + 1)) / na;
+    const corners = [
+      [mu0, a0],
+      [mu0, a1],
+      [mu1, a1],
+      [mu1, a0],
+    ].map(([m, a]) => P(surfacePoint(c, m, a).p));
+    const category = plantModel.categories[scene.assessment.classes[s.k]];
+    el(svg, "polygon", {
+      points: points(corners),
+      fill: category.color,
+      stroke: category.color,
+      "stroke-width": 0.65,
+      "data-tooltip": `PPFD ≈ ${Math.round(s.value)} · DLI ≈ ${(s.value * state.hours * 0.0036).toFixed(1)}`,
+    });
+  }
+  el(svg, "ellipse", {
+    cx: 260,
+    cy: 215,
+    rx: horizontal * scale,
+    ry: vertical * scale,
+    fill: "none",
+    stroke: "var(--foreground)",
+    "stroke-opacity": 0.4,
+  });
+  const marker = P(centerPoint);
+  el(
+    svg,
+    "text",
+    {
+      x: marker[0],
+      y: marker[1] + 4,
+      "text-anchor": "middle",
+      fill: "white",
+      "font-size": 18,
+    },
+    "×",
+  );
+  el(
+    svg,
+    "text",
+    { x: 260, y: 25, "text-anchor": "middle", "font-size": 12 },
+    state.orbit === 0
+      ? "Вид сверху"
+      : state.orbit === 90
+        ? "Вид сбоку"
+        : "Вид вдоль оси лампы",
+  );
+  el(
+    svg,
+    "text",
+    { x: 260, y: 410, "text-anchor": "middle", "font-size": 12 },
+    "Датчики на условной поверхности кроны",
+  );
+  el(
+    svg,
+    "text",
+    { x: 260, y: 428, "text-anchor": "middle", "font-size": 11 },
+    "Обратная сторона и внутренние листья не показаны",
+  );
+}
 export function renderDiagrams(q, state, scene) {
   const side = q("pbe-side"),
-    plan = q("pbe-plan");
-  const {
-    catalog,
-    ranged: estimated,
-    op,
-    base,
-    dim,
-    angle,
-    h,
-    b,
-    t,
-    g,
-    metrics,
-    meanClass,
-    assessment,
-    selected,
-  } = scene;
-  if (catalog && !op.ok) {
+    map = q("pbe-plan");
+  setup(side);
+  setup(map);
+  if (!scene.metrics) {
+    for (const svg of [side, map])
+      el(svg, "text", { x: 30, y: 210 }, "Измени ток, DIM или драйвер");
+    q("pbe-budget").replaceChildren();
     q("pbe-geometric-value").textContent = "";
-    for (const svg of [side, plan]) {
-      const w = Math.max(260, svg.getBoundingClientRect().width);
-      setup(svg, w);
-      el(svg, "text", { x: 14, y: 145 }, "Измени ток, DIM или драйвер");
-      svg.setAttribute("aria-label", "Нет расчёта: " + op.reason);
-    }
     return;
   }
-  const beam = "var(--muted-foreground)",
-    plant = "var(--foreground)",
-    desk = "var(--muted-foreground)",
-    edge = "var(--muted-foreground)";
+  sceneDrawing(side, state, scene);
+  mapDrawing(map, state, scene);
   side.setAttribute(
     "aria-label",
-    "Прямые пучки над зоной кроны и рабочей поверхностью, без купола",
+    `${scene.selected.name}, высота ${state.plantSize} см; лампа ${state.orbit}° от вертикали; экран ${state.screenSector}°`,
   );
-  const sw = Math.max(260, side.getBoundingClientRect().width),
-    pw = Math.max(260, plan.getBoundingClientRect().width);
-  const sg = setup(side, sw),
-    pg = setup(plan, pw);
-  const s = (sw - 28) / 2.05,
-    x0 = 14 + 0.7 * s,
-    z0 = 253;
-  const sx = (x) => x0 + x * s,
-    sy = (z) => z0 - z * s;
-  el(sg, "line", {
-    x1: 14,
-    y1: z0,
-    x2: sw - 14,
-    y2: z0,
-    stroke: edge,
-    "stroke-width": 1,
-  });
-  for (const [idx, a] of g.entries()) {
-    const alpha = catalog ? op.fluxes[idx] / base.ppf : dim / 100;
-    const ex = (a.w / 2) * Math.cos(t),
-      ez = (a.w / 2) * Math.sin(t);
-    const left = a.x - ex + (h - ez) * Math.tan(t - b),
-      right = a.x + ex + (h + ez) * Math.tan(t + b);
-    el(sg, "path", {
-      d: `M${sx(a.x - ex)} ${sy(h - ez)} L${sx(a.x + ex)} ${sy(h + ez)} L${sx(right)} ${z0} L${sx(left)} ${z0} Z`,
-      fill: beam,
-      "fill-opacity": 0.08 * alpha,
-      stroke: beam,
-      "stroke-opacity": 0.6 * alpha,
-      "stroke-width": 1,
-    });
-    el(sg, "line", {
-      x1: sx(a.x - ex),
-      y1: sy(h - ez),
-      x2: sx(a.x + ex),
-      y2: sy(h + ez),
-      stroke: "var(--foreground)",
-      "stroke-width": 4,
-    });
-    el(sg, "line", {
-      x1: sx(a.x),
-      y1: sy(h),
-      x2: sx(a.x + h * Math.tan(t)),
-      y2: z0,
-      stroke: beam,
-      "stroke-opacity": alpha * 0.5,
-      "stroke-dasharray": "3 4",
-      "stroke-width": 1,
-    });
-  }
-  el(sg, "line", {
-    x1: sx(-0.28),
-    y1: z0,
-    x2: sx(0.28),
-    y2: z0,
-    stroke: plantModel.categories[meanClass].color,
-    "stroke-width": 5,
-  });
-  el(sg, "line", {
-    x1: sx(0.43),
-    y1: z0,
-    x2: sx(1.03),
-    y2: z0,
-    stroke: desk,
-    "stroke-width": 3,
-  });
-  el(side, "text", { x: sx(0), y: 278, "text-anchor": "middle" }, "Крона");
-  el(side, "text", { x: sx(0.73), y: 278, "text-anchor": "middle" }, "Стол");
-  el(
-    side,
-    "text",
-    { x: 14, y: 296, class: "text-small" },
-    estimated
-      ? "Линия кроны — базовый сценарий"
-      : "Линия кроны — средняя оценка",
-  );
-  const ps = (pw - 28) / 2.05,
-    px = (x) => 14 + (x + 0.7) * ps,
-    py = (y) => 145 + y * ps;
-  const A = Math.cos(b) ** 2 - Math.sin(t) ** 2;
-  const center = (h * Math.sin(t) * Math.cos(t)) / A,
-    rx = (h * Math.sin(b) * Math.cos(b)) / A,
-    ry = (h * Math.sin(b)) / Math.sqrt(A);
-  for (const [idx, a] of g.entries()) {
-    const alpha = catalog ? op.fluxes[idx] / base.ppf : dim / 100;
-    if (a.disc) {
-      el(pg, "ellipse", {
-        cx: px(a.x + center),
-        cy: py(a.y),
-        rx: (rx + a.w / 2) * ps,
-        ry: (ry + a.d / 2) * ps,
-        fill: beam,
-        "fill-opacity": 0.1 * alpha,
-        stroke: beam,
-        "stroke-width": 1,
-        "stroke-opacity": alpha * 0.7,
-      });
-    } else {
-      const X = px(a.x + center - a.w / 2 - rx),
-        Y = py(a.y - a.d / 2 - ry),
-        W = (a.w + 2 * rx) * ps,
-        H = (a.d + 2 * ry) * ps;
-      el(pg, "rect", {
-        x: X,
-        y: Y,
-        width: W,
-        height: H,
-        rx: rx * ps,
-        ry: ry * ps,
-        fill: beam,
-        "fill-opacity": 0.1 * alpha,
-        stroke: beam,
-        "stroke-opacity": alpha * 0.7,
-        "stroke-width": 1,
-      });
-    }
-    if (a.disc)
-      el(pg, "ellipse", {
-        cx: px(a.x),
-        cy: py(a.y),
-        rx: (a.w * ps) / 2,
-        ry: (a.d * ps) / 2,
-        fill: "var(--background)",
-        stroke: edge,
-        "stroke-width": 1,
-      });
-    else
-      el(pg, "rect", {
-        x: px(a.x - a.w / 2),
-        y: py(a.y - a.d / 2),
-        width: a.w * ps,
-        height: a.d * ps,
-        fill: "var(--background)",
-        stroke: edge,
-        "stroke-width": 1,
-      });
-  }
-  const coloredAreas = plantModel.categories.map(() => []);
-  for (let k = 0; k < metrics.samples.length; k++) {
-    const sample = metrics.samples[k],
-      r0 = Math.sqrt(sample.i / metrics.nr),
-      r1 = Math.sqrt((sample.i + 1) / metrics.nr);
-    const a0 = (2 * Math.PI * (sample.j + (sample.i % 2) * 0.5)) / metrics.na,
-      a1 = a0 + (2 * Math.PI) / metrics.na;
-    const at = (r, a) =>
-      `${px(0.28 * r * Math.cos(a))} ${py(0.22 * r * Math.sin(a))}`;
-    const path =
-      r0 === 0
-        ? `M${px(0)} ${py(0)} L${at(r1, a0)} A${0.28 * r1 * ps} ${0.22 * r1 * ps} 0 0 1 ${at(r1, a1)} Z`
-        : `M${at(r0, a0)} L${at(r1, a0)} A${0.28 * r1 * ps} ${0.22 * r1 * ps} 0 0 1 ${at(r1, a1)} L${at(r0, a1)} A${0.28 * r0 * ps} ${0.22 * r0 * ps} 0 0 0 ${at(r0, a0)} Z`;
-    coloredAreas[assessment.classes[k]].push(path);
-  }
-  for (let k = 0; k < coloredAreas.length; k++) {
-    if (!coloredAreas[k].length) continue;
-    const category = plantModel.categories[k];
-    el(pg, "path", {
-      d: coloredAreas[k].join(" "),
-      fill: category.color,
-      "data-tooltip": `${category.label} · ${decimal(assessment.percentages[k])}% площади условной кроны`,
-    });
-  }
-  el(pg, "ellipse", {
-    cx: px(0),
-    cy: py(0),
-    rx: 0.28 * ps,
-    ry: 0.22 * ps,
-    fill: "none",
-    stroke: plant,
-    "stroke-width": 1,
-  });
-  el(pg, "circle", { cx: px(0), cy: py(0), r: 6, fill: "var(--background)" });
-  el(pg, "line", {
-    x1: px(0) - 4,
-    y1: py(0) - 4,
-    x2: px(0) + 4,
-    y2: py(0) + 4,
-    stroke: plant,
-    "stroke-width": 2,
-  });
-  el(pg, "line", {
-    x1: px(0) - 4,
-    y1: py(0) + 4,
-    x2: px(0) + 4,
-    y2: py(0) - 4,
-    stroke: plant,
-    "stroke-width": 2,
-  });
-  el(pg, "rect", {
-    x: px(0.43),
-    y: py(-0.2),
-    width: 0.6 * ps,
-    height: 0.4 * ps,
-    fill: "none",
-    stroke: desk,
-    "stroke-width": 1,
-    "stroke-dasharray": "4 3",
-  });
-  el(plan, "text", { x: px(0), y: 278, "text-anchor": "middle" }, "Крона");
-  el(plan, "text", { x: px(0.73), y: 278, "text-anchor": "middle" }, "Стол");
-  el(
-    plan,
-    "text",
-    { x: 14, y: 296, class: "text-small" },
-    estimated
-      ? "Крона — DLI базового сценария"
-      : "Крона — локальные оценки DLI",
-  );
-  plan.setAttribute(
+  map.setAttribute(
     "aria-label",
-    `${estimated ? "Базовый сценарий. " : ""}${selected.name}. По среднему DLI: ${plantModel.categories[meanClass].label}. Доли площади: ${plantModel.categories.map((c, i) => c.label + " " + decimal(assessment.percentages[i]) + "%").join(", ")}.`,
+    `Карта PPFD на кроне со стороны лампы, положение ${state.orbit}°`,
   );
-  const diameter = 2 * h * Math.tan(b) * 100;
   q("pbe-geometric-value").textContent =
-    `Для точечного источника без наклона: ≈ ${Math.round(angle)}° на высоте ${state.height} см → контур половинной силы излучения ≈ ${Math.round(diameter)} см. За контуром тоже есть свет.`;
+    `Лампа направлена к центру кроны. Зазор ${state.height} см измеряется от касательной плоскости кроны. Масштаб сцены подстраивается под габариты.`;
+  const budget = scene.metrics.budget,
+    wrap = q("pbe-budget");
+  wrap.replaceChildren();
+  const labels = [
+    ["target", "До оболочки кроны"],
+    ["screen", "Поглощено экраном"],
+    ["room", "Мимо кроны · в комнату"],
+  ];
+  const bar = document.createElement("div");
+  bar.className = "budget-bar";
+  bar.setAttribute("aria-hidden", "true");
+  const legend = document.createElement("div");
+  legend.className = "budget-legend";
+  for (const [key, label] of labels) {
+    const part = document.createElement("span");
+    part.className = "budget-" + key;
+    part.style.width = budget[key] * 100 + "%";
+    bar.append(part);
+    const item = document.createElement("span");
+    item.textContent = `${label}: ≈ ${Math.round(budget[key] * 100)}%`;
+    legend.append(item);
+  }
+  const note = document.createElement("div");
+  note.className = "text-small";
+  note.textContent = scene.flux
+    ? "Доли полного потока источника · базовый сценарий. Экран поглощает свет без отражения; крона — непрозрачная оболочка, не реальные листья."
+    : "Источник выключен.";
+  wrap.append(bar, legend, note);
 }

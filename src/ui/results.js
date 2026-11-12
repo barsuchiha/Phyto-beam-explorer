@@ -102,7 +102,9 @@ export function createResults(q) {
     const status = ranged
       ? scenarioStatus(dailyRange, selected.group)
       : {
-          label: plantModel.categories[meanClass].label + " по среднему DLI",
+          label:
+            plantModel.categories[meanClass].label +
+            " · условная оценка оболочки",
           color: plantModel.categories[meanClass].color,
         };
     q("pbe-status").textContent = selected.name + " · " + status.label;
@@ -114,7 +116,7 @@ export function createResults(q) {
           : "Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. ") +
         `Это не измерение и не доверительный интервал. Карта и проценты площади — базовый сценарий: средний PPFD ≈ ${number(metrics.mean)} мкмоль/(м²·с), DLI ≈ ${decimal(daily)}.`;
     q("pbe-target").textContent =
-      `Зелёная цель: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: средний PPFD ${Math.round(target.L / (state.hours * 0.0036))}–${Math.round(target.U / (state.hours * 0.0036))} мкмоль/(м²·с)`;
+      `Ориентир DLI: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: PPFD ${Math.round(target.L / (state.hours * 0.0036))}–${Math.round(target.U / (state.hours * 0.0036))} мкмоль/(м²·с). Среднее по наклонной оболочке не равно измерению над кроной.`;
     q("pbe-plant-source").href = selected.url;
     for (let i = 0; i < legendItems.length; i++)
       legendItems[i].textContent =
@@ -131,8 +133,6 @@ export function createResults(q) {
     }
     q("pbe-flow").textContent =
       `Общий поток сейчас: ${estimated ? "≈ " + formatRange(estimate.fluxes) : Number(flux.toFixed(1)).toLocaleString("ru-RU")} мкмоль/с · ${era ? `${g.length} светильник(а)` : g.length === 1 ? "одна плата" : `${g.length} плат(ы)`}` +
-      (catalog || estimated || era
-        ? " · без купола"
-        : " · при смене угла поток постоянный");
+      " · поток до экрана";
   };
 }

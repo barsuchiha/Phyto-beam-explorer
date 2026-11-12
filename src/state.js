@@ -1,6 +1,7 @@
 import { profiles } from "./data/profiles.js";
 import { drivers } from "./data/hardware.js";
 import { plants } from "./data/plants.js";
+import { plantShapes } from "./data/plant-shapes.js";
 
 export const defaults = Object.freeze({
   source: "square50",
@@ -15,6 +16,11 @@ export const defaults = Object.freeze({
   count: 2,
   driver: "ldd",
   current: 700,
+  plantSize: 100,
+  orbit: 0,
+  screenSector: 0,
+  screenDepth: 15,
+  screenTurn: 0,
 });
 const bounded = (v, a, b, f) =>
   Number.isFinite(Number(v)) ? Math.min(b, Math.max(a, Number(v))) : f;
@@ -29,19 +35,30 @@ export function restoreState(value) {
       "phyto-beams-v4",
       "phyto-beams-v5",
       "phyto-beams-v6",
+      "phyto-beams-v7",
     ].includes(saved.schema)
   )
     return { ...defaults };
   const driver = Object.hasOwn(drivers, saved.driver) ? saved.driver : "ldd";
+  const plant = Object.hasOwn(plants, saved.plant) ? saved.plant : "monstera";
+  const shape = plantShapes[plant];
+  const height = bounded(saved.height, 20, 100, 40);
   return {
     source: Object.hasOwn(profiles, saved.source) ? saved.source : "square50",
     angle: bounded(saved.angle, 30, 120, 60),
-    height: bounded(saved.height, 20, 100, 40),
+    height,
     tilt: bounded(saved.tilt, -20, 20, 0),
     dim: bounded(saved.dim, 0, 100, 70),
     dim2: bounded(saved.dim2, 0, 100, 70),
     ppf: bounded(saved.ppf, 0, 400, 50),
-    plant: Object.hasOwn(plants, saved.plant) ? saved.plant : "monstera",
+    plant,
+    plantSize: bounded(saved.plantSize, shape.min, shape.max, shape.initial),
+    orbit: bounded(saved.orbit, 0, 90, 0),
+    screenSector: [0, 90, 180, 270, 360].includes(Number(saved.screenSector))
+      ? Number(saved.screenSector)
+      : 0,
+    screenDepth: bounded(saved.screenDepth, 5, Math.min(40, height - 5), 15),
+    screenTurn: bounded(saved.screenTurn, 0, 360, 0),
     hours: bounded(saved.hours, 6, 16, 12),
     count: [1, 2, 4].includes(Number(saved.count)) ? Number(saved.count) : 2,
     driver,
@@ -53,6 +70,8 @@ export function restoreState(value) {
 
 export function updateState(state, key, value) {
   const next = { ...state };
+  if (key === "plant" && value !== state.plant && plantShapes[value])
+    next.plantSize = plantShapes[value].initial;
   if (
     key === "source" &&
     ["estimate", "era"].includes(profiles[value]?.kind) &&
@@ -62,7 +81,7 @@ export function updateState(state, key, value) {
   next[key] = ["source", "plant", "driver"].includes(key)
     ? value
     : Number(value);
-  return restoreState({ schema: "phyto-beams-v6", ...next });
+  return restoreState({ schema: "phyto-beams-v7", ...next });
 }
 
 // Keep the exported widget's key and envelope so existing visitors retain their
@@ -84,7 +103,7 @@ export function saveState(storage, location, state) {
     storage?.setItem(
       storageKey(location),
       JSON.stringify({
-        modelContent: { schema: "phyto-beams-v6", ...state },
+        modelContent: { schema: "phyto-beams-v7", ...state },
         privateContent: null,
       }),
     );

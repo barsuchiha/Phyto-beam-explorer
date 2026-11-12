@@ -9,7 +9,9 @@ import { installTooltips } from "./ui/tooltips.js";
 const root = document.getElementById("phyto-beam-explorer");
 const q = (id) => root.querySelector("#" + id);
 const controls = Object.fromEntries(
-  Object.keys(defaults).map((key) => [key, q("pbe-" + key)]),
+  Object.keys(defaults)
+    .map((key) => [key, q("pbe-" + key)])
+    .filter(([, element]) => element),
 );
 let storage;
 try {
@@ -32,12 +34,17 @@ function render() {
 for (const [key, control] of Object.entries(controls)) {
   control.addEventListener("input", () => {
     state = updateState(state, key, control.value);
-    render();
+    scheduleRender();
   });
   control.addEventListener("change", () =>
     saveState(storage, window.location, state),
   );
 }
+let renderFrame;
+function scheduleRender() {
+  cancelAnimationFrame(renderFrame);
+  renderFrame = requestAnimationFrame(render);
+}
 installTooltips(root);
-new ResizeObserver(render).observe(root);
+new ResizeObserver(scheduleRender).observe(root);
 render();

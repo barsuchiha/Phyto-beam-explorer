@@ -160,7 +160,7 @@ test("E27 range varies only assumed beam; PPF stays fixed and base is 120 degree
 });
 
 test("ERA controls cannot silently invent dimming, manual PPF or an unverified driver", () => {
-  const calculate = createCalculator();
+  const calculate = createCalculator({ geometry: "plane" });
   for (const [id, m] of Object.entries(eraModel.modules))
     for (const count of [1, 2, 4]) {
       const state = {

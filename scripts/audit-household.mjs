@@ -7,7 +7,7 @@ import { defaults } from "../src/state.js";
 import { profiles } from "../src/data/profiles.js";
 import { plants } from "../src/data/plants.js";
 
-const calculate = createCalculator();
+const calculate = createCalculator({ geometry: "plane" });
 const area = Math.PI * 0.28 * 0.22;
 const nominal = {
   ...defaults,

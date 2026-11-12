@@ -18,13 +18,14 @@
     <main>
       <div id="phyto-beam-explorer">
         <div>
-          <h2>Источник, пучок и две полезные зоны</h2>
-          <div class="text-small">Samsung · MiniFermer · ЭРА · 10 растений</div>
+          <h2>Свет вокруг растения</h2>
+          <div class="text-small">
+            Размер растения · положение лампы · защита комнаты
+          </div>
         </div>
         <div class="viz-controls">
           <label class="form-label beam-field" for="pbe-plant"
-            >Растение
-            <select class="form-select" id="pbe-plant">
+            >Растение<select class="form-select" id="pbe-plant">
               <optgroup label="Крупномеры">
                 <option value="monstera" selected>Монстера деликатесная</option>
                 <option value="elastica">Фикус эластика</option>
@@ -39,30 +40,27 @@
                 <option value="spider">Хлорофитум</option>
                 <option value="jade">Толстянка овальная</option>
               </optgroup>
-            </select>
-          </label>
-          <label class="form-label beam-field" for="pbe-hours"
+            </select></label
+          ><label class="form-label beam-field" for="pbe-plantSize"
             ><span class="beam-label"
-              ><span>Лампа работает в сутки</span
-              ><output id="pbe-hours-value" class="tabular-nums"
-                >12 ч</output
-              ></span
-            >
-            <input
+              ><span>Высота растения от грунта</span
+              ><output
+                id="pbe-plantSize-value"
+                class="tabular-nums"
+              ></output></span
+            ><input
               class="form-range"
-              id="pbe-hours"
+              id="pbe-plantSize"
               type="range"
-              min="6"
-              max="16"
-              step="1"
-              value="12"
-            />
-          </label>
+              min="30"
+              max="240"
+              step="5"
+              value="100"
+          /></label>
         </div>
         <div class="viz-controls">
           <label class="form-label beam-field" for="pbe-source"
-            >Источник
-            <select class="form-select" id="pbe-source">
+            >Источник<select class="form-select" id="pbe-source">
               <optgroup label="PPF платы + диаграмма диода Samsung">
                 <option value="square50" selected>
                   Square 50 · LM301B · 4000 K
@@ -114,139 +112,221 @@
                 </option>
                 <option value="b3">Б3 · два модуля, без расчёта купола</option>
               </optgroup>
-            </select>
-          </label>
-          <label class="form-label beam-field" for="pbe-ppf"
+            </select></label
+          ><label class="form-label beam-field" for="pbe-hours"
             ><span class="beam-label"
-              ><span>PPF всех источников при 100%</span
-              ><output id="pbe-ppf-value" class="tabular-nums"
-                >50 мкмоль/с</output
-              ></span
-            >
-            <input
+              ><span>Лампа работает в сутки</span
+              ><output id="pbe-hours-value" class="tabular-nums"></output></span
+            ><input
               class="form-range"
-              id="pbe-ppf"
+              id="pbe-hours"
               type="range"
-              min="0"
-              max="400"
-              step="5"
-              value="50"
-            />
-          </label>
+              min="6"
+              max="16"
+              step="1"
+              value="12"
+          /></label>
         </div>
-        <div id="pbe-hardware" class="viz-controls">
-          <label class="form-label beam-field" for="pbe-count"
-            ><span id="pbe-count-label">Количество плат</span>
-            <select id="pbe-count" class="form-select">
-              <option value="1">1 плата</option>
-              <option value="2" selected>2 платы</option>
-              <option value="4">4 платы</option>
-            </select>
-          </label>
-          <label class="form-label beam-field" for="pbe-driver"
-            >Питание и управление
-            <select id="pbe-driver" class="form-select">
-              <option value="lcm25">Mean Well LCM-25 · общий DIM</option>
-              <option value="lcm40">Mean Well LCM-40 · общий DIM</option>
-              <option value="ldd" selected>
-                24 В + LDD-H · наш контроллер
-              </option>
-            </select>
-          </label>
-          <label class="form-label beam-field" for="pbe-current"
-            >Ток при 100% / модель драйвера
-            <select id="pbe-current" class="form-select"></select>
-          </label>
-          <label class="form-label beam-field" for="pbe-dim2" id="pbe-channel2"
-            ><span class="beam-label"
-              ><span id="pbe-dim2-label">Вторая группа · PWM</span
-              ><output id="pbe-dim2-value" class="tabular-nums"
-                >70%</output
-              ></span
-            >
-            <input
-              id="pbe-dim2"
-              class="form-range"
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value="70"
-            />
-          </label>
-        </div>
-        <div class="viz-controls">
+        <div class="spatial-controls">
           <label class="form-label beam-field" for="pbe-height"
             ><span class="beam-label"
-              ><span>Высота над плоскостью</span
-              ><output id="pbe-height-value" class="tabular-nums"
-                >40 см</output
-              ></span
-            >
-            <input
+              ><span>Зазор от кроны до плоскости лампы</span
+              ><output
+                id="pbe-height-value"
+                class="tabular-nums"
+              ></output></span
+            ><input
               class="form-range"
               id="pbe-height"
               type="range"
               min="20"
               max="100"
               step="5"
-              value="40"
-            />
-          </label>
-          <label class="form-label beam-field" for="pbe-angle"
+              value="40" /></label
+          ><label class="form-label beam-field" for="pbe-orbit"
             ><span class="beam-label"
-              ><span id="pbe-angle-label">Полный угол пучка</span
-              ><output id="pbe-angle-value" class="tabular-nums"
-                >60°</output
-              ></span
-            >
-            <input
+              ><span>Положение: сверху → сбоку</span
+              ><output id="pbe-orbit-value" class="tabular-nums"></output></span
+            ><input
               class="form-range"
-              id="pbe-angle"
-              type="range"
-              min="30"
-              max="120"
-              step="5"
-              value="60"
-            />
-          </label>
-        </div>
-        <div class="viz-controls">
-          <label class="form-label beam-field" for="pbe-tilt"
-            ><span class="beam-label"
-              ><span>Наклон вправо, к столу</span
-              ><output id="pbe-tilt-value" class="tabular-nums"
-                >0°</output
-              ></span
-            >
-            <input
-              class="form-range"
-              id="pbe-tilt"
-              type="range"
-              min="-20"
-              max="20"
-              step="5"
-              value="0"
-            />
-          </label>
-          <label class="form-label beam-field" for="pbe-dim"
-            ><span class="beam-label"
-              ><span id="pbe-dim-label">Яркость источника</span
-              ><output id="pbe-dim-value" class="tabular-nums"
-                >70%</output
-              ></span
-            >
-            <input
-              class="form-range"
-              id="pbe-dim"
+              id="pbe-orbit"
               type="range"
               min="0"
-              max="100"
+              max="90"
               step="5"
-              value="70"
-            />
-          </label>
+              value="0" /></label
+          ><label class="form-label beam-field" for="pbe-screenSector"
+            >Экран вокруг лампы<select
+              class="form-select"
+              id="pbe-screenSector"
+            >
+              <option value="0">Без экрана</option>
+              <option value="90">Закрыть 90°</option>
+              <option value="180">Закрыть 180°</option>
+              <option value="270">Закрыть 270°</option>
+              <option value="360">Закрыть 360° · открытый торец</option>
+            </select></label
+          >
         </div>
+        <div class="viz-controls" id="pbe-screen-controls" hidden>
+          <label class="form-label beam-field" for="pbe-screenDepth"
+            ><span class="beam-label"
+              ><span>Глубина экрана</span
+              ><output
+                id="pbe-screenDepth-value"
+                class="tabular-nums"
+              ></output></span
+            ><input
+              class="form-range"
+              id="pbe-screenDepth"
+              type="range"
+              min="5"
+              max="35"
+              step="5"
+              value="15" /></label
+          ><label class="form-label beam-field" for="pbe-screenTurn"
+            ><span class="beam-label"
+              ><span>Поворот экрана вокруг оси лампы</span
+              ><output
+                id="pbe-screenTurn-value"
+                class="tabular-nums"
+              ></output></span
+            ><input
+              class="form-range"
+              id="pbe-screenTurn"
+              type="range"
+              min="0"
+              max="360"
+              step="15"
+              value="0"
+          /></label>
+        </div>
+        <div class="text-small" id="pbe-size-note"></div>
+        <div class="beam-columns">
+          <section>
+            <h3>Растение и лампа</h3>
+            <svg
+              id="pbe-side"
+              class="beam-svg"
+              role="img"
+              aria-label="Растение и лампа на дуге от нуля до девяноста градусов"
+            ></svg>
+          </section>
+          <section>
+            <h3>Карта со стороны лампы</h3>
+            <svg
+              id="pbe-plan"
+              class="beam-svg"
+              role="img"
+              aria-label="Свет на обращённой к лампе поверхности кроны"
+            ></svg>
+          </section>
+        </div>
+        <div
+          class="text-small"
+          id="pbe-geometric-value"
+          aria-live="polite"
+        ></div>
+        <div id="pbe-budget" class="light-budget" aria-live="polite"></div>
+        <details id="pbe-source-controls">
+          <summary>Мощность, пучок и питание</summary>
+          <div class="beam-field">
+            <div class="viz-controls">
+              <label class="form-label beam-field" for="pbe-ppf"
+                ><span class="beam-label"
+                  ><span>PPF всех источников при 100%</span
+                  ><output
+                    id="pbe-ppf-value"
+                    class="tabular-nums"
+                  ></output></span
+                ><input
+                  class="form-range"
+                  id="pbe-ppf"
+                  type="range"
+                  min="0"
+                  max="400"
+                  step="5"
+                  value="50" /></label
+              ><label class="form-label beam-field" for="pbe-angle"
+                ><span class="beam-label"
+                  ><span
+                    ><span id="pbe-angle-label"
+                      >Условный полный угол пучка</span
+                    ></span
+                  ><output
+                    id="pbe-angle-value"
+                    class="tabular-nums"
+                  ></output></span
+                ><input
+                  class="form-range"
+                  id="pbe-angle"
+                  type="range"
+                  min="30"
+                  max="120"
+                  step="5"
+                  value="60"
+              /></label>
+            </div>
+            <div id="pbe-hardware" class="viz-controls">
+              <label class="form-label beam-field" for="pbe-count"
+                ><span id="pbe-count-label">Количество плат</span
+                ><select id="pbe-count" class="form-select">
+                  <option value="1">1 плата</option>
+                  <option value="2" selected>2 платы</option>
+                  <option value="4">4 платы</option>
+                </select></label
+              ><label class="form-label beam-field" for="pbe-driver"
+                >Питание и управление<select
+                  id="pbe-driver"
+                  class="form-select"
+                >
+                  <option value="lcm25">Mean Well LCM-25 · общий DIM</option>
+                  <option value="lcm40">Mean Well LCM-40 · общий DIM</option>
+                  <option value="ldd" selected>
+                    24 В + LDD-H · наш контроллер
+                  </option>
+                </select></label
+              ><label class="form-label beam-field" for="pbe-current"
+                >Ток при 100% / модель драйвера<select
+                  id="pbe-current"
+                  class="form-select"
+                ></select></label
+              ><label
+                id="pbe-channel2"
+                class="form-label beam-field"
+                for="pbe-dim2"
+                ><span class="beam-label"
+                  ><span
+                    ><span id="pbe-dim2-label">Вторая группа · PWM</span></span
+                  ><output
+                    id="pbe-dim2-value"
+                    class="tabular-nums"
+                  ></output></span
+                ><input
+                  class="form-range"
+                  id="pbe-dim2"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value="70"
+              /></label>
+            </div>
+            <label class="form-label beam-field" for="pbe-dim"
+              ><span class="beam-label"
+                ><span><span id="pbe-dim-label">Яркость источника</span></span
+                ><output id="pbe-dim-value" class="tabular-nums"></output></span
+              ><input
+                class="form-range"
+                id="pbe-dim"
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value="70"
+            /></label>
+          </div>
+        </details>
         <div
           id="pbe-validation"
           class="text-small text-destructive"
@@ -261,14 +341,14 @@
         </div>
         <div class="viz-grid" aria-live="polite">
           <div class="card viz-stat">
-            <div>Средний PPFD в зоне кроны</div>
+            <div>Средний PPFD со стороны лампы</div>
             <div class="viz-stat-value tabular-nums" id="pbe-mean">—</div>
             <div class="text-small">
-              мкмоль/(м²·с) · горизонтальный овал 56 × 44 см
+              мкмоль/(м²·с) · поверхность условной кроны
             </div>
           </div>
           <div class="card viz-stat">
-            <div>PPFD в центре зоны</div>
+            <div>PPFD на оси кроны</div>
             <div class="viz-stat-value tabular-nums" id="pbe-center">—</div>
             <div class="text-small">мкмоль/(м²·с) · точка × на схеме</div>
           </div>
@@ -423,42 +503,24 @@
             <div class="text-small" id="pbe-era-links"></div>
           </div>
         </details>
-        <div class="beam-columns">
-          <div>
-            <h3>Сбоку</h3>
-            <svg
-              id="pbe-side"
-              class="beam-svg"
-              role="img"
-              aria-label="Условные пучки над зоной кроны и рабочей поверхностью"
-            ></svg>
-          </div>
-          <div>
-            <h3>Свет на кроне и столе</h3>
-            <svg
-              id="pbe-plan"
-              class="beam-svg"
-              role="img"
-              aria-label="Цветовая оценка суточной дозы по участкам условной кроны"
-            ></svg>
-          </div>
-        </div>
         <div
           class="plant-legend text-small"
           id="pbe-legend"
           aria-label="Доли площади кроны в пяти категориях"
         ></div>
         <div class="text-small">
-          Цвета и проценты — по площади условной кроны. «Оптимально*» — рабочая
-          цель; «опасно*» — условный сигнал риска, не установленный порог ожога.
+          Цвета и проценты — по площади поверхности кроны со стороны лампы.
+          «Оптимально*» — рабочая цель; «опасно*» — условный сигнал риска, не
+          установленный порог ожога.
         </div>
         <details>
           <summary class="cursor-interaction">
-            Все 10 растений при этих настройках
+            Требования 10 видов к этой дозе
           </summary>
           <div class="plant-comparison">
             <div class="text-small">
-              Цели DLI в моль/(м²·сут); оценка по среднему по кроне
+              Один текущий размер и форма кроны; сравнение только требований
+              DLI. Для геометрии другого вида выбери его сверху.
             </div>
             <table class="table table-sm">
               <thead>
@@ -473,9 +535,10 @@
           </div>
         </details>
         <div class="text-small">
-          Диапазоны — по световым группам; границы цветов условные. Зона 56 × 44
-          см одинакова для всех видов. Свет окна, адаптация и быстрый световой
-          стресс не учтены.
+          Диапазоны — по световым группам; границы цветов условные. Размеры
+          задаются выбранным видом и ползунком. Наклонные датчики на оболочке не
+          эквивалентны прежней горизонтальной карте; цели DLI здесь только
+          ориентир. Свет окна, адаптация и быстрый световой стресс не учтены.
         </div>
         <div class="text-small">
           <a
@@ -493,18 +556,9 @@
             >Свет для выбранного вида</a
           >
         </div>
-        <div class="beam-brief text-small">
-          <span>Растение: PPFD на листьях + суточная доза DLI</span>
-          <span>Человек: люксы на поверхности + цвет + блики</span>
-        </div>
-        <div
-          class="text-small"
-          id="pbe-geometric-value"
-          aria-live="polite"
-        ></div>
         <div class="text-small" id="pbe-method">
           Купол, отражения и затенение листьями не учтены. Цветная карта —
-          расчёт на плоскости, не измерения листьев.
+          расчёт на условной оболочке кроны, не измерения листьев.
         </div>
       </div>
     </main>

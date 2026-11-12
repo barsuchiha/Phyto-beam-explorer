@@ -17,7 +17,7 @@ const fixtures = JSON.parse(
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
 test("every source retains its pre-refactor PPFD, DLI, range and plant assessment", () => {
-  const calculate = createCalculator();
+  const calculate = createCalculator({ geometry: "plane" });
   for (const { overrides, expected } of fixtures) {
     const result = calculate(Object.freeze({ ...defaults, ...overrides }));
     if (expected.error) {
@@ -39,7 +39,7 @@ test("every source retains its pre-refactor PPFD, DLI, range and plant assessmen
 });
 
 test("duration and plant changes reuse optics but refresh the assessment", () => {
-  const calculate = createCalculator();
+  const calculate = createCalculator({ geometry: "plane" });
   const initial = calculate(defaults);
   const longer = calculate({ ...defaults, hours: 16, plant: "zz" });
   assert.equal(initial.metrics, longer.metrics);
@@ -79,7 +79,7 @@ test("v1-v6 widget settings and the original storage envelope still load", () =>
     assert.equal(loadState(adapter, location).height, 75);
     assert.equal(
       JSON.parse(storage.get(key)).modelContent.schema,
-      "phyto-beams-v6",
+      "phyto-beams-v7",
     );
   }
   assert.notEqual(storageKey({ ...location, search: "?test" }), key);

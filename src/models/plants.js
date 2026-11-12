@@ -14,18 +14,18 @@ function classify(value, group) {
           ? 3
           : 4;
 }
-function evaluate(values, hours, group) {
+function evaluate(values, hours, group, weights = values.map(() => 1)) {
   const counts = [0, 0, 0, 0, 0],
-    classes = values.map((v) => {
+    classes = values.map((v, i) => {
       const c = classify(dli(v, hours), group);
-      counts[c]++;
+      counts[c] += weights[i];
       return c;
     });
   return {
     classes,
     counts,
     percentages: counts.map((c) =>
-      values.length ? (100 * c) / values.length : 0,
+      values.length ? (100 * c) / weights.reduce((a, b) => a + b, 0) : 0,
     ),
   };
 }

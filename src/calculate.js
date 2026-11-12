@@ -6,10 +6,11 @@ import { estimateModel } from "./models/minifermer.js";
 import { mini36Model } from "./models/mini36.js";
 import { layout } from "./models/layout.js";
 import { eraModel } from "./models/era.js";
+import { crownScenario } from "./models/crown-scenario.js";
 
 // A calculator instance keeps only the last optical result. Plant and duration
 // changes reuse that result, while updating the DLI assessment immediately.
-export function createCalculator() {
+export function createCalculator({ geometry = "crown" } = {}) {
   let metricKey = "",
     metrics;
   return function calculate(state) {
@@ -73,13 +74,26 @@ export function createCalculator() {
       state.tilt,
       flux,
       g,
+      geometry === "crown"
+        ? [
+            state.plant,
+            state.plantSize,
+            state.orbit,
+            state.screenSector,
+            state.screenDepth,
+            state.screenTurn,
+          ]
+        : null,
     ]);
     if (key !== metricKey) {
-      metrics = era
-        ? eraModel.summarize(state.source, g, h, t, flux)
-        : estimated
-          ? engine.summarize(g, h, t, estimate.fluxes)
-          : photometry.summarize(g, h, t, curve, flux);
+      metrics =
+        geometry === "crown"
+          ? crownScenario(state, g, flux, estimate)
+          : era
+            ? eraModel.summarize(state.source, g, h, t, flux)
+            : estimated
+              ? engine.summarize(g, h, t, estimate.fluxes)
+              : photometry.summarize(g, h, t, curve, flux);
       metricKey = key;
     }
     const selected = plantModel.plants[state.plant],
@@ -90,6 +104,7 @@ export function createCalculator() {
       metrics.samples.map((s) => s.value),
       state.hours,
       selected.group,
+      geometry === "crown" ? metrics.samples.map((s) => s.area) : undefined,
     );
     const dailyRange = ranged
       ? metrics.range.mean.map((v) => plantModel.dli(v, state.hours))
