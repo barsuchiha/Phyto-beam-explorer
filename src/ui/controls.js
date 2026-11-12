@@ -41,6 +41,16 @@ export function renderControls(q, controls, state, scene) {
     "°" +
     (state.orbit === 0 ? " · сверху" : state.orbit === 90 ? " · сбоку" : "");
   q("pbe-screenDepth-value").textContent = state.screenDepth + " см";
+  q("pbe-screenOpening-value").textContent =
+    `${state.screenOpening}°` +
+    (state.screenOpening === 0 ? " · прямые стенки" : "");
+  q("pbe-screen-note").hidden = !state.screenSector;
+  const rig = scene.metrics?.rig;
+  q("pbe-screen-note").textContent =
+    `Каждая стенка отклонена наружу на ${(state.screenOpening / 2).toLocaleString("ru-RU")}° от оси лампы. Длина стенки постоянна; меняется форма отражателя, а не исходный пучок LED.` +
+    (rig
+      ? ` Глубина по оси ≈ ${(rig.depth * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} см, диаметр выходного края ≈ ${Math.round(rig.mouthRadius * 200)} см. Форма — условный ${state.screenOpening === 0 ? "цилиндр" : "усечённый конус"} с открытым торцом.`
+      : "");
   q("pbe-screenTurn-value").textContent = state.screenTurn + "°";
   q("pbe-screen-controls").hidden = !state.screenSector;
   q("pbe-material-controls").hidden = !state.screenSector;

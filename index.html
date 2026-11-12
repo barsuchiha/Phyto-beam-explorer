@@ -169,9 +169,28 @@
           >
         </div>
         <div class="viz-controls" id="pbe-screen-controls" hidden>
+          <label class="form-label beam-field" for="pbe-screenOpening">
+            <span class="beam-label"
+              ><span>Раскрытие стенок · полный угол</span
+              ><output
+                id="pbe-screenOpening-value"
+                class="tabular-nums"
+              ></output
+            ></span>
+            <input
+              class="form-range"
+              id="pbe-screenOpening"
+              type="range"
+              min="0"
+              max="120"
+              step="5"
+              value="0"
+              aria-describedby="pbe-screen-note"
+            />
+          </label>
           <label class="form-label beam-field" for="pbe-screenDepth"
             ><span class="beam-label"
-              ><span>Глубина экрана</span
+              ><span>Длина стенки экрана</span
               ><output
                 id="pbe-screenDepth-value"
                 class="tabular-nums"
@@ -201,6 +220,7 @@
               value="0"
           /></label>
         </div>
+        <div class="text-small" id="pbe-screen-note" hidden></div>
         <div class="text-small" id="pbe-size-note"></div>
         <div class="viz-controls" id="pbe-material-controls" hidden>
           <label class="form-label beam-field" for="pbe-screenMode"

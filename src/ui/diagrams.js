@@ -124,8 +124,9 @@ function plantDrawing(svg, c, P) {
 function sceneDrawing(svg, state, scene) {
   const { crown: c, rig, groups } = scene.metrics;
   // One frame for the entire orbit: moving the lamp does not make the camera pan.
-  const r = Math.max(c.rx, c.rz) + state.height / 100 + rig.radius;
-  const xMin = -c.rx - 0.2,
+  const extent = rig.radius + (rig.sector ? rig.length : 0);
+  const r = Math.max(c.rx, c.rz) + state.height / 100 + extent;
+  const xMin = -Math.max(c.rx, extent) - 0.2,
     xMax = Math.max(c.rx + 0.2, r + 0.12);
   const zMin = -Math.max(0.16, c.rx * 0.55),
     zMax = c.center[2] + r + 0.12;
@@ -235,7 +236,7 @@ function sceneDrawing(svg, state, scene) {
     "stroke-opacity": 0.35,
   });
   plantDrawing(svg, c, P);
-  // Cylinder-sector wall shared by the whole source assembly.
+  // Conical-sector wall shared by the whole source assembly.
   if (rig.sector) {
     const panels = [];
     for (
@@ -249,8 +250,16 @@ function sceneDrawing(svg, state, scene) {
       const raw = [
         [rig.radius * Math.cos(a), rig.radius * Math.sin(a), 0],
         [rig.radius * Math.cos(b), rig.radius * Math.sin(b), 0],
-        [rig.radius * Math.cos(b), rig.radius * Math.sin(b), rig.depth],
-        [rig.radius * Math.cos(a), rig.radius * Math.sin(a), rig.depth],
+        [
+          rig.mouthRadius * Math.cos(b),
+          rig.mouthRadius * Math.sin(b),
+          rig.depth,
+        ],
+        [
+          rig.mouthRadius * Math.cos(a),
+          rig.mouthRadius * Math.sin(a),
+          rig.depth,
+        ],
       ];
       panels.push({ raw, depth: Math.sin((a + b) / 2) });
     }
@@ -335,6 +344,49 @@ function sceneDrawing(svg, state, scene) {
       "text",
       { x: 0, y: 4, "text-anchor": "middle", "font-size": 10 },
       `${rig.sector}°`,
+    );
+    el(
+      svg,
+      "text",
+      { x: 465, y: 80, "text-anchor": "middle", "font-size": 10 },
+      "Сектор",
+    );
+    // Axial cross-section: distinguishes wall opening from the azimuthal sector.
+    const inset = el(svg, "g", { transform: "translate(330 30)" });
+    el(inset, "rect", {
+      x: -58,
+      y: -10,
+      width: 116,
+      height: 75,
+      rx: 6,
+      fill: "var(--background)",
+      "fill-opacity": 0.94,
+    });
+    const half = (rig.opening * Math.PI) / 360,
+      spread = 35 * Math.sin(half),
+      depth = 35 * Math.cos(half);
+    el(inset, "path", {
+      d: "M-14 0H14",
+      stroke: "var(--foreground)",
+      "stroke-width": 3,
+    });
+    for (const side of [-1, 1])
+      el(inset, "path", {
+        d: `M${side * 18} 0L${side * (18 + spread)} ${depth}`,
+        stroke: "var(--foreground)",
+        "stroke-width": 2,
+        fill: "none",
+      });
+    el(inset, "path", {
+      d: "M0 0V39",
+      stroke: "var(--muted-foreground)",
+      "stroke-dasharray": "2 3",
+    });
+    el(
+      inset,
+      "text",
+      { x: 0, y: 54, "text-anchor": "middle", "font-size": 10 },
+      `Раскрытие ${rig.opening}°`,
     );
   }
 }
@@ -433,7 +485,7 @@ export function renderDiagrams(q, state, scene) {
   mapDrawing(map, state, scene);
   side.setAttribute(
     "aria-label",
-    `${scene.selected.name}, высота ${state.plantSize} см; лампа ${state.orbit}° от вертикали; экран ${state.screenSector}°`,
+    `${scene.selected.name}, высота ${state.plantSize} см; лампа ${state.orbit}° от вертикали; сектор экрана ${state.screenSector}°; раскрытие ${state.screenOpening}°`,
   );
   map.setAttribute(
     "aria-label",

@@ -1,5 +1,6 @@
 import { plantShapes } from "../data/plant-shapes.js";
 import { photometry } from "./photometry.js";
+import { wallDistance } from "./screen-geometry.js";
 
 export const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
 export const add = (a, b) => a.map((v, i) => v + b[i]);
@@ -59,10 +60,13 @@ export function createRig(state, groups, crown) {
         Math.hypot(Math.abs(g.x) + g.w / 2, Math.abs(g.y) + g.d / 2),
       ),
     ) + 0.015;
-  const depth = Math.min(
+  const length = Math.min(
     (state.screenDepth ?? 15) / 100,
     Math.max(0, state.height / 100 - 0.05),
   );
+  const opening = state.screenOpening ?? 0,
+    half = rad(opening / 2),
+    depth = length * Math.cos(half);
   return {
     origin,
     n,
@@ -71,6 +75,10 @@ export function createRig(state, groups, crown) {
     f,
     radius,
     depth,
+    length,
+    opening,
+    slope: Math.tan(half),
+    mouthRadius: radius + length * Math.sin(half),
     sector: state.screenSector ?? 0,
     turn: state.screenTurn ?? 0,
     support,
@@ -102,25 +110,9 @@ export function intensity(curve, mu, phi = 0) {
   const n = Math.log(0.5) / Math.log(Math.cos(rad(curve / 2)));
   return ((n + 1) / (2 * Math.PI)) * Math.pow(mu, n);
 }
-// Distance to a finite absorbing cylinder sector, in lamp-local coordinates.
-// No rear cap, no reflection and no renormalization of transmitted light.
+// Shared wall intersection for direct occlusion and reflected photon transport.
 export function screenHit(origin, d, rig) {
-  if (!rig.sector || !rig.depth) return Infinity;
-  const aa = d[0] * d[0] + d[1] * d[1];
-  if (aa < 1e-15) return Infinity;
-  const b = origin[0] * d[0] + origin[1] * d[1];
-  const discriminant =
-    b * b - aa * (origin[0] ** 2 + origin[1] ** 2 - rig.radius ** 2);
-  if (discriminant < 0) return Infinity;
-  const t = (-b + Math.sqrt(discriminant)) / aa;
-  const z = origin[2] + t * d[2];
-  if (t <= 0 || z < 0 || z > rig.depth) return Infinity;
-  const az = Math.atan2(origin[1] + t * d[1], origin[0] + t * d[0]);
-  const delta = Math.atan2(
-    Math.sin(az - rad(rig.turn)),
-    Math.cos(az - rad(rig.turn)),
-  );
-  return Math.abs(delta) <= rad(rig.sector / 2) + 1e-12 ? t : Infinity;
+  return wallDistance(...origin, ...d, rig);
 }
 export function rayCrown(origin, d, c) {
   const p = sub(origin, c.center),

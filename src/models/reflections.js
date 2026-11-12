@@ -1,4 +1,5 @@
 import { sourceSamples, intensity, toWorld } from "./crown.js";
+import { wallDistance, wallNormal } from "./screen-geometry.js";
 
 export const reflectionNames = {
   absorb: "Поглощающий",
@@ -34,11 +35,16 @@ export function bounceDirection(d, n, kind, a = 0.5, b = 0.5) {
   const r = Math.sqrt(a),
     p = TAU * b,
     c = Math.sqrt(1 - a);
-  // Cylinder inward normal lies in XY; tangent axes are (-ny,nx,0), (0,0,1).
+  // Orthonormal frame for a conical wall. Reduces to the old cylinder at nz=0.
+  const h = Math.hypot(n[0], n[1]),
+    tx = -n[1] / h,
+    ty = n[0] / h,
+    bx = -n[2] * ty,
+    by = n[2] * tx;
   return [
-    c * n[0] - r * Math.cos(p) * n[1],
-    c * n[1] + r * Math.cos(p) * n[0],
-    r * Math.sin(p),
+    c * n[0] + r * (Math.cos(p) * tx + Math.sin(p) * bx),
+    c * n[1] + r * (Math.cos(p) * ty + Math.sin(p) * by),
+    c * n[2] + r * Math.sin(p) * h,
   ];
 }
 function geometry(c, rig, groups) {
@@ -54,23 +60,7 @@ function geometry(c, rig, groups) {
     ix: 1 / c.rx ** 2,
     iy: 1 / c.ry ** 2,
     iz: 1 / c.rz ** 2,
-    turn: (rig.turn * Math.PI) / 180,
-    half: (rig.sector * Math.PI) / 360,
   };
-}
-function wallDistance(x, y, z, dx, dy, dz, g) {
-  const aa = dx * dx + dy * dy;
-  if (aa < 1e-15 || !g.rig.sector) return Infinity;
-  const b = x * dx + y * dy,
-    disc = b * b - aa * (x * x + y * y - g.rig.radius ** 2);
-  if (disc < 0) return Infinity;
-  const t = (-b + Math.sqrt(disc)) / aa,
-    w = z + t * dz;
-  if (t < EPS || w < 0 || w > g.rig.depth) return Infinity;
-  const az = Math.atan2(y + t * dy, x + t * dx) - g.turn;
-  return Math.abs(Math.atan2(Math.sin(az), Math.cos(az))) <= g.half + 1e-12
-    ? t
-    : Infinity;
 }
 function crownDistance(x, y, z, dx, dy, dz, g) {
   // Rotate the ray from lamp-local coordinates into the ellipsoid axes.
@@ -118,7 +108,7 @@ function trace(
     first = 1;
   if (path) path.push([x, y, z]);
   for (;;) {
-    const wall = wallDistance(x, y, z, dx, dy, dz, g),
+    const wall = wallDistance(x, y, z, dx, dy, dz, g.rig, EPS),
       target = crownDistance(x, y, z, dx, dy, dz, g);
     const board = bounces ? boardDistance(x, y, z, dx, dy, dz, g) : Infinity;
     const distance = Math.min(wall, target, board);
@@ -141,12 +131,10 @@ function trace(
     if (distance === board) return { kind: 2, bounces, first, x, y, z };
     if (kind === "absorb") return { kind: 3, bounces: 1, first, x, y, z };
     bounces++;
-    const len = Math.hypot(x, y),
-      nx = -x / len,
-      ny = -y / len;
+    const normal = wallNormal(x, y, g.rig);
     [dx, dy, dz] = bounceDirection(
       [dx, dy, dz],
-      [nx, ny, 0],
+      normal,
       kind,
       random(seed + Math.imul(bounces, 0x9e3779b9)),
       random(seed ^ Math.imul(bounces, 0x6a09e667)),
