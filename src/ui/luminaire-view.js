@@ -187,7 +187,9 @@ export function createLuminaireView(host) {
     if (!currentScene) return;
     const bounds = new T.Box3()
       .setFromObject(modelGroup)
-      .union(new T.Box3().setFromObject(plantGroup));
+      .union(new T.Box3().setFromObject(plantGroup))
+      .union(new T.Box3().setFromObject(sourceGroup))
+      .union(new T.Box3().setFromObject(opticGroup));
     let center = bounds.getCenter(new T.Vector3()),
       size = Math.max(...bounds.getSize(new T.Vector3()).toArray());
     if (close) {
@@ -197,6 +199,13 @@ export function createLuminaireView(host) {
         currentScene.model.optic === "trough"
           ? 0.9
           : 0.35;
+      const screen = currentScene.screenDimensions;
+      if (screen && currentScene.surfaces.length) {
+        size = Math.max(size, screen.mouthRadius * 2.2, screen.depth + 0.2);
+        center.add(
+          vector(currentScene.sources[0].n).multiplyScalar(screen.depth / 2),
+        );
+      }
     }
     size = Math.max(0.2, size);
     controls.target.copy(center);

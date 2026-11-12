@@ -44,6 +44,8 @@ export const modelDefaults = {
   canopy: 105,
   flap: 45,
   screen: false,
+  screenLength: 6,
+  screenGap: 1,
   opening: 60,
   sector: 180,
   material: "mirror",
@@ -80,6 +82,8 @@ export function normalizeFitting(input = {}) {
   s.canopy = clamp(s.canopy, 70, 140, 105);
   s.flap = clamp(s.flap, 25, 65, 45);
   s.screen = m.optic === "cone" && s.screen === true;
+  s.screenLength = clamp(s.screenLength, 3, 30, 6);
+  s.screenGap = clamp(s.screenGap, 0.5, 5, 1);
   s.opening = clamp(s.opening, 0, 120, 60);
   s.sector = [90, 180, 270, 360].includes(Number(s.sector))
     ? Number(s.sector)

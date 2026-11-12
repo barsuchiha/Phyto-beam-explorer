@@ -42,6 +42,24 @@ export function flexibleSection(turn) {
     angle: a,
   };
 }
+// Centimetres in controls; metres in the shared optical/rendering geometry.
+// Diameters describe the full supporting circles, including for partial sectors.
+export function coneScreenDimensions(state, mount, source) {
+  const length = (state.screenLength ?? 6) / 100,
+    clearance = (state.screenGap ?? 1) / 100,
+    half = rad(state.opening / 2),
+    radius =
+      (source.type === "bulb"
+        ? source.size[0] / 2000
+        : Math.hypot(mount.body[0], mount.body[1]) / 2000) + clearance;
+  return {
+    length,
+    clearance,
+    radius,
+    depth: length * Math.cos(half),
+    mouthRadius: radius + length * Math.sin(half),
+  };
+}
 export function buildLuminaireScene(state, pose) {
   const model = luminaires[state.model],
     mount = mounts[state.mount],
@@ -102,6 +120,8 @@ export function buildLuminaireScene(state, pose) {
   crown.potHeight = potHeight;
   const surfaces = [],
     screenSupports = [];
+  const screenDimensions =
+    model.optic === "cone" ? coneScreenDimensions(state, mount, source) : null;
   if (model.optic === "flex") {
     const f = flexibleSection(state.canopy);
     for (const side of [-1, 1])
@@ -146,16 +166,11 @@ export function buildLuminaireScene(state, pose) {
       ];
     surfaces.push(quad(...local.map((v) => add(p, rotationY(v, state.flap)))));
   } else if (state.screen) {
-    const length = 0.06,
-      half = rad(state.opening / 2),
-      depth = length * Math.cos(half),
-      expand = length * Math.sin(half);
+    const { radius: r, mouthRadius, depth } = screenDimensions,
+      expand = mouthRadius - r;
     for (const s of sources) {
       // The shade starts at the emitting plane and extends forward. The bulb
       // and its radiator remain behind it, with no rear cap around the socket.
-      const r =
-        (s.disc ? s.w / 2 : Math.hypot(mount.body[0], mount.body[1]) / 2000) +
-        0.01;
       const point = (a, r, z) =>
         add(
           s.p,
@@ -234,6 +249,7 @@ export function buildLuminaireScene(state, pose) {
     crown,
     surfaces,
     screenSupports,
+    screenDimensions,
     boards,
     zShift,
     collision,

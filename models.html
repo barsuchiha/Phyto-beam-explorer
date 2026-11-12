@@ -25,16 +25,16 @@
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
           "./src/data/plants.js": "./src/data/plants.js?v=85068a262de7",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
-          "./src/models-app.js": "./src/models-app.js?v=aee6f5bea5df",
+          "./src/models-app.js": "./src/models-app.js?v=cf93c5013ec7",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=20beaa849d01",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=8b1c01cea10d",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/layout.js": "./src/models/layout.js?v=08b53705b4d3",
           "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=8e648a361b47",
-          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=ceb2496a513f",
+          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=67292b691b75",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer-bulbs.js": "./src/models/minifermer-bulbs.js?v=663c02bb4d09",
           "./src/models/minifermer.js": "./src/models/minifermer.js?v=f451717e99c5",
@@ -51,7 +51,7 @@
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=5d67b833f5c9",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=7d4b565414e9",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=811c5f740039",
           "./src/ui/results.js": "./src/ui/results.js?v=193a0447791d",
           "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
@@ -63,7 +63,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=aee6f5bea5df"></script>
+    <script type="module" src="./src/models-app.js?v=cf93c5013ec7"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -181,6 +181,30 @@
             ></label
           >
           <div id="lm-cone-controls" hidden>
+            <label for="lm-screenLength"
+              ><span
+                >Длина стенки экрана
+                <output id="lm-screenLength-value"></output></span
+              ><input
+                class="form-range"
+                id="lm-screenLength"
+                type="range"
+                min="3"
+                max="30"
+                step="0.5"
+            /></label>
+            <label for="lm-screenGap"
+              ><span
+                >Зазор вокруг лампы
+                <output id="lm-screenGap-value"></output></span
+              ><input
+                class="form-range"
+                id="lm-screenGap"
+                type="range"
+                min="0.5"
+                max="5"
+                step="0.5"
+            /></label>
             <label for="lm-opening"
               ><span
                 >Раскрытие экрана <output id="lm-opening-value"></output></span
@@ -200,9 +224,10 @@
                 <option value="360">360°</option>
               </select></label
             >
+            <p id="lm-screen-size" class="model-hint" aria-live="polite"></p>
             <p class="model-hint" id="lm-screen-note">
-              Стенка 60 мм, радиальный зазор 10 мм вокруг корпуса.
-              Геометрический вариант, механизм регулировки не разработан.
+              Длина измеряется вдоль стенки; глубина по оси зависит от
+              раскрытия. Крепление и нагрев не проверены.
             </p>
           </div>
           <div id="lm-material-controls">

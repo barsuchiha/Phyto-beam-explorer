@@ -84,7 +84,7 @@ function setOptions(id, items, value) {
   }
   select.value = value;
 }
-function renderControls(poses) {
+function renderControls(poses, geometry) {
   const m = luminaires[state.model],
     source = fittingSources[state.source],
     spec = plantShapes[state.plant];
@@ -117,9 +117,11 @@ function renderControls(poses) {
     ["hours", " ч"],
     ["flap", "°"],
     ["opening", "°"],
+    ["screenLength", " см"],
+    ["screenGap", " см"],
     ["reflectance", "%"],
   ])
-    q(name + "-value").textContent = state[name] + unit;
+    q(name + "-value").textContent = fmt(state[name]) + unit;
   const flex = flexibleSection(state.canopy);
   q("canopy-value").textContent = (flex.gap * 100).toFixed(1) + " см";
   // Slider increases to the right while the CAD's bend decreases.
@@ -147,8 +149,12 @@ function renderControls(poses) {
       : "Добавить экран головки · проект";
   q("screen-note").textContent =
     m.family === "Soltech"
-      ? `Экран начинается у светового выхода; стенка 60 мм, зазор 10 мм ${source.type === "bulb" ? "от края колбы" : "от габарита корпуса"}. Верх открыт. Крепление показано условно; нагрев и нагрузка не проверены.`
-      : "Стенка 60 мм, радиальный зазор 10 мм вокруг корпуса. Геометрический вариант, механизм регулировки не разработан.";
+      ? "Экран начинается у светового выхода, верх открыт. Длина измеряется вдоль стенки; зазор — от габарита корпуса. Крепление, нагрев и нагрузка не проверены."
+      : "Длина измеряется вдоль стенки; зазор — от габарита корпуса. Геометрический вариант, механизм регулировки не разработан.";
+  const size = geometry.screenDimensions;
+  q("screen-size").textContent = size
+    ? `У лампы Ø${fmt(size.radius * 200)} см · край Ø${fmt(size.mouthRadius * 200)} см · глубина ${fmt(size.depth * 100)} см. Диаметры указаны по полной окружности, даже при неполном секторе.`
+    : "";
   if (minifermerBulbs[state.source])
     q("screen-note").textContent += " " + bulbScreenNote;
   hide(
@@ -239,9 +245,9 @@ async function render() {
     const poses = await getCAD(state.model);
     if (run !== serial) return;
     state.pose = Math.min(state.pose, poses.length - 1);
-    renderControls(poses);
     const pose = poses[state.pose],
       geometry = buildLuminaireScene(state, pose);
+    renderControls(poses, geometry);
     view?.update(state, pose, geometry);
     if (view) q("loading").hidden = true;
     q("caption").textContent =

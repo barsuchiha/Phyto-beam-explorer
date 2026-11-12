@@ -11,6 +11,7 @@ import {
 } from "../src/models/fitting.js";
 import {
   buildLuminaireScene,
+  coneScreenDimensions,
   flexibleSection,
   quad,
 } from "../src/models/luminaire-scene.js";
@@ -20,6 +21,7 @@ import {
   tracePath,
   triangles,
 } from "../src/models/luminaire-light.js";
+import { mounts, fittingSources } from "../src/data/luminaires.js";
 const cad = (id) =>
   JSON.parse(
     readFileSync(new URL("../data/cad/" + cadAssets[id].file, import.meta.url)),
@@ -156,6 +158,103 @@ test("Soltech screen changes photon paths while preserving PPF and the complete 
     assert.ok(b.returned <= b.target);
     if (material === "absorb") assert.ok(b.room < bare.metrics[1].budget.room);
   }
+});
+test("screen size defaults migrate, clamp and persist independently of opening", () => {
+  const old = normalizeFitting({ model: "luna", screen: true, opening: 60 });
+  assert.equal(old.screenLength, 6);
+  assert.equal(old.screenGap, 1);
+  const saved = normalizeFitting(
+    JSON.parse(
+      JSON.stringify(
+        changeFitting(
+          changeFitting(old, "screenLength", "18.5"),
+          "screenGap",
+          "2.5",
+        ),
+      ),
+    ),
+  );
+  assert.equal(saved.screenLength, 18.5);
+  assert.equal(saved.screenGap, 2.5);
+  assert.equal(saved.opening, 60);
+  assert.equal(normalizeFitting({ screenLength: 999 }).screenLength, 30);
+  assert.equal(normalizeFitting({ screenLength: -1 }).screenLength, 3);
+  assert.equal(normalizeFitting({ screenGap: 999 }).screenGap, 5);
+  assert.equal(normalizeFitting({ screenGap: -1 }).screenGap, 0.5);
+  const size = coneScreenDimensions(
+    { ...old, screenLength: 20, screenGap: 2 },
+    mounts.e27,
+    fittingSources.mfE27_25,
+  );
+  assert.ok(Math.abs(size.radius - 0.085) < 1e-12);
+  assert.ok(Math.abs(size.mouthRadius - 0.185) < 1e-12);
+  assert.ok(Math.abs(size.depth - Math.sqrt(3) / 10) < 1e-12);
+  const panel = coneScreenDimensions(old, mounts.large, fittingSources.mf36);
+  assert.ok(panel.radius >= Math.hypot(0.164, 0.144) / 2 + 0.01 - 1e-12);
+});
+test("screen length and gap resize actual ray surfaces without moving or dimming the lamp", () => {
+  const data = cad("luna")[0];
+  const state = normalizeFitting({
+    model: "luna",
+    source: "mfE27_25",
+    screen: true,
+    sector: 360,
+    opening: 0,
+    plantSize: 50,
+  });
+  let previous;
+  for (const screenLength of [3, 15, 30]) {
+    const s = { ...state, screenLength },
+      g = buildLuminaireScene(s, data);
+    assert.equal(g.collision, false);
+    const first = g.surfaces[0];
+    assert.ok(
+      Math.abs(
+        Math.hypot(...first.a.map((v, i) => v - first.d[i])) -
+          screenLength / 100,
+      ) < 1e-12,
+    );
+    const result = calculateLuminaire({ ...s, material: "absorb" }, g, 8192);
+    if (previous) {
+      assert.deepEqual(g.sources, previous.g.sources);
+      assert.deepEqual(result.output.fluxes, previous.result.output.fluxes);
+      assert.ok(
+        result.metrics[result.middle].budget.screen >
+          previous.result.metrics[previous.result.middle].budget.screen,
+      );
+      assert.ok(result.mean <= previous.result.mean + 1e-10);
+    }
+    previous = { g, result };
+  }
+  for (const material of ["mirror", "diffuse"]) {
+    const s = {
+      ...state,
+      screenLength: 20,
+      screenGap: 4,
+      opening: 60,
+      material,
+    };
+    const g = buildLuminaireScene(s, data),
+      result = calculateLuminaire(s, g, 8192);
+    assert.equal(g.collision, false);
+    assert.ok(Math.abs(g.screenDimensions.radius - 0.105) < 1e-12);
+    for (const metric of result.metrics) {
+      const b = metric.budget;
+      assert.ok(
+        Math.abs(b.target + b.room + b.screen + b.housing + b.residual - 1) <
+          1e-9,
+      );
+    }
+  }
+  const plant = { ...state, plantSize: 100 };
+  assert.equal(
+    buildLuminaireScene({ ...plant, screenLength: 6 }, data).collision,
+    false,
+  );
+  assert.equal(
+    buildLuminaireScene({ ...plant, screenLength: 30 }, data).collision,
+    true,
+  );
 });
 test("flexible canopy preserves arc length, published edge gaps and fixed emitter positions", () => {
   const data = cad("B3flex")[0];
