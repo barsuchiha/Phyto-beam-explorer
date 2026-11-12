@@ -561,7 +561,10 @@ export function createLuminaireView(host, onLeaf = () => {}) {
   function selectLeaf(id) {
     dispose(selectedGroup);
     const leaf = currentScene?.leafGeometry.leaves[id];
-    if (!leaf) return;
+    if (!leaf) {
+      draw();
+      return;
+    }
     const geometry = leafMeshGeometry(
       leaf.patches.flatMap(
         (k) => currentScene.leafGeometry.patches[k].triangles,

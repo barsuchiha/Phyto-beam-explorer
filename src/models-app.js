@@ -271,8 +271,12 @@ function renderLeafDetail() {
   if (!latestResult) return;
   const summary = renderDailyLight(state, latestResult, selectedLeaf);
   const leaf = latestResult.leaves?.find((l) => l.id === summary?.leaf);
-  if (!leaf) return;
   q("leaf-select").value = String(selectedLeaf);
+  if (!leaf) {
+    view?.selectLeaf(-1);
+    q("leaf-detail").textContent = "";
+    return;
+  }
   view?.selectLeaf(leaf.id);
   const values = leaf.sides.map(
     (side, i) =>
@@ -310,7 +314,7 @@ function renderResult(result, geometry, reference) {
     setOptions(
       "leaf-select",
       [
-        [-1, "Самый освещённый · автоматически"],
+        [-1, "Всё растение"],
         ...result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
       ],
       String(selectedLeaf),
@@ -478,6 +482,7 @@ for (const [name, control] of Object.entries(controls))
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
     state = changeFitting(state, name, value);
+    if (name === "plant" || name === "model") selectedLeaf = -1;
     if (name === "model") {
       const url = new URL(location.href);
       url.searchParams.set("model", state.model);
@@ -500,7 +505,12 @@ q("leaf-select").addEventListener("input", () => {
   selectedLeaf = Number(q("leaf-select").value);
   renderLeafDetail();
 });
+q("leaf-clear").addEventListener("click", () => {
+  selectedLeaf = -1;
+  renderLeafDetail();
+});
 q("daily-switch").addEventListener("click", () => {
+  selectedLeaf = -1;
   state = changeFitting(state, "receiver", "leaves");
   save();
   render();

@@ -363,6 +363,7 @@ export function calculateLuminaire(
           );
           return {
             mean: values[middle],
+            values,
             range: [Math.min(...values), Math.max(...values)],
             hits: cells.reduce((sum, b) => sum + b.hits, 0),
           };

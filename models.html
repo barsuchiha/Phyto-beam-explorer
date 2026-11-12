@@ -10,7 +10,7 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=2ad91069cc56" />
+    <link rel="stylesheet" href="./styles/models.css?v=35febd4fc934" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -27,12 +27,12 @@
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
           "./src/data/plants.js": "./src/data/plants.js?v=ac1847f6b1e0",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
-          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=cf444792b04a",
-          "./src/models-app.js": "./src/models-app.js?v=b7289f5a084d",
+          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=87fab558e583",
+          "./src/models-app.js": "./src/models-app.js?v=416c2c1b8644",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=8ddb7d9b7bf4",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
-          "./src/models/daily-light.js": "./src/models/daily-light.js?v=48b159f820a5",
+          "./src/models/daily-light.js": "./src/models/daily-light.js?v=9c0cb00c1151",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
           "./src/models/fitting.js": "./src/models/fitting.js?v=ab0d6246e51e",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
@@ -42,7 +42,7 @@
           "./src/models/leaf-collision.js": "./src/models/leaf-collision.js?v=d7e9ed2e991b",
           "./src/models/leaf-geometry.js": "./src/models/leaf-geometry.js?v=5461205619bf",
           "./src/models/light-readout.js": "./src/models/light-readout.js?v=474f0463b1bc",
-          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=3a184fd9616b",
+          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=20b7c907a016",
           "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=38a07b8ec53c",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer-bulbs.js": "./src/models/minifermer-bulbs.js?v=663c02bb4d09",
@@ -59,12 +59,12 @@
           "./src/ui/bulb-details.js": "./src/ui/bulb-details.js?v=14630a51790e",
           "./src/ui/bulb-mesh.js": "./src/ui/bulb-mesh.js?v=3ab5192c6787",
           "./src/ui/controls.js": "./src/ui/controls.js?v=bed80977e352",
-          "./src/ui/daily-light.js": "./src/ui/daily-light.js?v=063bd50470e4",
+          "./src/ui/daily-light.js": "./src/ui/daily-light.js?v=9489ac956f66",
           "./src/ui/details.js": "./src/ui/details.js?v=b3bf000685a4",
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=1ad5fd8d93fe",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=b0a6214c5ca6",
           "./src/ui/olive-view.js": "./src/ui/olive-view.js?v=d7a04319f710",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=79fa6cfb08cc",
           "./src/ui/results.js": "./src/ui/results.js?v=efc24d0a9431",
@@ -77,7 +77,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=b7289f5a084d"></script>
+    <script type="module" src="./src/models-app.js?v=416c2c1b8644"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -459,6 +459,7 @@
                 aria-label="Свет за день"
               >
                 <g
+                  id="lm-sun-outline"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -473,20 +474,57 @@
                 <path id="lm-daily-fill" fill="currentColor" />
               </svg>
               <div aria-live="polite">
-                <h2 id="lm-daily-heading">Свет за день · от лампы</h2>
+                <h2 id="lm-daily-heading">Всё растение · свет за день</h2>
                 <p id="lm-daily-title" class="daily-title"></p>
                 <p id="lm-daily-amount" class="daily-amount"></p>
                 <p id="lm-daily-reference" class="model-hint">
-                  Полное солнце = нижний ориентир для растения.
+                  Полное солнце — вся листва достигла нижнего ориентира.
                 </p>
               </div>
             </div>
-            <div id="lm-leaf-panel">
+            <p id="lm-daily-coverage" class="daily-coverage"></p>
+            <p id="lm-daily-tip" class="model-hint">
+              Нажми на лист в 3D, чтобы посмотреть его досветку отдельно.
+            </p>
+            <section
+              id="lm-leaf-day-panel"
+              class="leaf-report"
+              aria-labelledby="lm-leaf-day-heading"
+              hidden
+            >
+              <div class="leaf-report-header">
+                <h3 id="lm-leaf-day-heading"></h3>
+                <button
+                  id="lm-leaf-clear"
+                  type="button"
+                  aria-label="Закрыть оценку листа"
+                >
+                  Закрыть
+                </button>
+              </div>
+              <div class="leaf-overview" aria-live="polite">
+                <svg
+                  id="lm-leaf-day-icon"
+                  viewBox="0 0 96 96"
+                  role="img"
+                  aria-label="Досветка листа"
+                >
+                  <use href="#lm-sun-outline" />
+                  <path id="lm-leaf-day-fill" fill="currentColor" />
+                </svg>
+                <div>
+                  <p id="lm-leaf-day-title" class="daily-title"></p>
+                  <p id="lm-leaf-day-amount" class="daily-amount"></p>
+                </div>
+              </div>
+            </section>
+            <details id="lm-leaf-panel" class="leaf-picker">
+              <summary>Или выбрать лист из списка</summary>
               <label for="lm-leaf-select"
-                >Смотрим лист · можно нажать на него в 3D
+                >Лист
                 <select class="form-select" id="lm-leaf-select"></select>
               </label>
-            </div>
+            </details>
             <p id="lm-daily-context" class="model-hint"></p>
             <button id="lm-daily-switch" type="button" hidden>
               Считать на листьях
@@ -495,6 +533,7 @@
           <details id="lm-light-details" class="light-details">
             <summary>Цифры и баланс света</summary>
             <p id="lm-trace-note" class="model-hint"></p>
+            <p id="lm-daily-calculation" class="model-hint"></p>
             <div class="model-metrics" id="lm-metrics"></div>
             <p class="model-hint" id="lm-source-summary"></p>
             <p class="model-hint" id="lm-daily-note"></p>

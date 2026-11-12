@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dailyLeafLight, dailyPercent } from "../src/models/daily-light.js";
+import {
+  dailyLeafLight,
+  dailyPlantLight,
+  dailyPercent,
+} from "../src/models/daily-light.js";
 
 const state = { plant: "lyrata", hours: 10 };
 const face = (dli, lo = dli, hi = dli) => ({
@@ -67,4 +71,90 @@ test("lamp off, sparse sampling and missing old leaf selection have distinct saf
   zero.leaves[0].sides[0].hits = 0;
   assert.equal(dailyLeafLight(zero, state).sparse, true);
   assert.equal(dailyLeafLight(fixture(8), state, 999).leaf, 0);
+});
+
+const plantFixture = (specs, middle = 0) => ({
+  receiver: "leaves",
+  middle,
+  output: { fluxes: specs[0].doses.map(() => 10) },
+  leaves: specs.map(({ area, doses, backs = doses.map(() => 0) }, id) => ({
+    id,
+    area,
+    sides: [doses, backs].map((values) => ({
+      mean: values[middle] / 0.036,
+      values: values.map((v) => v / 0.036),
+      range: [Math.min(...values) / 0.036, Math.max(...values) / 0.036],
+      hits: 500,
+    })),
+  })),
+});
+const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-10, `${a} vs ${b}`);
+
+test("the whole-plant sun caps each leaf before area weighting so excess cannot hide shade", () => {
+  const r = plantFixture([
+    { area: 9, doses: [0] },
+    { area: 1, doses: [60] },
+  ]);
+  const s = dailyPlantLight(r, state);
+  near(s.mean, 6); // Uncapped average would appear to meet the reference.
+  near(s.fill, 0.1);
+  near(s.reachedRange[0], 0.1);
+  near(s.aboveRange[0], 0.1);
+  assert.equal(s.kind, "mixed");
+});
+
+test("whole-plant weighting uses leaf area, not leaf count or both sides averaged together", () => {
+  const r = plantFixture([
+    { area: 1, doses: [3] },
+    { area: 3, doses: [6] },
+  ]);
+  const original = JSON.stringify(r),
+    s = dailyPlantLight(r, state);
+  near(s.fill, 0.875);
+  near(s.reachedRange[0], 0.75);
+  assert.equal(s.area, 4);
+  assert.equal(s.kind, "partial");
+  assert.equal(JSON.stringify(r), original);
+});
+
+test("whole-plant intervals keep source scenarios correlated across leaves", () => {
+  const r = plantFixture([
+    { area: 1, doses: [0, 12] },
+    { area: 1, doses: [12, 0] },
+  ]);
+  const s = dailyPlantLight(r, state);
+  assert.deepEqual(s.ratioRange, [0.5, 0.5]);
+  assert.deepEqual(s.reachedRange, [0.5, 0.5]);
+  assert.equal(s.kind, "mixed");
+});
+
+test("whole-plant evaluation keeps the same physical face across scenarios and flags ambiguity", () => {
+  const r = plantFixture([{ area: 1, doses: [9, 0], backs: [0, 9] }]);
+  const s = dailyPlantLight(r, state);
+  assert.deepEqual(s.ratioRange, [0, 1]);
+  assert.equal(s.kind, "uncertain");
+  const u = dailyPlantLight(plantFixture([{ area: 1, doses: [3, 8] }]), state);
+  assert.equal(u.kind, "uncertain");
+});
+
+test("whole-plant sun distinguishes enough, too high, off and unavailable receivers", () => {
+  const r = plantFixture([
+    { area: 1, doses: [8] },
+    { area: 2, doses: [9] },
+  ]);
+  assert.equal(dailyPlantLight(r, state).kind, "enough");
+  assert.equal(dailyPlantLight(r, state).fill, 1);
+  assert.equal(
+    dailyPlantLight(plantFixture([{ area: 1, doses: [12] }]), state).kind,
+    "high",
+  );
+  const off = plantFixture([{ area: 1, doses: [0] }]);
+  off.output.fluxes = [0];
+  assert.equal(dailyPlantLight(off, state).kind, "off");
+  assert.equal(dailyPlantLight(off, state).fill, 0);
+  assert.equal(dailyPlantLight({ ...r, receiver: "crown" }, state), null);
+  assert.equal(
+    dailyPlantLight(plantFixture([{ area: 0, doses: [8] }]), state),
+    null,
+  );
 });

@@ -149,6 +149,14 @@ test("Lambertian disk interception matches R²/(R²+h²); map and both-face mean
   assert.ok(Math.abs(m.budget.target - 0.25 / 4.25) < 0.0002);
   assert.ok(Math.abs(r.mean * 2 - r.leaves[0].sides[0].mean) < 1e-10);
   assert.equal(r.leaves[0].sides[1].mean, 0);
+  for (const [k, metric] of r.metrics.entries()) {
+    const incident = r.leaves.reduce(
+      (sum, leaf) =>
+        sum + leaf.area * leaf.sides.reduce((s, side) => s + side.values[k], 0),
+      0,
+    );
+    assert.ok(Math.abs(incident - metric.budget.target * metric.flux) < 1e-10);
+  }
   assert.ok(
     Math.abs(
       r.bins.reduce((a, b) => a + b.area * b.ppfd, 0) -

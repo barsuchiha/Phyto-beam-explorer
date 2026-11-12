@@ -426,6 +426,68 @@ a:focus-visible {
 #lm-daily-context {
   margin: 12px 0 0;
 }
+.daily-coverage {
+  margin: 16px 0 8px;
+  font-size: 13px;
+}
+#lm-daily-tip {
+  margin: 8px 0;
+}
+.leaf-picker > summary {
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--muted-foreground);
+}
+.leaf-picker label {
+  margin-top: 10px;
+}
+.leaf-report {
+  margin-top: 16px;
+  border-left: 2px solid var(--border);
+  padding: 2px 0 2px 14px;
+}
+.leaf-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.leaf-report-header h3 {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+#lm-leaf-clear {
+  font: inherit;
+  font-size: 12px;
+  background: transparent;
+  color: var(--muted-foreground);
+  border: 0;
+  cursor: pointer;
+  padding: 5px;
+}
+#lm-leaf-clear:hover {
+  color: var(--foreground);
+}
+.leaf-overview {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+#lm-leaf-day-icon {
+  width: 54px;
+  height: 54px;
+  color: #d9c180;
+}
+.leaf-overview .daily-title {
+  font-size: 16px;
+}
+.leaf-overview .daily-amount {
+  font-size: 12px;
+}
 .daily-report #lm-leaf-panel {
   margin-top: 18px;
   max-width: 460px;
