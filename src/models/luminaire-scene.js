@@ -2,6 +2,7 @@ import { luminaires, mounts, fittingSources } from "../data/luminaires.js";
 import { crownGeometry, add, sub, mul, dot, unit } from "./crown.js";
 import { sourceFit } from "./fitting.js";
 import { buildLeafGeometry } from "./leaf-geometry.js";
+import { leafSurfaceCollision } from "./leaf-collision.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -228,6 +229,12 @@ export function buildLuminaireScene(state, pose) {
       ((p[2] - crown.center[2]) / crown.rz) ** 2 <
     1;
   // Conservative envelope check. This is not full CAD collision detection.
+  const leafGeometry = buildLeafGeometry(
+    crown,
+    state.plant,
+    state.plantSize,
+    state.leafTilt ?? 0,
+  );
   const collision =
     sources.some((s) =>
       [
@@ -241,14 +248,15 @@ export function buildLuminaireScene(state, pose) {
     ) ||
     surfaces.some((s) =>
       [s.a, s.b, s.c, s.d, mul(add(s.a, s.c), 0.5)].some(inside),
-    );
+    ) ||
+    leafSurfaceCollision(leafGeometry, [...boards, ...surfaces]);
   return {
     model,
     mount,
     source,
     sources,
     crown,
-    leafGeometry: buildLeafGeometry(crown, state.plant, state.plantSize),
+    leafGeometry,
     surfaces,
     screenSupports,
     screenDimensions,

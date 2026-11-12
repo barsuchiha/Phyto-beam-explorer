@@ -295,6 +295,7 @@ a:focus-visible {
   .model-controls > label:first-child,
   .model-controls > hr,
   .model-controls > .model-hint,
+  #lm-architecture-details,
   #lm-cone-controls,
   #lm-material-controls {
     grid-column: 1/-1;

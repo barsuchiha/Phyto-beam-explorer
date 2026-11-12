@@ -3,6 +3,7 @@ import { luminaires, mounts, fittingSources } from "./data/luminaires.js";
 import { cadAssets } from "./data/cad-assets.js";
 import { plants } from "./data/plants.js";
 import { plantShapes } from "./data/plant-shapes.js";
+import { plantArchitecture } from "./data/plant-architecture.js";
 import {
   normalizeFitting,
   changeFitting,
@@ -118,6 +119,7 @@ function renderControls(poses, geometry) {
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
+    ["leafTilt", "°"],
     ["install", " см"],
     ["plantOffset", " см"],
     ["hours", " ч"],
@@ -128,6 +130,12 @@ function renderControls(poses, geometry) {
     ["reflectance", "%"],
   ])
     q(name + "-value").textContent = fmt(state[name]) + unit;
+  const architecture = plantArchitecture[state.plant];
+  q("posture-note").textContent =
+    `0° — типовая форма; минус опускает кончики, плюс поднимает. Сейчас высота от грунта ${fmt(geometry.leafGeometry.height * 100)} см. Площадь листьев при повороте сохраняется.${state.receiver === "crown" ? " Чтобы наклон влиял на свет на растении, выбери «На листьях»." : ""}`;
+  q("architecture-note").textContent =
+    `${architecture.note} Наклон оси пластинки у основания: ${architecture.pitch.join("…")}° к горизонту; изменение к кончику: ${architecture.bend}°. Эти углы, размеры и густота — допущения, не паспорт вида. Поправка задаёт статичное положение на весь расчёт; фототропизм и суточное движение не моделируются.`;
+  q("architecture-source").href = architecture.url;
   const flex = flexibleSection(state.canopy);
   q("canopy-value").textContent = (flex.gap * 100).toFixed(1) + " см";
   // Slider increases to the right while the CAD's bend decreases.
@@ -221,7 +229,7 @@ function renderLeafDetail() {
       `Сторона ${i === 0 ? "A" : "B"}: PPFD ${fmt(side.range[0])}–${fmt(side.range[1])}, DLI ${dose(plantModel.dli(side.range[0], state.hours))}–${dose(plantModel.dli(side.range[1], state.hours))}`,
   );
   q("leaf-detail").textContent =
-    `Лист ${selectedLeaf + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A/B — стороны нарисованной сетки, не измеренные верх/низ живого листа.` +
+    `Лист ${selectedLeaf + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A — лицевая сторона модели, B — обратная; положение настоящего листа не измерено.` +
     (leaf.sides.some((s) => s.hits === 0)
       ? " Ноль попаданий лучей не доказывает полную темноту: слабый свет может не попасть в выборку."
       : "");
@@ -240,7 +248,7 @@ function renderResult(result, geometry, reference) {
     renderLeafDetail();
   }
   q("receiver-note").textContent = leafMode
-    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Это показатель распределения, не оценка достаточности света для растения. Наклоны и форма листьев условные; цвет маленьких участков может быть шумным. Синие обратные стороны не означают, что всё растение недосвечено.`
+    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Это показатель распределения, не оценка достаточности света для растения. Форма и наклоны заданы по типу растения, но остаются допущениями; цвет маленьких участков может быть шумным. Синие обратные стороны не означают, что всё растение недосвечено.`
     : "Среднее включает всю оболочку и её теневую сторону. Это показатель распределения, не оценка достаточности света для растения. Его нельзя напрямую сравнивать с датчиком сверху или средним на первой странице. Рисованные листья в этом режиме не участвуют в расчёте.";
   const { metrics, range, middle } = result,
     b = metrics[middle].budget;
@@ -311,7 +319,7 @@ async function render() {
     ).note;
     hide("collision", !geometry.collision);
     q("collision").textContent =
-      "Габарит кроны пересекает источник или экран. Подними конструкцию, сдвинь растение или выбери меньший размер: расчёт для этого положения остановлен.";
+      "Крона или листья пересекают источник или экран. Подними конструкцию, сдвинь растение или измени его размер/наклон листьев: расчёт для этого положения остановлен.";
     q("metrics").replaceChildren();
     q("budget").replaceChildren();
     for (const id of [

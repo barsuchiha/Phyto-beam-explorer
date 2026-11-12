@@ -9,7 +9,8 @@ export function referenceDetector(scene) {
   const center = [
     scene.crown.center[0],
     scene.crown.center[1],
-    scene.crown.center[2] + scene.crown.rz,
+    scene.leafGeometry?.bounds?.max[2] ??
+      scene.crown.center[2] + scene.crown.rz,
   ];
   const point = (i) => [
     center[0] + REFERENCE_RADIUS * Math.cos((i * 2 * Math.PI) / 64),

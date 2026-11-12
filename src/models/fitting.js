@@ -37,6 +37,7 @@ export const modelDefaults = {
   source: "square50",
   plant: "monstera",
   plantSize: 100,
+  leafTilt: 0,
   install: 150,
   plantOffset: 0,
   dim: 70,
@@ -64,6 +65,7 @@ export function normalizeFitting(input = {}) {
   if (!Object.hasOwn(plantShapes, s.plant)) s.plant = "monstera";
   const p = plantShapes[s.plant];
   s.plantSize = clamp(s.plantSize, p.min, p.max, p.initial);
+  s.leafTilt = clamp(s.leafTilt, -20, 20, 0);
   s.pose = Math.round(
     clamp(
       s.pose,
@@ -103,8 +105,10 @@ export function changeFitting(state, key, value) {
     next.install = luminaires[value].install ?? 130;
     next.mount = luminaires[value].mounts[0];
   }
-  if (key === "plant" && plantShapes[value])
+  if (key === "plant" && plantShapes[value]) {
     next.plantSize = plantShapes[value].initial;
+    next.leafTilt = 0;
+  }
   const normalized = normalizeFitting(next);
   if (
     normalized.source.startsWith("mfE27_") &&

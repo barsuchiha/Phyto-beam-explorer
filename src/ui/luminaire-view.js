@@ -46,31 +46,8 @@ function leafMeshGeometry(triangles) {
   geometry.computeVertexNormals();
   return geometry;
 }
-function plant(group, c, id, height, leafGeometry) {
-  const art = plantIllustration(id, height),
-    sx = c.rx / art.radius,
-    sz = c.height / art.top;
-  const growPoint = (x, z, depth = 0) => [
-    c.soil[0] + x * sx,
-    c.soil[1] + depth,
-    c.soil[2] + z * sz,
-  ];
-  for (const stem of art.stems) {
-    const nums = stem.d.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi).map(Number);
-    const p = [];
-    for (let j = 0; j <= 16; j++) {
-      const t = j / 16,
-        q = 1 - t;
-      if (stem.d.includes("Q"))
-        p.push(
-          growPoint(
-            q * q * nums[0] + 2 * q * t * nums[2] + t * t * nums[4],
-            q * q * nums[1] + 2 * q * t * nums[3] + t * t * nums[5],
-          ),
-        );
-    }
-    if (p.length) group.add(line(p, 0x55694b));
-  }
+export function populatePlant(group, c, id, height, leafGeometry) {
+  for (const stem of leafGeometry.stems) group.add(line(stem.points, 0x55694b));
   for (const leaf of leafGeometry.leaves) {
     const geometry = leafMeshGeometry(
       leaf.patches.flatMap((id) => leafGeometry.patches[id].triangles),
@@ -84,17 +61,9 @@ function plant(group, c, id, height, leafGeometry) {
     );
     mesh.userData.leaf = leaf.id;
     group.add(mesh);
-    const drawn = art.leaves[leaf.id],
-      depth = Math.sin(leaf.id * 2.399) * c.ry * 0.55;
-    if (!drawn.path) {
-      const vein = line(
-        [growPoint(drawn.x, drawn.y), growPoint(drawn.tx, drawn.ty, depth)],
-        drawn.pattern ? 0xc6ce88 : 0x94a878,
-        0.75,
-      );
-      vein.userData.leaf = leaf.id;
-      group.add(vein);
-    }
+    const vein = line(leaf.vein, leaf.pattern ? 0xc6ce88 : 0x94a878, 0.75);
+    vein.userData.leaf = leaf.id;
+    group.add(vein);
   }
   for (const flower of leafGeometry.decorations)
     group.add(
@@ -401,7 +370,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
         }
       }
     }
-    plant(
+    populatePlant(
       plantGroup,
       geometry.crown,
       state.plant,
