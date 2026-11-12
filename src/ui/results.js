@@ -112,7 +112,8 @@ export function createResults(q) {
             " · условная оценка оболочки",
           color: plantModel.categories[meanClass].color,
         };
-    q("pbe-status").textContent = selected.name + " · " + status.label;
+    q("pbe-status").textContent =
+      selected.name + " · вклад лампы: " + status.label;
     q("pbe-status-dot").style.background = status.color;
     if (estimated)
       q("pbe-estimate-notice").textContent =
@@ -121,7 +122,7 @@ export function createResults(q) {
           : "Оценка с допущениями: диапазон по 9 сочетаниям потока и пучка. ") +
         `Это не измерение и не доверительный интервал. Карта и проценты площади — базовый сценарий: средний PPFD ≈ ${number(metrics.mean)} мкмоль/(м²·с), DLI ≈ ${decimal(daily)}.`;
     q("pbe-target").textContent =
-      `Ориентир DLI: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: PPFD ${Math.round(target.L / (state.hours * 0.0036))}–${Math.round(target.U / (state.hours * 0.0036))} мкмоль/(м²·с). Среднее по наклонной оболочке не равно измерению над кроной.`;
+      `Ориентир DLI за весь день: ${target.L}–${target.U} моль/(м²·сут) · при ${state.hours} ч: PPFD ${Math.round(target.L / (state.hours * 0.0036))}–${Math.round(target.U / (state.hours * 0.0036))} мкмоль/(м²·с). Здесь только вклад лампы; свет окна не задан, поэтому полная доза и достаточность освещения не определены. Среднее по наклонной оболочке не равно измерению над кроной.`;
     q("pbe-plant-source").href = selected.url;
     for (let i = 0; i < legendItems.length; i++)
       legendItems[i].textContent =

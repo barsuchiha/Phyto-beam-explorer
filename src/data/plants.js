@@ -126,9 +126,9 @@ export const plants = {
   },
 };
 export const categories = [
-  { label: "Света не хватает", color: "var(--pbe-blue)" },
-  { label: "Условно хватает", color: "var(--pbe-yellow)" },
-  { label: "Оптимально*", color: "var(--pbe-green)" },
-  { label: "Слишком много*", color: "var(--pbe-red)" },
-  { label: "Опасно*", color: "var(--pbe-burgundy)" },
+  { label: "Значительно ниже ориентира", color: "var(--pbe-blue)" },
+  { label: "Ниже ориентира", color: "var(--pbe-yellow)" },
+  { label: "В диапазоне ориентира", color: "var(--pbe-green)" },
+  { label: "Выше ориентира", color: "var(--pbe-red)" },
+  { label: "Значительно выше ориентира", color: "var(--pbe-burgundy)" },
 ];

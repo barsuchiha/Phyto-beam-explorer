@@ -4,6 +4,7 @@ import { OrbitControls } from "../vendor/OrbitControls.js";
 import { plantIllustration } from "../models/plant-illustration.js";
 import { add, mul, surfacePoint } from "../models/crown.js";
 import { plantModel } from "../models/plants.js";
+import { referenceDetector } from "../models/reference-light.js";
 
 const vector = (p) => new T.Vector3(...p),
   colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
@@ -149,7 +150,8 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     opticGroup = new T.Group(),
     rayGroup = new T.Group(),
     heatGroup = new T.Group();
-  const selectedGroup = new T.Group();
+  const selectedGroup = new T.Group(),
+    referenceGroup = new T.Group();
   scene.add(
     modelGroup,
     plantGroup,
@@ -158,6 +160,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     rayGroup,
     heatGroup,
     selectedGroup,
+    referenceGroup,
   );
   let currentResult,
     currentScene,
@@ -221,6 +224,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       rayGroup,
       heatGroup,
       selectedGroup,
+      referenceGroup,
     ])
       dispose(group);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
@@ -404,6 +408,37 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       state.plantSize,
       geometry.leafGeometry,
     );
+    const detector = referenceDetector(geometry);
+    const [cx, cy, cz] = detector.center,
+      r = detector.radius;
+    referenceGroup.add(
+      line(
+        Array.from({ length: 65 }, (_, i) => [
+          cx + r * Math.cos((i * Math.PI) / 32),
+          cy + r * Math.sin((i * Math.PI) / 32),
+          cz,
+        ]),
+        0xf3efcd,
+      ),
+    );
+    referenceGroup.add(
+      line(
+        [
+          [cx - r / 2, cy, cz],
+          [cx + r / 2, cy, cz],
+        ],
+        0xf3efcd,
+      ),
+    );
+    referenceGroup.add(
+      line(
+        [
+          [cx, cy - r / 2, cz],
+          [cx, cy + r / 2, cz],
+        ],
+        0xf3efcd,
+      ),
+    );
     host.dataset.plant = state.plant;
     host.dataset.model = state.model;
     host.dataset.source = state.source;
@@ -411,6 +446,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       state.plant,
       state.plantSize,
     ).leaves.length;
+    host.dataset.referenceHeight = String(detector.center[2]);
     if (lastModel !== state.model) {
       lastModel = state.model;
       fit();

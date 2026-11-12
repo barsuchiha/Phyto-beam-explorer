@@ -14,6 +14,7 @@ import {
   flexibleSection,
 } from "./models/luminaire-scene.js";
 import { calculateLuminaire, lightOutput } from "./models/luminaire-light.js";
+import { calculateReferenceLight } from "./models/reference-light.js";
 import { createLuminaireView } from "./ui/luminaire-view.js";
 import { plantModel } from "./models/plants.js";
 
@@ -225,7 +226,7 @@ function renderLeafDetail() {
       ? " Ноль попаданий лучей не доказывает полную темноту: слабый свет может не попасть в выборку."
       : "");
 }
-function renderResult(result, geometry) {
+function renderResult(result, geometry, reference) {
   latestResult = result;
   const leafMode = result.receiver === "leaves";
   hide("leaf-panel", !leafMode);
@@ -239,8 +240,8 @@ function renderResult(result, geometry) {
     renderLeafDetail();
   }
   q("receiver-note").textContent = leafMode
-    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². PPFD усреднён по обеим поверхностям, включая теневые участки. Цвет — по четырём участкам на каждой стороне; листья затеняют друг друга. Форма и наклоны условные, пропускание и переотражения листьев не рассчитаны. Карта с ограниченной выборкой: цвет маленьких участков может быть шумным. Это другая модель, её среднее нельзя напрямую сравнивать со средним по оболочке.`
-    : "PPFD усредняется по всей внешней оболочке кроны, включая теневую сторону. Это другая область усреднения, чем на первой странице. Рисованные листья не участвуют в расчёте.";
+    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Это показатель распределения, не оценка достаточности света для растения. Наклоны и форма листьев условные; цвет маленьких участков может быть шумным. Синие обратные стороны не означают, что всё растение недосвечено.`
+    : "Среднее включает всю оболочку и её теневую сторону. Это показатель распределения, не оценка достаточности света для растения. Его нельзя напрямую сравнивать с датчиком сверху или средним на первой странице. Рисованные листья в этом режиме не участвуют в расчёте.";
   const { metrics, range, middle } = result,
     b = metrics[middle].budget;
   const ppfRange = [
@@ -251,9 +252,24 @@ function renderResult(result, geometry) {
     ppfRange[0] === ppfRange[1]
       ? fmt(metrics[middle].flux)
       : fmt(ppfRange[0]) + "–" + fmt(ppfRange[1]);
-  const ranged = range[1] - range[0] > 0.05;
+  const rangeText = (values, format = fmt) =>
+    Math.abs(values[1] - values[0]) > 0.05
+      ? format(values[0]) + "–" + format(values[1])
+      : format((values[0] + values[1]) / 2);
+  const dliRange = (values) =>
+    values.map((v) => plantModel.dli(v, state.hours));
   q("metrics").innerHTML =
-    `<div><span>Средний PPFD</span><strong>${ranged ? fmt(range[0]) + "–" + fmt(range[1]) : fmt(result.mean)}</strong><small>мкмоль/(м²·с) · ${leafMode ? "обе стороны листьев" : "вся крона"}</small></div><div><span>DLI за ${state.hours} ч</span><strong>${ranged ? dose(plantModel.dli(range[0], state.hours)) + "–" + dose(plantModel.dli(range[1], state.hours)) : dose(plantModel.dli(result.mean, state.hours))}</strong><small>моль/(м²·сутки)</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
+    `<div><span>PPFD · датчик сверху</span><strong>${rangeText(reference.range)}</strong><small>мкмоль/(м²·с) · круг Ø10 см</small></div><div><span>DLI от лампы · ${state.hours} ч</span><strong>${rangeText(dliRange(reference.range), dose)}</strong><small>моль/(м²·сутки) · на датчике</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
+  const target = plantModel.groups[plants[state.plant].group];
+  q("reference-note").textContent =
+    `Светлый круг в 3D — горизонтальный датчик на высоте ${fmt(reference.center[2] * 100)} см от пола, над центром растения. Считается только его верхняя сторона, отдельно от листьев; экран учитывается. При боковой подсветке показание сверху может быть низким — смотри также карту листьев.` +
+    (reference.lowSample && ppfRange[1] > 0
+      ? " Мало попаданий в датчик: значение нестабильно, ноль не доказывает отсутствия света."
+      : "");
+  q("daily-note").textContent =
+    `Условный ориентир выбранной световой группы: DLI ${target.L}–${target.U} моль/(м²·сутки) за весь день. Здесь показана только добавка от лампы. Свет окна не задан, поэтому полная суточная доза и достаточность освещения не определены. Диапазон отражает сценарии источника, не все ошибки модели.`;
+  q("surface-summary").textContent =
+    `${leafMode ? "По листьям · обе стороны" : "По всей оболочке"}: средний PPFD ${rangeText(range)} мкмоль/(м²·с); DLI от лампы ${rangeText(dliRange(range), dose)} моль/(м²·сутки).`;
   const bar = document.createElement("div");
   bar.className = "model-budget";
   const labels = document.createElement("div");
@@ -298,6 +314,13 @@ async function render() {
       "Габарит кроны пересекает источник или экран. Подними конструкцию, сдвинь растение или выбери меньший размер: расчёт для этого положения остановлен.";
     q("metrics").replaceChildren();
     q("budget").replaceChildren();
+    for (const id of [
+      "reference-note",
+      "daily-note",
+      "surface-summary",
+      "receiver-note",
+    ])
+      q(id).textContent = "";
     if (geometry.collision) {
       q("status").textContent =
         "Показана геометрическая примерка; PPFD для пересечения не рассчитывается.";
@@ -308,7 +331,8 @@ async function render() {
       if (run !== serial) return;
       try {
         const result = calculateLuminaire(state, geometry);
-        if (run === serial) renderResult(result, geometry);
+        const reference = calculateReferenceLight(state, geometry);
+        if (run === serial) renderResult(result, geometry, reference);
       } catch (error) {
         q("status").textContent =
           "Не удалось рассчитать свет для этой конфигурации.";
