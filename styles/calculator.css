@@ -10,6 +10,11 @@
   --pbe-burgundy: light-dark(#781c3b, #a52b50);
   --plant-ink: light-dark(#355947, #93bda3);
   --plant-fill: light-dark(#b3c7b4, #294a3b);
+  --plant-dark: light-dark(#4c6856, #18382c);
+  --plant-variegation: light-dark(#ded9a8, #a2bd83);
+  --plant-cream: light-dark(#f1f0d9, #e1e6cd);
+  --plant-flower: light-dark(#b75c64, #c76c78);
+  --plant-spadix: light-dark(#cab876, #e2cd8e);
   --beam-ink: light-dark(#aa883e, #c3ab6f);
   --screen-fill: light-dark(#a7aaa4, #71766e);
   --reflector-mirror: light-dark(#b6c8d2, #9eafb9);

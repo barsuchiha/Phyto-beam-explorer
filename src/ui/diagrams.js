@@ -1,3 +1,4 @@
+import { plantDrawing } from "./plant-drawing.js";
 import { plantModel } from "../models/plants.js";
 import { illustrativePath, reflectionNames } from "../models/reflections.js";
 import {
@@ -23,103 +24,6 @@ const points = (arr) => arr.map((p) => p.join(",")).join(" ");
 function setup(svg) {
   svg.replaceChildren();
   svg.setAttribute("viewBox", "0 0 520 440");
-}
-function plantDrawing(svg, c, P) {
-  const line = (a, b, attrs = {}) =>
-    el(svg, "line", {
-      x1: P(a)[0],
-      y1: P(a)[1],
-      x2: P(b)[0],
-      y2: P(b)[1],
-      stroke: "var(--plant-ink)",
-      "stroke-width": 2,
-      ...attrs,
-    });
-  const stem = [0, 0, c.height * 0.75];
-  if (c.spec.form === "grass") {
-    for (let i = -7; i <= 7; i++) {
-      const x = ((c.rx * i) / 7) * 0.96,
-        z = c.height * (0.32 + 0.22 * (1 - Math.abs(i) / 7));
-      const A = P([0, 0, c.height * 0.07]),
-        B = P([x * 0.2, 0, c.height]),
-        C = P([x * 0.85, 0, c.height * (0.95 - Math.abs(i) * 0.025)]),
-        D = P([x, 0, z]),
-        E = P([x * 0.4 + c.rx * 0.045, 0, c.height * 0.78]);
-      el(svg, "path", {
-        d: `M${A} C${B} ${C} ${D} Q${E} ${A}Z`,
-        fill: "var(--plant-fill)",
-        stroke: "var(--plant-ink)",
-        "stroke-width": 1.1,
-      });
-    }
-  } else {
-    line([0, 0, 0], stem);
-    for (let i = 0; i < 11; i++) {
-      const z = c.center[2] - c.rz * 0.65 + (i / 10) * c.rz * 1.35;
-      const side = i % 2 ? -1 : 1,
-        spread = Math.sqrt(Math.max(0.1, 1 - ((z - c.center[2]) / c.rz) ** 2));
-      const x = side * c.rx * 0.53 * spread;
-      const center = P([x, 0, z]);
-      line([0, 0, Math.max(0.05, z - c.rz * 0.3)], [x, 0, z]);
-      const scale = Math.abs(P([1, 0, 0])[0] - P([0, 0, 0])[0]);
-      const narrow = ["ribbon", "lance"].includes(c.spec.form),
-        round = c.spec.form === "round";
-      const w = c.rx * (narrow ? 0.23 : 0.36) * scale,
-        h = c.rz * (round ? 0.13 : 0.21) * scale;
-      const g = el(svg, "g", {
-        transform: `translate(${center[0]} ${center[1]}) rotate(${side * (narrow ? 35 : 25)})`,
-      });
-      el(g, "path", {
-        d: `M0 ${h} C${-w * 1.5} ${h * 0.25} ${-w} ${-h * 0.9} 0 ${-h} C${w} ${-h * 0.9} ${w * 1.5} ${h * 0.25} 0 ${h}Z`,
-        fill: "var(--plant-fill)",
-        stroke: "var(--plant-ink)",
-        "stroke-width": 1.2,
-      });
-      el(g, "path", {
-        d: `M0 ${h} Q${-w * 0.12} 0 0 ${-h * 0.85}`,
-        fill: "none",
-        stroke: "var(--plant-ink)",
-        "stroke-width": 0.7,
-      });
-      if (c.spec.form === "split")
-        for (const y of [-0.45, 0, 0.45])
-          for (const side of [-1, 1])
-            el(g, "path", {
-              d: `M${side * w * 0.25} ${y * h + h * 0.15} Q${side * w * 0.6} ${y * h} ${side * w * 0.85} ${y * h - h * 0.15}`,
-              stroke: "var(--background)",
-              "stroke-width": 2.2,
-              fill: "none",
-            });
-      if (c.spec.form === "pinnate")
-        for (const y of [-0.4, 0.2])
-          for (const side of [-1, 1])
-            el(g, "ellipse", {
-              cx: side * w * 0.43,
-              cy: y * h,
-              rx: w * 0.42,
-              ry: h * 0.25,
-              fill: "var(--plant-fill)",
-              stroke: "var(--plant-ink)",
-              "stroke-width": 0.6,
-            });
-    }
-  }
-  const pot = Math.min(0.34, Math.max(0.12, c.rx * 0.65));
-  el(svg, "polygon", {
-    points: points([
-      P([-pot / 2, 0, 0]),
-      P([pot / 2, 0, 0]),
-      P([pot * 0.36, 0, -pot * 0.8]),
-      P([-pot * 0.36, 0, -pot * 0.8]),
-    ]),
-    fill: "var(--muted)",
-    stroke: "var(--muted-foreground)",
-    "stroke-width": 1,
-  });
-  line([-pot * 0.53, 0, 0], [pot * 0.53, 0, 0], {
-    stroke: "var(--muted-foreground)",
-    "stroke-width": 2,
-  });
 }
 function sceneDrawing(svg, state, scene) {
   const { crown: c, rig, groups } = scene.metrics;
@@ -235,7 +139,7 @@ function sceneDrawing(svg, state, scene) {
     "stroke-dasharray": "3 5",
     "stroke-opacity": 0.35,
   });
-  plantDrawing(svg, c, P);
+  plantDrawing(svg, c, P, state.plant);
   // Conical-sector wall shared by the whole source assembly.
   if (rig.sector) {
     const panels = [];

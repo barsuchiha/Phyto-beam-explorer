@@ -64,6 +64,66 @@ export const plants = {
     group: "high",
     url: "https://plants.ces.ncsu.edu/plants/crassula-ovata/",
   },
+  pothos: {
+    name: "Эпипремнум золотистый",
+    size: "лиана на опоре",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/epipremnum-aureum/",
+  },
+  philodendron: {
+    name: "Филодендрон сердцелистный",
+    size: "лиана на опоре",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/philodendron-hederaceum/",
+  },
+  syngonium: {
+    name: "Сингониум ножколистный",
+    size: "среднее",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/syngonium-podophyllum/",
+  },
+  snake: {
+    name: "Сансевиерия · щучий хвост",
+    size: "среднее",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/",
+  },
+  palm: {
+    name: "Хамедорея изящная",
+    size: "крупномер",
+    group: "low",
+    url: "https://plants.ces.ncsu.edu/plants/chamaedorea-elegans/",
+  },
+  calathea: {
+    name: "Калатея орбифолия",
+    size: "среднее",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/goeppertia-orbifolia/",
+  },
+  alocasia: {
+    name: "Алоказия Polly",
+    size: "среднее",
+    group: "medium",
+    url: "https://www.rhs.org.uk/plants/372528/alocasia-polly/details",
+  },
+  anthurium: {
+    name: "Антуриум Андре",
+    size: "среднее",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/anthurium-andraeanum/",
+  },
+  benjamina: {
+    name: "Фикус Бенджамина",
+    size: "крупномер",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/ficus-benjamina/",
+  },
+  peperomia: {
+    name: "Пеперомия туполистная",
+    size: "среднее",
+    group: "medium",
+    url: "https://plants.ces.ncsu.edu/plants/peperomia-obtusifolia/",
+  },
 };
 export const categories = [
   { label: "Света не хватает", color: "var(--pbe-blue)" },

@@ -60,7 +60,7 @@ export function renderControls(q, controls, state, scene) {
     (state.reflectance === 100 ? " · идеальный предел" : " · допущение");
   controls.screenTurn.disabled = state.screenSector === 360;
   q("pbe-size-note").textContent =
-    `Для этого вида: ${shape.min}–${shape.max} см от грунта. Это диапазон комнатных экземпляров для моделирования; пропорции кроны условные.`;
+    `Для этого вида: ${shape.min}–${shape.max} см от грунта. Это диапазон комнатных экземпляров для моделирования; пропорции и густота условные. С высотой на рисунке прибавляются листья. PPFD считается по оболочке кроны. ${shape.note ?? ""}`;
   controls.dim.disabled = !!p.fixed;
   controls.angle.disabled = catalog || estimated || era;
   controls.ppf.disabled = catalog || estimated || era;

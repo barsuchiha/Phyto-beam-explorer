@@ -10,7 +10,7 @@
     <title>Свет для растений — модули и диапазон PPFD</title>
     <link rel="stylesheet" href="./styles/base.css?v=a670f2593415" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/calculator.css?v=f32c98bc8fb1" />
+    <link rel="stylesheet" href="./styles/calculator.css?v=dc92fbecde00" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -19,8 +19,8 @@
           "./src/data/era-ies.js": "./src/data/era-ies.js?v=d3fb1b7e0021",
           "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
           "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
-          "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=2f8ff8ae013c",
-          "./src/data/plants.js": "./src/data/plants.js?v=f030ce11acad",
+          "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
+          "./src/data/plants.js": "./src/data/plants.js?v=85068a262de7",
           "./src/data/profiles.js": "./src/data/profiles.js?v=ce62b7808ee1",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=61deb0084f59",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
@@ -31,15 +31,17 @@
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer.js": "./src/models/minifermer.js?v=f451717e99c5",
           "./src/models/photometry.js": "./src/models/photometry.js?v=8d9415abe938",
+          "./src/models/plant-illustration.js": "./src/models/plant-illustration.js?v=d717cf7a8dbd",
           "./src/models/plants.js": "./src/models/plants.js?v=13ff71608c99",
           "./src/models/reflections.js": "./src/models/reflections.js?v=211a2cac075a",
           "./src/models/screen-geometry.js": "./src/models/screen-geometry.js?v=cecc4882e837",
           "./src/state.js": "./src/state.js?v=f206d0e9e745",
-          "./src/ui/controls.js": "./src/ui/controls.js?v=bad4842cf27b",
+          "./src/ui/controls.js": "./src/ui/controls.js?v=283344de425b",
           "./src/ui/details.js": "./src/ui/details.js?v=6c1436846b82",
-          "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=dc2f2440482c",
+          "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
+          "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=e8592de8a5c4",
           "./src/ui/results.js": "./src/ui/results.js?v=ee408453c7c5",
           "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
           "./src/ui/tooltips.js": "./src/ui/tooltips.js?v=d78d66fda803"
@@ -67,6 +69,8 @@
                 <option value="lyrata">Фикус лирата</option>
                 <option value="strelitzia">Стрелиция Николая</option>
                 <option value="dracaena">Драцена душистая</option>
+                <option value="benjamina">Фикус Бенджамина</option>
+                <option value="palm">Хамедорея изящная</option>
               </optgroup>
               <optgroup label="Средние растения">
                 <option value="peace">Спатифиллум</option>
@@ -74,6 +78,16 @@
                 <option value="zz">Замиокулькас</option>
                 <option value="spider">Хлорофитум</option>
                 <option value="jade">Толстянка овальная</option>
+                <option value="syngonium">Сингониум ножколистный</option>
+                <option value="snake">Сансевиерия · щучий хвост</option>
+                <option value="calathea">Калатея орбифолия</option>
+                <option value="alocasia">Алоказия Polly</option>
+                <option value="anthurium">Антуриум Андре</option>
+                <option value="peperomia">Пеперомия туполистная</option>
+              </optgroup>
+              <optgroup label="Лианы на опоре">
+                <option value="pothos">Эпипремнум золотистый</option>
+                <option value="philodendron">Филодендрон сердцелистный</option>
               </optgroup>
             </select></label
           ><label class="form-label beam-field" for="pbe-plantSize"
@@ -629,7 +643,7 @@
         </div>
         <details>
           <summary class="cursor-interaction">
-            Требования 10 видов к этой дозе
+            Требования 20 растений к этой дозе
           </summary>
           <div class="plant-comparison">
             <div class="text-small">
