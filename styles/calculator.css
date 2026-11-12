@@ -12,6 +12,8 @@
   --plant-fill: light-dark(#b3c7b4, #294a3b);
   --beam-ink: light-dark(#aa883e, #c3ab6f);
   --screen-fill: light-dark(#a7aaa4, #71766e);
+  --reflector-mirror: light-dark(#b6c8d2, #9eafb9);
+  --reflector-diffuse: light-dark(#e7e5dd, #d0cec4);
 }
 #phyto-beam-explorer .beam-field {
   display: flex;
@@ -134,6 +136,48 @@
 }
 .budget-room {
   background: var(--beam-ink);
+}
+.budget-housing {
+  background: var(--muted-foreground);
+}
+.budget-residual {
+  background: var(--pbe-burgundy);
+}
+.screen-table-scroll {
+  overflow-x: auto;
+}
+#pbe-screen-comparison {
+  display: grid;
+  gap: 0.6rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+#pbe-screen-comparison h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+#pbe-screen-comparison :is(th, td) {
+  white-space: nowrap;
+}
+.screen-choice {
+  border: 0;
+  padding: 0.4rem 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.screen-choice:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+.selected-screen {
+  background: var(--muted);
+}
+.selected-screen .screen-choice {
+  font-weight: 600;
 }
 .budget-legend {
   display: flex;

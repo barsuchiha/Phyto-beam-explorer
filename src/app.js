@@ -5,6 +5,7 @@ import { renderDetails } from "./ui/details.js";
 import { createResults } from "./ui/results.js";
 import { renderDiagrams } from "./ui/diagrams.js";
 import { installTooltips } from "./ui/tooltips.js";
+import { renderScreenComparison } from "./ui/screen-comparison.js";
 
 const root = document.getElementById("phyto-beam-explorer");
 const q = (id) => root.querySelector("#" + id);
@@ -29,6 +30,7 @@ function render() {
   renderDetails(q, state, scene);
   renderResults(state, scene);
   renderDiagrams(q, state, scene);
+  renderScreenComparison(q, state, scene);
 }
 
 for (const [key, control] of Object.entries(controls)) {
@@ -46,5 +48,12 @@ function scheduleRender() {
   renderFrame = requestAnimationFrame(render);
 }
 installTooltips(root);
+root.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-screen-mode]");
+  if (!button) return;
+  state = updateState(state, "screenMode", button.dataset.screenMode);
+  saveState(storage, window.location, state);
+  scheduleRender();
+});
 new ResizeObserver(scheduleRender).observe(root);
 render();

@@ -1,4 +1,5 @@
 import { plantModel } from "../models/plants.js";
+import { illustrativePath, reflectionNames } from "../models/reflections.js";
 import {
   add,
   sub,
@@ -191,6 +192,26 @@ function sceneDrawing(svg, state, scene) {
     const a = (i * 14 * Math.PI) / 180,
       local = [Math.sin(a), 0, Math.cos(a)];
     const d = add(mul(rig.u, local[0]), mul(rig.f, local[2]));
+    if (rig.sector && state.screenMode !== "absorb") {
+      const trace = illustrativePath(
+        c,
+        rig,
+        groups,
+        local,
+        state.screenMode,
+        100 + i,
+      );
+      for (let k = 1; k < trace.length; k++)
+        path([trace[k - 1], trace[k]], {
+          stroke: "var(--beam-ink)",
+          "stroke-opacity": scene.flux
+            ? 0.55 * (state.reflectance / 100) ** Math.max(0, k - 1)
+            : 0,
+          "stroke-width": k > 1 ? 1.4 : 1,
+          "stroke-dasharray": k > 1 ? "4 3" : "none",
+        });
+      continue;
+    }
     const shield = screenHit([0, 0, 0], local, rig),
       hit = rayCrown(rig.origin, d, c);
     const distance = Math.min(shield, hit, r * 1.8),
@@ -237,7 +258,12 @@ function sceneDrawing(svg, state, scene) {
     for (const panel of panels)
       el(svg, "polygon", {
         points: points(panel.raw.map((p) => P(toWorld(rig, p)))),
-        fill: "var(--screen-fill)",
+        fill:
+          state.screenMode === "mirror"
+            ? "var(--reflector-mirror)"
+            : state.screenMode === "diffuse"
+              ? "var(--reflector-diffuse)"
+              : "var(--screen-fill)",
         "fill-opacity": 0.8,
         stroke: "var(--muted-foreground)",
         "stroke-width": 0.5,
@@ -421,7 +447,9 @@ export function renderDiagrams(q, state, scene) {
   const labels = [
     ["target", "До оболочки кроны"],
     ["screen", "Поглощено экраном"],
+    ["housing", "Возврат в платы · поглощено"],
     ["room", "Мимо кроны · в комнату"],
+    ["residual", "Незавершённые пути"],
   ];
   const bar = document.createElement("div");
   bar.className = "budget-bar";
@@ -431,16 +459,18 @@ export function renderDiagrams(q, state, scene) {
   for (const [key, label] of labels) {
     const part = document.createElement("span");
     part.className = "budget-" + key;
-    part.style.width = budget[key] * 100 + "%";
+    part.style.width = (budget[key] ?? 0) * 100 + "%";
     bar.append(part);
     const item = document.createElement("span");
-    item.textContent = `${label}: ≈ ${Math.round(budget[key] * 100)}%`;
+    const value = (budget[key] ?? 0) * 100;
+    item.textContent = `${label}: ≈ ${value.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%`;
+    if (key === "residual" && value < 0.001) continue;
     legend.append(item);
   }
   const note = document.createElement("div");
   note.className = "text-small";
   note.textContent = scene.flux
-    ? "Доли полного потока источника · базовый сценарий. Экран поглощает свет без отражения; крона — непрозрачная оболочка, не реальные листья."
+    ? `Доли полного потока источника · базовый сценарий. ${state.screenSector ? reflectionNames[state.screenMode] + " экран" : "Без экрана"}. Крона — непрозрачная оболочка, не реальные листья. До кроны после отражений: ≈ ${((budget.returned ?? 0) * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 })}% исходного потока.`
     : "Источник выключен.";
   wrap.append(bar, legend, note);
 }

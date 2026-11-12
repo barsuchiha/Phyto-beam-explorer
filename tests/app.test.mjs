@@ -79,7 +79,7 @@ test("v1-v6 widget settings and the original storage envelope still load", () =>
     assert.equal(loadState(adapter, location).height, 75);
     assert.equal(
       JSON.parse(storage.get(key)).modelContent.schema,
-      "phyto-beams-v7",
+      "phyto-beams-v8",
     );
   }
   assert.notEqual(storageKey({ ...location, search: "?test" }), key);

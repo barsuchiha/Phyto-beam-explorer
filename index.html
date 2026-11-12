@@ -202,6 +202,33 @@
           /></label>
         </div>
         <div class="text-small" id="pbe-size-note"></div>
+        <div class="viz-controls" id="pbe-material-controls" hidden>
+          <label class="form-label beam-field" for="pbe-screenMode"
+            >Поверхность экрана
+            <select class="form-select" id="pbe-screenMode">
+              <option value="absorb">Поглощающая · отражение 0%</option>
+              <option value="mirror">
+                Зеркальная · направленное отражение
+              </option>
+              <option value="diffuse">Матовая · рассеянное отражение</option>
+            </select>
+          </label>
+          <label class="form-label beam-field" for="pbe-reflectance"
+            ><span class="beam-label"
+              ><span>Отражение зеркального и матового</span
+              ><output id="pbe-reflectance-value" class="tabular-nums"></output
+            ></span>
+            <input
+              class="form-range"
+              id="pbe-reflectance"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value="90"
+            />
+          </label>
+        </div>
         <div class="beam-columns">
           <section>
             <h3>Растение и лампа</h3>
@@ -228,6 +255,36 @@
           aria-live="polite"
         ></div>
         <div id="pbe-budget" class="light-budget" aria-live="polite"></div>
+        <section
+          id="pbe-screen-comparison"
+          hidden
+          aria-labelledby="pbe-screen-title"
+        >
+          <h3 id="pbe-screen-title">Одна геометрия · три поверхности</h3>
+          <div class="text-small" id="pbe-screen-assumption"></div>
+          <div class="screen-table-scroll">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Экран</th>
+                  <th scope="col">
+                    Средний PPFD<br /><small>мкмоль/(м²·с)</small>
+                  </th>
+                  <th scope="col">Кроне</th>
+                  <th scope="col">В комнату</th>
+                  <th scope="col">Поглощено</th>
+                </tr>
+              </thead>
+              <tbody id="pbe-screen-rows"></tbody>
+            </table>
+          </div>
+          <div class="text-small" id="pbe-screen-gain" aria-live="polite"></div>
+          <div class="text-small">
+            Нажми название, чтобы показать этот вариант на карте. Проценты — от
+            полного потока источника, поглощение — экраном и платами. Сравнение
+            по базовому сценарию; форма, PPF и положение лампы одинаковы.
+          </div>
+        </section>
         <details id="pbe-source-controls">
           <summary>Мощность, пучок и питание</summary>
           <div class="beam-field">
@@ -350,7 +407,9 @@
           <div class="card viz-stat">
             <div>PPFD на оси кроны</div>
             <div class="viz-stat-value tabular-nums" id="pbe-center">—</div>
-            <div class="text-small">мкмоль/(м²·с) · точка × на схеме</div>
+            <div class="text-small" id="pbe-axis-caption">
+              мкмоль/(м²·с) · точка × на схеме
+            </div>
           </div>
           <div class="card viz-stat">
             <div>Средняя суточная доза · DLI</div>

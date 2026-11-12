@@ -21,6 +21,8 @@ export const defaults = Object.freeze({
   screenSector: 0,
   screenDepth: 15,
   screenTurn: 0,
+  screenMode: "absorb",
+  reflectance: 90,
 });
 const bounded = (v, a, b, f) =>
   Number.isFinite(Number(v)) ? Math.min(b, Math.max(a, Number(v))) : f;
@@ -36,6 +38,7 @@ export function restoreState(value) {
       "phyto-beams-v5",
       "phyto-beams-v6",
       "phyto-beams-v7",
+      "phyto-beams-v8",
     ].includes(saved.schema)
   )
     return { ...defaults };
@@ -59,6 +62,10 @@ export function restoreState(value) {
       : 0,
     screenDepth: bounded(saved.screenDepth, 5, Math.min(40, height - 5), 15),
     screenTurn: bounded(saved.screenTurn, 0, 360, 0),
+    screenMode: ["absorb", "mirror", "diffuse"].includes(saved.screenMode)
+      ? saved.screenMode
+      : "absorb",
+    reflectance: bounded(saved.reflectance, 0, 100, 90),
     hours: bounded(saved.hours, 6, 16, 12),
     count: [1, 2, 4].includes(Number(saved.count)) ? Number(saved.count) : 2,
     driver,
@@ -78,10 +85,10 @@ export function updateState(state, key, value) {
     profiles[state.source].kind !== profiles[value]?.kind
   )
     next.count = 1;
-  next[key] = ["source", "plant", "driver"].includes(key)
+  next[key] = ["source", "plant", "driver", "screenMode"].includes(key)
     ? value
     : Number(value);
-  return restoreState({ schema: "phyto-beams-v7", ...next });
+  return restoreState({ schema: "phyto-beams-v8", ...next });
 }
 
 // Keep the exported widget's key and envelope so existing visitors retain their
@@ -103,7 +110,7 @@ export function saveState(storage, location, state) {
     storage?.setItem(
       storageKey(location),
       JSON.stringify({
-        modelContent: { schema: "phyto-beams-v7", ...state },
+        modelContent: { schema: "phyto-beams-v8", ...state },
         privateContent: null,
       }),
     );

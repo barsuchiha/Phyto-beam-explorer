@@ -6,6 +6,7 @@ import {
 } from "./crown.js";
 import { eraModel } from "./era.js";
 import { mini36Model } from "./mini36.js";
+import { compareScreens, reflectedMetrics, transport } from "./reflections.js";
 
 export function crownScenario(state, groups, flux, estimate) {
   const crown = crownGeometry(state),
@@ -37,7 +38,7 @@ export function crownScenario(state, groups, flux, estimate) {
       flux,
     });
   const cache = new Map();
-  const scenarios = spec.map((s) => {
+  const directScenarios = spec.map((s) => {
     if (state.source === "mf193" || state.source === "mf194") {
       if (!cache.has(s.curve))
         cache.set(s.curve, summarizeCrown(crown, rig, s.g, s.curve, 1));
@@ -53,12 +54,43 @@ export function crownScenario(state, groups, flux, estimate) {
   });
   const middle = Math.floor(spec.length / 2),
     base = spec[middle];
+  const rho = (state.reflectance ?? 90) / 100,
+    mode = state.screenMode ?? "absorb";
+  let screenComparison;
+  let scenarios = directScenarios;
+  if (rig.sector && flux > 0) {
+    screenComparison = compareScreens(
+      crown,
+      rig,
+      base.g,
+      base.curve,
+      flux,
+      directScenarios[middle],
+      rho,
+    );
+    scenarios = directScenarios.map((direct, i) =>
+      i === middle
+        ? screenComparison[mode]
+        : mode === "absorb"
+          ? direct
+          : reflectedMetrics(
+              direct,
+              transport(crown, rig, spec[i].g),
+              spec[i].curve,
+              spec[i].flux,
+              rho,
+              mode,
+            ),
+    );
+  }
   const result = {
     ...scenarios[middle],
     crown,
     rig,
     curve: base.curve,
     groups: base.g,
+    direct: directScenarios[middle],
+    screenComparison,
   };
   if (spec.length > 1) {
     result.range = {};
@@ -76,6 +108,24 @@ export function crownScenario(state, groups, flux, estimate) {
       eraModel.curve,
       flux,
     );
-  result.budget = photonBudget(crown, rig, base.g, base.curve, flux);
+  if (!screenComparison) {
+    result.budget = {
+      ...photonBudget(crown, rig, base.g, base.curve, flux),
+      housing: 0,
+      residual: 0,
+      returned: 0,
+    };
+    result.screenComparison = Object.fromEntries(
+      ["absorb", "mirror", "diffuse"].map((mode) => [
+        mode,
+        {
+          mean: result.mean,
+          center: result.center,
+          budget: result.budget,
+          reflectedMean: 0,
+        },
+      ]),
+    );
+  }
   return result;
 }

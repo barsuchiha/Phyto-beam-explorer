@@ -92,6 +92,10 @@ export function createResults(q) {
       }
       return;
     }
+    q("pbe-axis-caption").textContent =
+      state.screenSector && state.screenMode !== "absorb"
+        ? "мкмоль/(м²·с) · ×: прямой свет в точке + отражённый в соседних ячейках"
+        : "мкмоль/(м²·с) · точка × на схеме";
     q("pbe-mean").textContent =
       "≈ " + (ranged ? formatRange(metrics.range.mean) : number(metrics.mean));
     q("pbe-center").textContent =

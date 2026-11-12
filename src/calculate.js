@@ -82,6 +82,8 @@ export function createCalculator({ geometry = "crown" } = {}) {
             state.screenSector,
             state.screenDepth,
             state.screenTurn,
+            state.screenMode,
+            state.reflectance,
           ]
         : null,
     ]);
