@@ -329,3 +329,35 @@ a:focus-visible {
     font-size: 10px;
   }
 }
+
+#lm-olive-controls {
+  display: grid;
+  gap: 18px;
+}
+#lm-olive-optics label {
+  margin: 16px 0;
+}
+.olive-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.olive-presets button {
+  font: inherit;
+  font-size: 11px;
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+.olive-presets button:hover {
+  background: var(--muted);
+}
+@media (max-width: 680px) {
+  #lm-olive-controls,
+  #lm-olive-optics {
+    grid-column: 1/-1;
+  }
+}

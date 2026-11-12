@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare:publish": "node scripts/version-assets.mjs",
+    "prepare:publish": "node scripts/bundle-light-worker.mjs && node scripts/version-assets.mjs",
     "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
   }
 }

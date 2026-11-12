@@ -65,4 +65,9 @@ export const cadAssets = {
     archive:
       "22_Б3_гибкий_купол_три_раскрытия_Shapr3D_2026-11-11/Исходники/meshes.json",
   },
+  olive: {
+    file: "olive-0dc78031ef61.json",
+    archive:
+      "17_Подставка_один_или_три_модуля_2026-11-08/Исходники/mesh_preview.json",
+  },
 };

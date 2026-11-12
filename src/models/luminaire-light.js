@@ -66,7 +66,10 @@ export function lightOutput(state, count) {
   return {
     fluxes: [f, f, f],
     curves: ["lm301b", "lm301b", "lm301b"],
-    note: `350 мА на плату, ${p.ppf.toFixed(2)} мкмоль/с при 100%. Внешний LDD-350H + БП 24 В, отдельный канал на головку; DIM через PWM. Тепловой расчёт корпуса не выполнен.`,
+    note:
+      state.model === "olive"
+        ? `6 плат COMPACT 21, по две на блок, 350 мА. PPF до панелей: 54,06 мкмоль/с при 100%; электрическая мощность плат 16,8 Вт. Проект питания: три внешних LDD-350H, по две платы последовательно на канал (тип. 16 В), общий БП 24 В; PWM на нашей стороне. Сейчас яркость общая. Нагрев кассеты и размещение питания не проверены.`
+        : `350 мА на плату, ${p.ppf.toFixed(2)} мкмоль/с при 100%. Внешний LDD-350H + БП 24 В, отдельный канал на головку; DIM через PWM. Тепловой расчёт корпуса не выполнен.`,
   };
 }
 export function triangles(surfaces) {
@@ -126,7 +129,8 @@ export function tracePath(
   let o = origin,
     d = direction,
     weight = 1,
-    absorbed = 0;
+    absorbed = 0,
+    reflections = 0;
   const path = [o];
   for (let bounce = 0; bounce <= maxBounces; bounce++) {
     const leafHit = geometry.leafReceiver
@@ -143,13 +147,18 @@ export function tracePath(
         hit = t;
       }
     }
+    const fixtureHit = geometry.fixture?.hit(o, d, distance);
+    if (fixtureHit) {
+      distance = fixtureHit.distance;
+      hit = fixtureHit;
+    }
     if (!Number.isFinite(distance))
       return {
         kind: "room",
         weight,
         absorbed,
         path: [...path, add(o, mul(d, 1.2))],
-        bounces: bounce,
+        bounces: reflections,
       };
     const p = add(o, mul(d, distance));
     path.push(p);
@@ -163,12 +172,36 @@ export function tracePath(
         leaf: leafHit?.leaf,
         patch: leafHit?.patch,
         side: leafHit?.side,
-        bounces: bounce,
+        bounces: reflections,
       };
     if (hit.kind === "housing")
-      return { kind: "housing", weight, absorbed, path, bounces: bounce };
+      return { kind: "housing", weight, absorbed, path, bounces: reflections };
+    if (hit.kind === "clear" || hit.kind === "frost") {
+      // One thin skin per CAD panel: attenuation once per crossing, without
+      // double-counting the two sides of a solid glass insert.
+      absorbed += weight * (1 - hit.transmission);
+      weight *= hit.transmission;
+      if (weight < 1e-10 || bounce === maxBounces)
+        return {
+          kind: "residual",
+          weight,
+          absorbed,
+          path,
+          bounces: reflections,
+        };
+      if (hit.kind === "frost")
+        d = scatter(
+          mul(d, -1),
+          hit.n,
+          "diffuse",
+          noise(seed + bounce * 1777),
+          noise(seed + 900001 + bounce * 3331),
+        );
+      o = add(p, mul(d, EPS * 4));
+      continue;
+    }
     if (material === "absorb")
-      return { kind: "screen", weight, absorbed, path, bounces: bounce };
+      return { kind: "screen", weight, absorbed, path, bounces: reflections };
     absorbed += weight * (1 - rho);
     weight *= rho;
     if (weight < 1e-10 || bounce === maxBounces)
@@ -180,6 +213,7 @@ export function tracePath(
       noise(seed + bounce * 1777),
       noise(seed + 900001 + bounce * 3331),
     );
+    reflections++;
     o = add(p, mul(d, EPS * 4));
   }
 }
@@ -198,6 +232,7 @@ export function calculateLuminaire(
     crown: scene.crown,
     triangles: triangles([...scene.surfaces, ...scene.boards]),
     leafReceiver: state.receiver === "leaves",
+    fixture: scene.fixture,
     leafBVH:
       state.receiver === "leaves"
         ? buildLeafBVH(scene.leafGeometry.triangles)

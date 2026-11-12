@@ -3,6 +3,15 @@ import { minifermerBulbs, bulbScreenNote } from "./minifermer-bulbs.js";
 // Dimensions from the project's P00 / Soltech / flexible-B3 CAD sketches.
 // These are concept envelopes, not manufacturing or thermal approvals.
 export const luminaires = {
+  olive: {
+    name: "Оливковая · Три поворотных блока",
+    family: "Авторская",
+    mounts: ["oliveCassette"],
+    optic: "olive",
+    install: null,
+    plantX: 0.55,
+    note: "Твоя башенка из CAD: три блока по 400 мм, два узла по 18 мм, общая высота 1290 мм, основание Ø360 мм. Нижний блок закреплён на основании; верхние поворачиваются относительно соседнего. Диапазон ползунков — пространство примерки, механические ограничения и запас провода ещё не определены.",
+  },
   B3flex: {
     name: "Б3 · Жёсткий паз и гибкий купол",
     family: "P00",
@@ -123,6 +132,15 @@ export const luminaires = {
 };
 
 export const mounts = {
+  oliveCassette: {
+    name: "Внутренняя кассета · проект",
+    type: "panel",
+    opening: [320, 32],
+    body: [330, 32, 20],
+    margin: 3,
+    sources: ["compact21"],
+    note: "По две COMPACT 21 последовательно вдоль каждого блока: 149 + 10 + 149 = 308 мм. Платы 24 мм шириной входят в новую кассету 330 × 32 × 20 мм. Трубка Ø17 мм из эскиза была заместителем света: платы внутрь неё не входят, здесь она заменена кассетой. Рассеиватель на платах не добавлен; охлаждение, крепёж и проводка требуют разработки.",
+  },
   original: {
     name: "Исходная головка P00",
     type: "panel",

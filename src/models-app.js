@@ -18,6 +18,8 @@ import { calculateLuminaire, lightOutput } from "./models/luminaire-light.js";
 import { calculateReferenceLight } from "./models/reference-light.js";
 import { createLuminaireView } from "./ui/luminaire-view.js";
 import { plantModel } from "./models/plants.js";
+import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
+import { lightWorkerFile } from "./data/worker-asset.js";
 
 const q = (id) => document.getElementById("lm-" + id),
   key = "phyto-luminaire-fitting-v1";
@@ -27,18 +29,23 @@ try {
 } catch {
   state = normalizeFitting();
 }
+const requestedModel = new URL(location.href).searchParams.get("model");
+if (requestedModel && Object.hasOwn(luminaires, requestedModel))
+  state = changeFitting(state, "model", requestedModel);
 const controls = Object.fromEntries(
   Object.keys(state)
     .map((k) => [k, q(k)])
     .filter(([, el]) => el),
 );
 const option = (value, label) => new Option(label, value);
-for (const family of ["P00", "Soltech"]) {
+for (const family of ["Авторская", "P00", "Soltech"]) {
   const group = document.createElement("optgroup");
   group.label =
-    family === "P00"
-      ? "Наши конструкции P00"
-      : "Крепления по референсам Soltech";
+    family === "Авторская"
+      ? "Твоя оливковая лампа"
+      : family === "P00"
+        ? "Наши конструкции P00"
+        : "Крепления по референсам Soltech";
   for (const [id, m] of Object.entries(luminaires))
     if (m.family === family) group.append(option(id, m.name));
   q("model").append(group);
@@ -128,8 +135,25 @@ function renderControls(poses, geometry) {
     ["screenLength", " см"],
     ["screenGap", " см"],
     ["reflectance", "%"],
+    ["towerTurn", "°"],
+    ["jointMiddle", "°"],
+    ["jointTop", "°"],
+    ["clearTransmission", "%"],
+    ["slotTransmission", "%"],
   ])
     q(name + "-value").textContent = fmt(state[name]) + unit;
+  hide("olive-controls", state.model !== "olive");
+  hide("olive-optics", state.model !== "olive");
+  const wrap = (a) => ((((a + 180) % 360) + 360) % 360) - 180;
+  q("olive-directions").textContent = `Направления снизу вверх: ${oliveAngles(
+    state,
+  )
+    .map((a) => fmt(wrap(a)) + "°")
+    .join(
+      " / ",
+    )}. 0° — в сторону растения справа от лампы. Средний поворачивает и верхний блок; верхний ползунок доворачивает его отдельно.`;
+  q("focus").textContent =
+    state.model === "olive" ? "Блок крупно" : "Головка крупно";
   const architecture = plantArchitecture[state.plant];
   q("posture-note").textContent =
     `0° — типовая форма; минус опускает кончики, плюс поднимает. Сейчас высота от грунта ${fmt(geometry.leafGeometry.height * 100)} см. Площадь листьев при повороте сохраняется.${state.receiver === "crown" ? " Чтобы наклон влиял на свет на растении, выбери «На листьях»." : ""}`;
@@ -214,7 +238,7 @@ const budgetItems = [
   ["target", "На крону", "#8bb997"],
   ["room", "В комнату", "#c5a571"],
   ["screen", "В экран", "#8c9290"],
-  ["housing", "В источник", "#7584a1"],
+  ["housing", "В корпус / источник", "#7584a1"],
   ["residual", "Остаток", "#a47b9d"],
 ];
 const fmt = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
@@ -287,7 +311,7 @@ function renderResult(result, geometry, reference) {
     part.style.cssText = `width:${b[id] * 100}%;background:${color}`;
     bar.append(part);
     const text = document.createElement("span");
-    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : label} ${fmt(b[id] * 100)}%`;
+    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : id === "screen" && state.model === "olive" ? "В панелях" : label} ${fmt(b[id] * 100)}%`;
     labels.append(text);
   }
   q("budget").replaceChildren(bar, labels);
@@ -296,10 +320,13 @@ function renderResult(result, geometry, reference) {
   view?.light(state, result);
 }
 let serial = 0,
-  timer;
+  timer,
+  lightWorker;
 async function render() {
   const run = ++serial;
   clearTimeout(timer);
+  lightWorker?.terminate();
+  lightWorker = null;
   latestResult = null;
   hide("leaf-panel", true);
   try {
@@ -338,6 +365,34 @@ async function render() {
     timer = setTimeout(() => {
       if (run !== serial) return;
       try {
+        if (state.model === "olive" && typeof Worker !== "undefined") {
+          lightWorker = new Worker(
+            new URL("../data/workers/" + lightWorkerFile, import.meta.url),
+            { type: "module" },
+          );
+          const worker = lightWorker;
+          worker.onmessage = ({ data }) => {
+            if (run !== serial) return;
+            worker.terminate();
+            lightWorker = null;
+            if (data.error) {
+              q("status").textContent =
+                "Не удалось рассчитать свет для этой конфигурации.";
+              console.error(data.error);
+            } else renderResult(data.result, geometry, data.reference);
+          };
+          worker.onerror = (error) => {
+            worker.terminate();
+            if (run === serial) {
+              lightWorker = null;
+              q("status").textContent =
+                "Не удалось загрузить расчёт. Обнови страницу.";
+              console.error(error);
+            }
+          };
+          worker.postMessage({ state, pose });
+          return;
+        }
         const result = calculateLuminaire(state, geometry);
         const reference = calculateReferenceLight(state, geometry);
         if (run === serial) renderResult(result, geometry, reference);
@@ -359,6 +414,11 @@ for (const [name, control] of Object.entries(controls))
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
     state = changeFitting(state, name, value);
+    if (name === "model") {
+      const url = new URL(location.href);
+      url.searchParams.set("model", state.model);
+      history.replaceState(null, "", url);
+    }
     save();
     render();
   });
@@ -374,4 +434,12 @@ q("leaf-select").addEventListener("input", () => {
 });
 q("focus").addEventListener("click", () => view?.fit(true));
 q("reset-view").addEventListener("click", () => view?.fit());
+for (const button of document.querySelectorAll("[data-olive-preset]"))
+  button.addEventListener("click", () => {
+    const [towerTurn, jointMiddle, jointTop] =
+      OLIVE_PRESETS[button.dataset.olivePreset];
+    state = normalizeFitting({ ...state, towerTurn, jointMiddle, jointTop });
+    save();
+    render();
+  });
 render();

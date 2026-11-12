@@ -10,39 +10,42 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=6b6d387c5688" />
+    <link rel="stylesheet" href="./styles/models.css?v=afbce70bb1f6" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
           "./src/app.js": "./src/app.js?v=fc701ef12871",
           "./src/calculate.js": "./src/calculate.js?v=d12f16338f47",
-          "./src/data/cad-assets.js": "./src/data/cad-assets.js?v=cfccb7a97d93",
+          "./src/data/cad-assets.js": "./src/data/cad-assets.js?v=93f0d3ad475e",
           "./src/data/era-ies.js": "./src/data/era-ies.js?v=d3fb1b7e0021",
           "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
           "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
           "./src/data/leaf-paths.js": "./src/data/leaf-paths.js?v=d627038bf483",
-          "./src/data/luminaires.js": "./src/data/luminaires.js?v=dcd1b2723343",
+          "./src/data/luminaires.js": "./src/data/luminaires.js?v=c7cb744ea4e4",
           "./src/data/minifermer-bulbs.js": "./src/data/minifermer-bulbs.js?v=8848c75d27d7",
           "./src/data/plant-architecture.js": "./src/data/plant-architecture.js?v=e20a38e2a3ca",
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
           "./src/data/plants.js": "./src/data/plants.js?v=ac1847f6b1e0",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
-          "./src/models-app.js": "./src/models-app.js?v=a990fbe98f40",
+          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=cf444792b04a",
+          "./src/models-app.js": "./src/models-app.js?v=5b553472c29d",
+          "./src/models-light-worker.js": "./src/models-light-worker.js?v=8ddb7d9b7bf4",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=e5c7aafc8f4e",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=cea297267d41",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/layout.js": "./src/models/layout.js?v=08b53705b4d3",
           "./src/models/leaf-bvh.js": "./src/models/leaf-bvh.js?v=4c04ff2b48f5",
           "./src/models/leaf-collision.js": "./src/models/leaf-collision.js?v=d7e9ed2e991b",
           "./src/models/leaf-geometry.js": "./src/models/leaf-geometry.js?v=5461205619bf",
-          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=defe68caa033",
-          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=c6c797bbc689",
+          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=3a184fd9616b",
+          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=38a07b8ec53c",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer-bulbs.js": "./src/models/minifermer-bulbs.js?v=663c02bb4d09",
           "./src/models/minifermer.js": "./src/models/minifermer.js?v=f451717e99c5",
+          "./src/models/olive.js": "./src/models/olive.js?v=d6d04ece24f3",
           "./src/models/photometry.js": "./src/models/photometry.js?v=8d9415abe938",
           "./src/models/plant-architecture.js": "./src/models/plant-architecture.js?v=8e009ec53379",
           "./src/models/plant-illustration.js": "./src/models/plant-illustration.js?v=d717cf7a8dbd",
@@ -58,7 +61,8 @@
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=7d3521f04264",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=0e19432a781f",
+          "./src/ui/olive-view.js": "./src/ui/olive-view.js?v=d7a04319f710",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=79fa6cfb08cc",
           "./src/ui/results.js": "./src/ui/results.js?v=efc24d0a9431",
           "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
@@ -70,7 +74,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=a990fbe98f40"></script>
+    <script type="module" src="./src/models-app.js?v=5b553472c29d"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -87,6 +91,67 @@
           <label for="lm-model"
             >Модель<select id="lm-model" class="form-select"></select
           ></label>
+          <div id="lm-olive-controls" hidden>
+            <div
+              class="olive-presets"
+              role="group"
+              aria-label="Положения блоков"
+            >
+              <button type="button" data-olive-preset="toward">
+                Все к растению
+              </button>
+              <button type="button" data-olive-preset="cad">
+                0° / 45° / 90°
+              </button>
+              <button type="button" data-olive-preset="alternate">
+                1 и 3 / 2
+              </button>
+            </div>
+            <label for="lm-towerTurn"
+              ><span
+                >Поворот всей лампы<output
+                  id="lm-towerTurn-value"
+                ></output></span
+              ><input
+                class="form-range"
+                id="lm-towerTurn"
+                type="range"
+                min="-180"
+                max="180"
+                step="5"
+            /></label>
+            <label for="lm-jointMiddle"
+              ><span
+                >Средний относительно нижнего<output
+                  id="lm-jointMiddle-value"
+                ></output></span
+              ><input
+                class="form-range"
+                id="lm-jointMiddle"
+                type="range"
+                min="-180"
+                max="180"
+                step="5"
+            /></label>
+            <label for="lm-jointTop"
+              ><span
+                >Верхний относительно среднего<output
+                  id="lm-jointTop-value"
+                ></output></span
+              ><input
+                class="form-range"
+                id="lm-jointTop"
+                type="range"
+                min="-180"
+                max="180"
+                step="5"
+            /></label>
+            <p class="model-hint" id="lm-olive-directions"></p>
+            <p class="model-hint">
+              Это статичная примерка поворотов, не разрешение на многократное
+              вращение с проводом. Пределы узлов ещё не разработаны.
+            </p>
+          </div>
           <label for="lm-pose" id="lm-pose-field"
             >Положение конструкции<select
               id="lm-pose"
@@ -266,6 +331,51 @@
               раскрытия. Крепление и нагрев не проверены.
             </p>
           </div>
+          <details id="lm-olive-optics" class="model-hint" hidden>
+            <summary>Прозрачная грань и матовые прорези</summary>
+            <p>
+              Панели — из твоего CAD. Прозрачная грань пропускает свет прямо;
+              130 матовых вставок в каждом блоке рассеивают его наружу. Передача
+              света и отражение — допущения.
+            </p>
+            <label for="lm-clearTransmission"
+              ><span
+                >Пропускание прозрачной грани<output
+                  id="lm-clearTransmission-value"
+                ></output></span
+              ><input
+                class="form-range"
+                id="lm-clearTransmission"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="92"
+            /></label>
+            <label for="lm-slotTransmission"
+              ><span
+                >Пропускание матовых вставок<output
+                  id="lm-slotTransmission-value"
+                ></output></span
+              ><input
+                class="form-range"
+                id="lm-slotTransmission"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="75"
+            /></label>
+            <p>
+              Непрошедший свет считается потерей в панели; отражение от стекла и
+              преломление не моделируются. Рассеяние вставок — условное
+              ламбертово в проходящую полусферу. Внутренний металл настраивается
+              ниже.
+            </p>
+            <a href="OLIVE_LAMP.md" target="_blank" rel="noopener"
+              >Размеры, питание и допущения модели</a
+            >
+          </details>
           <div id="lm-material-controls">
             <label for="lm-material"
               >Поверхность экрана<select class="form-select" id="lm-material">
@@ -380,19 +490,21 @@
         <p>
           Источник равномерно распределён по выбранной плате или условному диску
           колбы. Отражатель повторяет форму купола, желоба или створки;
-          учитываются повторные отражения и поглощение. Остальные детали CAD
-          показаны для примерки: в оптическом расчёте они заменены непрозрачными
-          плоскостями плат. Стойки, провода, патрон, стены и тепло не
-          моделируются. Стебли, цветки и горшок показаны визуально, но не
+          учитываются повторные отражения и поглощение. Для оливковой башенки
+          также учитываются прозрачная грань, матовые вставки, металлические
+          панели, рамки, рёбра, торцы и новая кассета. В остальных моделях
+          детали CAD показаны для примерки: в оптическом расчёте они заменены
+          непрозрачными плоскостями плат. Стойки, провода, патрон, стены и тепло
+          не моделируются. Стебли, цветки и горшок показаны визуально, но не
           затеняют листья.
         </p>
         <p>
           Баланс делит исходный PPF на первое попадание в выбранную поверхность
           (листья или оболочку кроны), уход в комнату, поглощение экраном,
-          возврат в источник и численный остаток. «На растение» не означает
-          поглощение настоящими листьями. Коэффициент отражения — одинаковый во
-          всём PAR, а не паспорт покрытия. Цвет и экспозиция 3D-рендера не
-          используются для расчёта.
+          поглощение корпусом/источником и численный остаток. «На растение» не
+          означает поглощение настоящими листьями. Коэффициент отражения —
+          одинаковый во всём PAR, а не паспорт покрытия. Цвет и экспозиция
+          3D-рендера не используются для расчёта.
         </p>
         <p>
           Контрольный PPFD — отдельный расчёт для горизонтального круга Ø10 см

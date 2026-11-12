@@ -6,6 +6,11 @@ export function sourceFit(mountId, sourceId) {
     source = fittingSources[sourceId];
   if (!mount || !source || mount.type !== source.type)
     return { ok: false, reason: "Другой тип крепления" };
+  if (mount.sources && !mount.sources.includes(sourceId))
+    return {
+      ok: false,
+      reason: "Для этой кассеты предусмотрены две узкие COMPACT 21",
+    };
   if (mount.type === "bulb")
     return {
       ok: source.size[0] <= mount.maxDiameter,
@@ -52,6 +57,11 @@ export const modelDefaults = {
   sector: 180,
   material: "mirror",
   reflectance: 90,
+  towerTurn: 0,
+  jointMiddle: 45,
+  jointTop: 45,
+  clearTransmission: 92,
+  slotTransmission: 75,
 };
 const clamp = (v, lo, hi, fallback) =>
   Number.isFinite(Number(v)) ? Math.max(lo, Math.min(hi, Number(v))) : fallback;
@@ -72,7 +82,7 @@ export function normalizeFitting(input = {}) {
       0,
       ["B2", "B3", "G2", "pinocchio"].includes(s.model)
         ? 2
-        : ["luna", "archetto", "B3flex"].includes(s.model)
+        : ["luna", "archetto", "B3flex", "olive"].includes(s.model)
           ? 0
           : 1,
       0,
@@ -96,6 +106,10 @@ export function normalizeFitting(input = {}) {
     ? s.material
     : "mirror";
   s.reflectance = clamp(s.reflectance, 0, 100, 90);
+  for (const k of ["towerTurn", "jointMiddle", "jointTop"])
+    s[k] = clamp(s[k], -180, 180, modelDefaults[k]);
+  s.clearTransmission = clamp(s.clearTransmission, 0, 100, 92);
+  s.slotTransmission = clamp(s.slotTransmission, 0, 100, 75);
   return s;
 }
 export function changeFitting(state, key, value) {
@@ -104,6 +118,10 @@ export function changeFitting(state, key, value) {
     next.pose = 0;
     next.install = luminaires[value].install ?? 130;
     next.mount = luminaires[value].mounts[0];
+    if (value === "olive") {
+      next.receiver = "leaves";
+      next.plantOffset = 0;
+    }
   }
   if (key === "plant" && plantShapes[value]) {
     next.plantSize = plantShapes[value].initial;

@@ -5,6 +5,7 @@ import { plantIllustration } from "../models/plant-illustration.js";
 import { add, mul, surfacePoint } from "../models/crown.js";
 import { plantModel } from "../models/plants.js";
 import { referenceDetector } from "../models/reference-light.js";
+import { populateOlive } from "./olive-view.js";
 
 const vector = (p) => new T.Vector3(...p),
   colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
@@ -197,6 +198,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     ])
       dispose(group);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
+    if (geometry.olive) populateOlive(modelGroup, pose, geometry, state);
     for (const m of pose.meshes) {
       if (/light_output_placeholder/i.test(m.name)) continue;
       if (state.model === "G2" && /Reflector_(back|surface)/.test(m.name))
@@ -231,7 +233,13 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     geometry.sources.forEach((s) => {
       const group = new T.Group();
       group.position.copy(vector(s.p));
-      group.rotation.y = (s.tilt * Math.PI) / 180;
+      group.quaternion.setFromRotationMatrix(
+        new T.Matrix4().makeBasis(
+          vector(s.u),
+          vector(s.v),
+          vector(mul(s.n, -1)),
+        ),
+      );
       if (geometry.mount.type === "bulb") {
         const length =
           (geometry.source.size[2] ?? geometry.source.drawHeight) / 1000;

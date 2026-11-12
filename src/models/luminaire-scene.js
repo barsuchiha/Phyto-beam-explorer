@@ -3,6 +3,7 @@ import { crownGeometry, add, sub, mul, dot, unit } from "./crown.js";
 import { sourceFit } from "./fitting.js";
 import { buildLeafGeometry } from "./leaf-geometry.js";
 import { leafSurfaceCollision } from "./leaf-collision.js";
+import { oliveAssembly } from "./olive.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -77,19 +78,22 @@ export function buildLuminaireScene(state, pose) {
           : Math.max(...rawSources.map((s) => s.center[2] / 1000));
     zShift = state.install / 100 - reference;
   }
-  const sources = rawSources.map((s) => {
-    const n = rotationY([0, 0, -1], s.tilt),
-      u = rotationY([1, 0, 0], s.tilt);
-    // Preserve the original upper mechanical interface when a deeper head is tried.
-    const extra = state.mount === "large" ? (mount.body[2] - 26) / 1000 : 0;
-    return {
-      p: add(add(mul(s.center, 0.001), [0, 0, zShift]), mul(n, extra)),
-      n,
-      u,
-      v: [0, 1, 0],
-      tilt: s.tilt,
-    };
-  });
+  const olive = state.model === "olive" ? oliveAssembly(state, pose) : null;
+  const sources =
+    olive?.sources ??
+    rawSources.map((s) => {
+      const n = rotationY([0, 0, -1], s.tilt),
+        u = rotationY([1, 0, 0], s.tilt);
+      // Preserve the original upper mechanical interface when a deeper head is tried.
+      const extra = state.mount === "large" ? (mount.body[2] - 26) / 1000 : 0;
+      return {
+        p: add(add(mul(s.center, 0.001), [0, 0, zShift]), mul(n, extra)),
+        n,
+        u,
+        v: [0, 1, 0],
+        tilt: s.tilt,
+      };
+    });
   if (model.family === "Soltech") {
     const anchor = add(mul(pose.anchor, 0.001), [0, 0, zShift]);
     const length =
@@ -223,6 +227,7 @@ export function buildLuminaireScene(state, pose) {
       "housing",
     ),
   );
+  if (olive) boards.push(...olive.holders);
   const inside = (p) =>
     ((p[0] - crown.center[0]) / crown.rx) ** 2 +
       ((p[1] - crown.center[1]) / crown.ry) ** 2 +
@@ -249,7 +254,11 @@ export function buildLuminaireScene(state, pose) {
     surfaces.some((s) =>
       [s.a, s.b, s.c, s.d, mul(add(s.a, s.c), 0.5)].some(inside),
     ) ||
-    leafSurfaceCollision(leafGeometry, [...boards, ...surfaces]);
+    leafSurfaceCollision(leafGeometry, [
+      ...boards,
+      ...surfaces,
+      ...(olive?.collisionSurfaces ?? []),
+    ]);
   return {
     model,
     mount,
@@ -263,5 +272,7 @@ export function buildLuminaireScene(state, pose) {
     boards,
     zShift,
     collision,
+    olive,
+    fixture: olive?.fixture,
   };
 }
