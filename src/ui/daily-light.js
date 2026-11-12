@@ -59,8 +59,7 @@ export function renderDailyLight(state, result, selectedLeaf) {
       ? "Есть листья выше ориентира"
       : titles[summary.kind];
   q("title").textContent = title;
-  q("amount").textContent =
-    `Общая досветка: ${amount} · ${state.hours} ч в день`;
+  q("amount").textContent = `Общая досветка: ${amount}`;
   q("coverage").textContent =
     `Нижний ориентир достигнут у ${percentRange(summary.reachedRange)} листвы — по площади.` +
     (summary.aboveRange[1] > 0
