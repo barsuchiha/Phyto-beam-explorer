@@ -6,6 +6,8 @@ import {
   ppfdMapPosition,
   surfaceReadout,
   percentText,
+  lightMapScales,
+  continuousLightColor,
 } from "../src/models/light-readout.js";
 import { normalizeFitting } from "../src/models/fitting.js";
 import { buildLuminaireScene } from "../src/models/luminaire-scene.js";
@@ -28,6 +30,58 @@ test("the shared PPFD map distinguishes weak side light without redefining its l
   );
   assert.equal(normalizeFitting({}).colorMetric, "ppfd");
   assert.equal(normalizeFitting({ colorMetric: "dli" }).colorMetric, "dli");
+  assert.equal(
+    normalizeFitting({ colorMetric: "dli-guide" }).colorMetric,
+    "dli-guide",
+  );
+});
+
+test("DLI uses a fixed logarithmic scale that resolves weak daily doses and includes zero", () => {
+  const scale = lightMapScales.dli;
+  assert.equal(scale.position(0), 0);
+  assert.equal(scale.position(30), 1);
+  assert.equal(scale.color(60), scale.color(30));
+  assert.equal(scale.color(-1), scale.color(0));
+  assert.deepEqual(
+    scale.stops.map(([v]) => v),
+    [0, 0.1, 0.5, 1, 3, 10, 30],
+  );
+  const values = [0, 0.01, 0.05, 0.1, 0.2, 0.8, 3, 10];
+  assert.equal(new Set(values.map(scale.color)).size, values.length);
+  for (const value of values) {
+    assert.ok(
+      Math.abs(
+        scale.position(value) - Math.log1p(value / 0.1) / Math.log(301),
+      ) < 1e-12,
+    );
+  }
+  for (const [value, color] of scale.stops)
+    assert.equal(scale.color(value), color);
+});
+
+test("DLI colours follow daily dose while PPFD colours stay independent of lighting hours", () => {
+  // 100 µmol/m²/s for 12 h = 4.32 mol/m²/day; 200 for 6 h is the same dose.
+  assert.equal(
+    continuousLightColor(100, "dli", 12),
+    lightMapScales.dli.color(4.32),
+  );
+  assert.equal(
+    continuousLightColor(100, "dli", 12),
+    continuousLightColor(200, "dli", 6),
+  );
+  assert.notEqual(
+    continuousLightColor(100, "dli", 12),
+    continuousLightColor(100, "dli", 6),
+  );
+  assert.equal(
+    continuousLightColor(100, "ppfd", 12),
+    continuousLightColor(100, "ppfd", 6),
+  );
+  assert.equal(continuousLightColor(0, "dli", 12), lightMapScales.dli.color(0));
+  assert.equal(
+    continuousLightColor(100, "dli", 0),
+    lightMapScales.dli.color(0),
+  );
 });
 
 test("surface readout preserves scenario ranges and selects a whole leaf side, not a patch peak", () => {

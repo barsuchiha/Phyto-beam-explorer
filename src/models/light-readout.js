@@ -1,5 +1,6 @@
 // Presentation of existing incident-light results. No transport or PPF changes.
 // The fixed log scale resolves weak side light without normalising each scene.
+import { plantModel } from "./plants.js";
 export const PPFD_MAP_MAX = 300;
 export const ppfdMapStops = [
   [0, "#292038"],
@@ -34,6 +35,31 @@ export function ppfdMapColor(value) {
       )
       .join("")
   );
+}
+// Both legends and surface colours use these fixed scales. DLI is the lamp's
+// daily contribution, with a 0.1 mol softening scale so zero remains defined.
+export const lightMapScales = {
+  ppfd: {
+    label: "PPFD",
+    max: PPFD_MAP_MAX,
+    units: "мкмоль/(м²·с)",
+    stops: ppfdMapStops,
+    position: ppfdMapPosition,
+    color: ppfdMapColor,
+  },
+  dli: {
+    label: "DLI",
+    max: 30,
+    units: "моль/(м²·сутки)",
+    stops: ppfdMapStops.map(([v, color]) => [v / 10, color]),
+    position: (value) => ppfdMapPosition(value * 10),
+    color: (value) => ppfdMapColor(value * 10),
+  },
+};
+export function continuousLightColor(ppfd, metric, hours) {
+  return metric === "dli"
+    ? lightMapScales.dli.color(plantModel.dli(ppfd, hours))
+    : lightMapScales.ppfd.color(ppfd);
 }
 export function surfaceReadout(result) {
   let brightest = null;

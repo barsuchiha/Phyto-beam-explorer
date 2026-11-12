@@ -23,8 +23,7 @@ import { lightWorkerFile } from "./data/worker-asset.js";
 import {
   surfaceReadout,
   percentText,
-  ppfdMapStops,
-  ppfdMapPosition,
+  lightMapScales,
 } from "./models/light-readout.js";
 
 const q = (id) => document.getElementById("lm-" + id),
@@ -105,20 +104,33 @@ function setOptions(id, items, value) {
   select.value = value;
 }
 function renderMapLegend() {
-  const continuous = state.colorMetric === "ppfd";
-  hide("ppfd-legend", !continuous);
+  const scale = lightMapScales[state.colorMetric],
+    continuous = Boolean(scale);
+  hide("continuous-legend", !continuous);
   hide("legend", continuous);
   hide("dli-note", continuous);
-  q("ppfd-gradient").style.background =
-    `linear-gradient(to right,${ppfdMapStops.map(([v, c]) => `${c} ${ppfdMapPosition(v) * 100}%`).join(",")})`;
-  q("ppfd-ticks").replaceChildren(
-    ...ppfdMapStops.map(([value]) => {
+  if (!continuous) return;
+  q("continuous-legend").setAttribute(
+    "aria-label",
+    `Шкала ${scale.label} от 0 до ${scale.max} и выше`,
+  );
+  q("continuous-gradient").style.background =
+    `linear-gradient(to right,${scale.stops.map(([v, c]) => `${c} ${scale.position(v) * 100}%`).join(",")})`;
+  q("continuous-ticks").replaceChildren(
+    ...scale.stops.map(([value]) => {
       const tick = document.createElement("span");
-      tick.style.left = ppfdMapPosition(value) * 100 + "%";
-      tick.textContent = value === 300 ? "300+" : String(value);
+      tick.style.left = scale.position(value) * 100 + "%";
+      tick.textContent =
+        value.toLocaleString("ru-RU") + (value === scale.max ? "+" : "");
       return tick;
     }),
   );
+  q("continuous-note").textContent =
+    `${scale.units} · общая логарифмическая шкала. ` +
+    (state.colorMetric === "dli"
+      ? `Добавка от лампы за ${state.hours} ч в день; свет окна не включён. `
+      : "") +
+    `Цвет показывает количество света, а не достаточность для растения. ${scale.max}+ — верхний цвет.`;
 }
 function renderControls(poses, geometry) {
   const m = luminaires[state.model],

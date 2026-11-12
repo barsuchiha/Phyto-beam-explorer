@@ -6,7 +6,7 @@ import { add, mul, surfacePoint } from "../models/crown.js";
 import { plantModel } from "../models/plants.js";
 import { referenceDetector } from "../models/reference-light.js";
 import { populateOlive } from "./olive-view.js";
-import { ppfdMapColor } from "../models/light-readout.js";
+import { continuousLightColor } from "../models/light-readout.js";
 
 const vector = (p) => new T.Vector3(...p),
   colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
@@ -436,7 +436,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     dispose(rayGroup);
     dispose(heatGroup);
     const lightColor = (ppfd) =>
-      state.colorMetric === "dli"
+      state.colorMetric === "dli-guide"
         ? new T.Color(
             colors[
               plantModel.classify(
@@ -445,7 +445,9 @@ export function createLuminaireView(host, onLeaf = () => {}) {
               )
             ],
           )
-        : new T.Color(ppfdMapColor(ppfd));
+        : new T.Color(
+            continuousLightColor(ppfd, state.colorMetric, state.hours),
+          );
     for (const ray of result.rays)
       rayGroup.add(
         line(

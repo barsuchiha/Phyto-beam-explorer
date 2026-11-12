@@ -377,25 +377,25 @@ a:focus-visible {
   max-width: 100%;
   font-size: 12px;
 }
-#lm-ppfd-gradient {
+#lm-continuous-gradient {
   height: 12px;
   border-radius: 4px;
 }
-#lm-ppfd-ticks {
+#lm-continuous-ticks {
   position: relative;
   height: 24px;
   margin-top: 5px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
-#lm-ppfd-ticks span {
+#lm-continuous-ticks span {
   position: absolute;
   transform: translateX(-50%);
 }
-#lm-ppfd-ticks span:first-child {
+#lm-continuous-ticks span:first-child {
   transform: none;
 }
-#lm-ppfd-ticks span:last-child {
+#lm-continuous-ticks span:last-child {
   transform: translateX(-100%);
 }
 #lm-reference-details {
