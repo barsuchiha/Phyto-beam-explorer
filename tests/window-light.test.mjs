@@ -156,3 +156,13 @@ test("saved window controls migrate safely and sunlight duration cannot exceed d
     4,
   );
 });
+
+test("fully shaded foliage is low light, not a claim that an active window is switched off", () => {
+  const r = result(0, 0, 0, 0);
+  assert.equal(dailyPlantLight(r, state).kind, "low");
+  assert.equal(dailyLeafLight(r, state, 0).kind, "low");
+  assert.equal(
+    dailyPlantLight(r, { ...state, windowWeather: "off" }).kind,
+    "off",
+  );
+});

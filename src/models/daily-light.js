@@ -1,6 +1,18 @@
 import { plantModel } from "./plants.js";
 import { windowDose, windowSettings } from "./window-light.js";
 
+function sourcesOn(result, state) {
+  const window = windowSettings(state);
+  return (
+    result.output.fluxes.some((f) => f > 0) ||
+    Boolean(
+      result.windowLight &&
+        ((window.diffuse > 0 && window.hours > 0) ||
+          (window.beam > 0 && window.sunHours > 0)),
+    )
+  );
+}
+
 // Add both sources on the SAME physical face before choosing the brighter face.
 // Never add the brightest lamp face to a different brightest daylight face.
 export function dailyFaceLight(result, state, leaf, side) {
@@ -45,11 +57,7 @@ export function dailyLeafLight(result, state, selectedLeaf = -1) {
   const side = brighterFace(result, state, leaf);
   const data = dailyFaceLight(result, state, leaf, side);
   const { range, value } = data;
-  const emitting =
-    result.output.fluxes.some((f) => f > 0) ||
-    result.windowLight?.leaves.some((l) =>
-      l.sides.some((s) => windowDose(s, state) > 0),
-    );
+  const emitting = sourcesOn(result, state);
   const { L, U } = plantModel.groups[plantModel.plants[state.plant].group];
   const kind = !emitting
     ? "off"
@@ -149,9 +157,7 @@ export function dailyPlantLight(result, state) {
     Math.min(...scenarios.map((s) => s[key])),
     Math.max(...scenarios.map((s) => s[key])),
   ];
-  const emitting =
-    result.output.fluxes.some((f) => f > 0) ||
-    leaves.some((l) => l.dose.window > 0);
+  const emitting = sourcesOn(result, state);
   const kinds = new Set(scenarios.map((s) => s.kind));
   const middle =
     scenarios[result.middle * factors.length + Math.floor(factors.length / 2)];
