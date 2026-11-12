@@ -41,6 +41,47 @@ html > body {
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
+.model-controls h3 {
+  margin-top: 12px;
+}
+.ray-controls {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  display: grid;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+.ray-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--foreground);
+  cursor: pointer;
+}
+.ray-controls input {
+  accent-color: #d9c180;
+}
+.room-report {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin-top: 16px;
+  font-size: 12px;
+}
+.room-report p {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+.room-report strong {
+  font-weight: 500;
+}
+.room-report span {
+  color: var(--muted-foreground);
+}
+.room-report .room-hit span {
+  color: #c7a66e;
+}
 .model-controls label {
   display: grid;
   gap: 8px;

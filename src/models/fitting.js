@@ -45,6 +45,7 @@ export const modelDefaults = {
   leafTilt: 0,
   install: 150,
   plantOffset: 0,
+  chairOffset: 0,
   dim: 70,
   hours: 12,
   receiver: "crown",
@@ -91,6 +92,7 @@ export function normalizeFitting(input = {}) {
   );
   s.install = clamp(s.install, 50, 250, m.install ?? 130);
   s.plantOffset = clamp(s.plantOffset, -60, 60, 0);
+  s.chairOffset = clamp(s.chairOffset, -60, 80, 0);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.hours = clamp(s.hours, 6, 16, 12);
   s.receiver = s.receiver === "leaves" ? "leaves" : "crown";

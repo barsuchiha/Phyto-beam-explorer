@@ -152,6 +152,11 @@ export function tracePath(
       distance = fixtureHit.distance;
       hit = fixtureHit;
     }
+    const roomHit = geometry.room?.hit(o, d, distance);
+    if (roomHit) {
+      distance = roomHit.distance;
+      hit = roomHit;
+    }
     if (!Number.isFinite(distance))
       return {
         kind: "room",
@@ -162,6 +167,16 @@ export function tracePath(
       };
     const p = add(o, mul(d, distance));
     path.push(p);
+    if (hit?.kind === "room")
+      return {
+        kind: "room",
+        weight,
+        absorbed,
+        path,
+        point: p,
+        roomHit: hit,
+        bounces: reflections,
+      };
     if (!hit)
       return {
         kind: "target",
@@ -233,6 +248,7 @@ export function calculateLuminaire(
     triangles: triangles([...scene.surfaces, ...scene.boards]),
     leafReceiver: state.receiver === "leaves",
     fixture: scene.fixture,
+    room: scene.room,
     leafBVH:
       state.receiver === "leaves"
         ? buildLeafBVH(scene.leafGeometry.triangles)
@@ -269,6 +285,13 @@ export function calculateLuminaire(
     total: 0,
   }));
   const rays = [];
+  const rayStride = Math.max(1, Math.floor(rayCount / 512));
+  const roomKinds = ["chair", "cat", "walls", "floor", "escape"];
+  const roomPower = Object.fromEntries(
+    roomKinds.map((key) => [key, Array(scenarioCount).fill(0)]),
+  );
+  const roomHits = Object.fromEntries(roomKinds.map((key) => [key, 0]));
+  const roomCells = new Map();
   for (let i = 1; i <= rayCount; i++) {
     const source =
       scene.sources[
@@ -302,6 +325,8 @@ export function calculateLuminaire(
       i,
     );
     let index = -1;
+    const roomKind = result.roomHit?.receiver ?? "escape";
+    if (result.kind === "room") roomHits[roomKind]++;
     if (result.kind === "target" && geometry.leafReceiver) {
       index = result.patch * 2 + result.side;
       bins[index].hits++;
@@ -319,16 +344,49 @@ export function calculateLuminaire(
       budgets[k].total += w;
       budgets[k].screen += w * result.absorbed;
       budgets[k][result.kind] += w * result.weight;
+      if (result.kind === "room") roomPower[roomKind][k] += w * result.weight;
       if (index >= 0) {
         bins[index].power[k] += w * result.weight;
         if (result.bounces) budgets[k].returned += w * result.weight;
       }
     }
-    if (i % 521 === 0 && rays.length < 48)
+    if (result.roomHit && roomKind !== "escape") {
+      const p = result.point;
+      // 5 cm world-space cells are a display-only smoothing grid, not detectors.
+      const key =
+        result.roomHit.object +
+        ":" +
+        p.map((v) => Math.floor(v / 0.05)).join(":");
+      const w =
+        ((TAU * intensity(output.curves[middle], mu, phi)) / rayCount) *
+        result.weight;
+      let cell = roomCells.get(key);
+      if (!cell) {
+        cell = {
+          point: [0, 0, 0],
+          normal: [0, 0, 0],
+          weight: 0,
+          receiver: roomKind,
+        };
+        roomCells.set(key, cell);
+      }
+      cell.weight += w;
+      for (let j = 0; j < 3; j++) {
+        cell.point[j] += p[j] * w;
+        cell.normal[j] += result.roomHit.normal[j] * w;
+      }
+    }
+    if (i % rayStride === 0 && rays.length < 512)
       rays.push({
         points: result.path,
         kind: result.kind,
         reflected: result.bounces > 0,
+        receiver: result.roomHit?.receiver,
+        strength:
+          TAU *
+          intensity(output.curves[middle], mu, phi) *
+          output.fluxes[middle] *
+          result.weight,
       });
   }
   const area = bins.reduce((s, b) => s + b.area, 0);
@@ -380,6 +438,26 @@ export function calculateLuminaire(
     nz,
     na,
     rays,
+    room: scene.room
+      ? {
+          fractions: Object.fromEntries(
+            roomKinds.map((key) => [
+              key,
+              roomPower[key].map((value, k) => value / budgets[k].total),
+            ]),
+          ),
+          hits: roomHits,
+          splats: [...roomCells.values()]
+            .filter((c) => c.weight > 0)
+            .map((cell) => ({
+              point: cell.point.map((v) => v / cell.weight),
+              normal: unit(cell.normal),
+              power:
+                (cell.weight / budgets[middle].total) * output.fluxes[middle],
+              receiver: cell.receiver,
+            })),
+        }
+      : null,
     area,
     rayCount,
     middle,

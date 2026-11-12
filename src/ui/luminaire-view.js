@@ -6,6 +6,8 @@ import { add, mul, surfacePoint } from "../models/crown.js";
 import { referenceDetector } from "../models/reference-light.js";
 import { populateOlive } from "./olive-view.js";
 import { ppfdMapColor } from "../models/light-readout.js";
+import { populateRoom, populateRoomLight } from "./room-view.js";
+import { populateRayLight } from "./ray-view.js";
 
 const vector = (p) => new T.Vector3(...p);
 function material(color, options = {}) {
@@ -25,9 +27,13 @@ function line(points, color, opacity = 1) {
 }
 function dispose(group) {
   group.traverse((o) => {
+    if (o.isInstancedMesh) o.dispose();
     o.geometry?.dispose();
-    if (Array.isArray(o.material)) o.material.forEach((m) => m.dispose());
-    else o.material?.dispose();
+    const materials = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of materials) {
+      m?.map?.dispose();
+      m?.dispose();
+    }
   });
   group.clear();
 }
@@ -99,26 +105,27 @@ export function createLuminaireView(host, onLeaf = () => {}) {
   host.append(renderer.domElement);
   renderer.domElement.setAttribute(
     "aria-label",
-    "3D-модель светильника и растения. Для вращения перетаскивайте сцену.",
+    "Угол комнаты: светильник, растение и кресло с кошкой. Для вращения перетаскивайте сцену.",
   );
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
   controls.minDistance = 0.08;
   controls.maxDistance = 15;
-  scene.add(new T.HemisphereLight(0xffffff, 0x69705f, 2.1));
+  const ambient = new T.HemisphereLight(0xffffff, 0x69705f, 1.6);
+  scene.add(ambient);
   const key = new T.DirectionalLight(0xffffff, 3);
   key.position.set(2, -3, 4);
   scene.add(key);
-  const grid = new T.GridHelper(6, 30, 0x50594f, 0x30382f);
-  grid.rotation.x = Math.PI / 2;
-  grid.position.z = -0.003;
-  scene.add(grid);
   const modelGroup = new T.Group(),
     plantGroup = new T.Group(),
     sourceGroup = new T.Group(),
     opticGroup = new T.Group(),
     rayGroup = new T.Group(),
     heatGroup = new T.Group();
+  const roomGroup = new T.Group(),
+    roomLightGroup = new T.Group(),
+    pathGroup = new T.Group(),
+    warmGroup = new T.Group();
   const selectedGroup = new T.Group(),
     referenceGroup = new T.Group();
   referenceGroup.visible = false;
@@ -131,11 +138,17 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     heatGroup,
     selectedGroup,
     referenceGroup,
+    roomGroup,
+    roomLightGroup,
+    pathGroup,
+    warmGroup,
   );
   let currentResult,
     currentScene,
     lastModel = "",
-    viewMode = "plant";
+    lastChair,
+    viewMode = "rays",
+    showPaths = false;
   const draw = () => renderer.render(scene, camera);
   controls.addEventListener("change", draw);
   new ResizeObserver(() => {
@@ -152,6 +165,10 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       .union(new T.Box3().setFromObject(plantGroup))
       .union(new T.Box3().setFromObject(sourceGroup))
       .union(new T.Box3().setFromObject(opticGroup));
+    if (!close)
+      for (const child of roomGroup.children)
+        if (["chair", "cat"].includes(child.userData.roomReceiver))
+          bounds.union(new T.Box3().setFromObject(child));
     let center = bounds.getCenter(new T.Vector3()),
       size = Math.max(...bounds.getSize(new T.Vector3()).toArray());
     if (close) {
@@ -171,15 +188,30 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     }
     size = Math.max(0.2, size);
     controls.target.copy(center);
-    camera.position
-      .copy(center)
-      .add(
-        new T.Vector3(
-          front ? 0 : size * 0.85,
-          -size * 1.75,
-          front ? size * 0.05 : size * 0.8,
-        ),
-      );
+    const direction = new T.Vector3(
+      front ? 0 : 0.65,
+      -1.8,
+      front ? 0.05 : 0.9,
+    ).normalize();
+    const right = new T.Vector3()
+      .crossVectors(new T.Vector3(0, 0, 1), direction)
+      .normalize();
+    const up = new T.Vector3().crossVectors(direction, right).normalize();
+    const tanV = Math.tan(T.MathUtils.degToRad(camera.fov / 2)),
+      tanH = tanV * camera.aspect;
+    let distance = close ? size * 2.2 : 0;
+    if (!close)
+      for (const x of [bounds.min.x, bounds.max.x])
+        for (const y of [bounds.min.y, bounds.max.y])
+          for (const z of [bounds.min.z, bounds.max.z]) {
+            const p = new T.Vector3(x, y, z).sub(center);
+            distance = Math.max(
+              distance,
+              Math.abs(p.dot(right)) / tanH + p.dot(direction),
+              Math.abs(p.dot(up)) / tanV + p.dot(direction),
+            );
+          }
+    camera.position.copy(center).addScaledVector(direction, distance * 1.12);
     controls.update();
     draw();
   }
@@ -195,8 +227,13 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       heatGroup,
       selectedGroup,
       referenceGroup,
+      roomGroup,
+      roomLightGroup,
+      pathGroup,
+      warmGroup,
     ])
       dispose(group);
+    if (geometry.room) populateRoom(roomGroup, geometry.room);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
     if (geometry.olive) populateOlive(modelGroup, pose, geometry, state);
     for (const m of pose.meshes) {
@@ -424,8 +461,9 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       state.plantSize,
     ).leaves.length;
     host.dataset.referenceHeight = String(detector.center[2]);
-    if (lastModel !== state.model) {
+    if (lastModel !== state.model || lastChair !== state.chairOffset) {
       lastModel = state.model;
+      lastChair = state.chairOffset;
       fit();
     } else draw();
   }
@@ -433,24 +471,18 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     currentResult = result;
     dispose(rayGroup);
     dispose(heatGroup);
+    dispose(roomLightGroup);
+    dispose(pathGroup);
+    dispose(warmGroup);
+    populateRoomLight(roomLightGroup, result);
+    populateRayLight(rayGroup, pathGroup, result.rays);
     const lightColor = (ppfd) => new T.Color(ppfdMapColor(ppfd));
-    for (const ray of result.rays)
-      rayGroup.add(
-        line(
-          ray.points,
-          ray.kind === "target"
-            ? 0x97c79d
-            : ray.kind === "room"
-              ? 0xcbaf77
-              : 0x989e95,
-          0.27,
-        ),
-      );
     if (result.receiver === "leaves") {
       for (const leaf of currentScene.leafGeometry.leaves)
         for (const side of [0, 1]) {
           const positions = [],
-            col = [];
+            col = [],
+            warmColors = [];
           for (const id of leaf.patches) {
             const patch = currentScene.leafGeometry.patches[id],
               bin = result.bins[id * 2 + side];
@@ -459,6 +491,11 @@ export function createLuminaireView(host, onLeaf = () => {}) {
               for (const p of tri) {
                 positions.push(...p);
                 col.push(...color.toArray());
+                warmColors.push(
+                  ...new T.Color(1, 0.78, 0.42)
+                    .multiplyScalar(0.65 * (1 - Math.exp(-bin.ppfd / 65)))
+                    .toArray(),
+                );
               }
           }
           const geometry = new T.BufferGeometry();
@@ -476,6 +513,25 @@ export function createLuminaireView(host, onLeaf = () => {}) {
           );
           mesh.userData.leaf = leaf.id;
           heatGroup.add(mesh);
+          const warmGeometry = geometry.clone();
+          warmGeometry.setAttribute(
+            "color",
+            new T.Float32BufferAttribute(warmColors, 3),
+          );
+          warmGroup.add(
+            new T.Mesh(
+              warmGeometry,
+              new T.MeshBasicMaterial({
+                vertexColors: true,
+                side: side === 0 ? T.FrontSide : T.BackSide,
+                transparent: true,
+                depthWrite: false,
+                blending: T.AdditiveBlending,
+                polygonOffset: true,
+                polygonOffsetFactor: -1,
+              }),
+            ),
+          );
         }
       setMode(viewMode);
       return;
@@ -526,6 +582,11 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     for (const child of plantGroup.children)
       if (child.userData.leaf !== undefined) child.visible = !leafMap;
     rayGroup.visible = mode === "rays";
+    pathGroup.visible = mode === "rays" && showPaths;
+    warmGroup.visible = mode === "rays";
+    roomLightGroup.visible = mode === "rays";
+    ambient.intensity = mode === "rays" ? 0.65 : 1.6;
+    key.intensity = mode === "rays" ? 0.7 : 2;
     draw();
   }
   let pointerStart;
@@ -556,7 +617,16 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       group.children.filter((m) => m.isMesh && m.userData.leaf !== undefined),
       false,
     )[0];
-    if (hit) onLeaf(hit.object.userData.leaf);
+    if (
+      hit &&
+      !ray
+        .intersectObjects(
+          roomGroup.children.filter((m) => m.isMesh),
+          false,
+        )
+        .some((r) => r.distance < hit.distance)
+    )
+      onLeaf(hit.object.userData.leaf);
   });
   function selectLeaf(id) {
     dispose(selectedGroup);
@@ -581,5 +651,17 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     referenceGroup.visible = visible;
     draw();
   }
-  return { update, light, fit, setMode, selectLeaf, setReferenceVisible };
+  function setPaths(visible) {
+    showPaths = visible;
+    setMode(viewMode);
+  }
+  return {
+    update,
+    light,
+    fit,
+    setMode,
+    selectLeaf,
+    setReferenceVisible,
+    setPaths,
+  };
 }

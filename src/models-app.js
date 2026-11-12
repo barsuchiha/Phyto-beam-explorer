@@ -153,6 +153,7 @@ function renderControls(poses, geometry) {
     ["leafTilt", "°"],
     ["install", " см"],
     ["plantOffset", " см"],
+    ["chairOffset", " см"],
     ["hours", " ч"],
     ["flap", "°"],
     ["opening", "°"],
@@ -379,6 +380,46 @@ function renderResult(result, geometry, reference) {
     ? `Всего на ${leafMode ? "листья" : "крону"}: ${percentText(b.target)} исходного PPF; в том числе после отражений: ${percentText(b.returned)} исходного PPF. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`
     : "Лампа выключена: её вклад в PPFD и DLI равен нулю. Доля попавшего света не определяется без исходного потока.";
   q("trace-note").textContent = q("status").textContent;
+  const room = result.room;
+  hide("room-report", !room);
+  if (room) {
+    q("room-report").replaceChildren(
+      ...[
+        ["chair", "Кресло"],
+        ["cat", "Кошка"],
+      ].map(([id, label]) => {
+        const values = room.fractions[id],
+          reaches = readout.emitting && Math.max(...values) > 0;
+        const el = document.createElement("p");
+        el.className = reaches ? "room-hit" : "";
+        const title = document.createElement("strong");
+        title.textContent = label;
+        const text = document.createElement("span");
+        text.textContent = !readout.emitting
+          ? "Лампа выключена"
+          : reaches
+            ? "Свет попадает"
+            : "Нет попаданий в выборке";
+        el.append(title, text);
+        return el;
+      }),
+    );
+    q("room-numbers").textContent = !readout.emitting
+      ? "Лампа выключена: свет от неё на кресло и кошку не поступает."
+      : [
+          ["chair", "Кресло"],
+          ["cat", "Кошка"],
+          ["walls", "Стены"],
+          ["floor", "Пол"],
+          ["escape", "За границы сцены"],
+        ]
+          .map(([id, label]) => {
+            const values = room.fractions[id];
+            return `${label}: ${percentText(Math.min(...values))}–${percentText(Math.max(...values))} исходного PPF`;
+          })
+          .join(". ") +
+        ". Это части категории «В комнату», не дополнительные потоки. Ноль попаданий не доказывает отсутствие слабого света. Повторные отражения от комнаты не учтены; яркость дымки и пятен условная.";
+  }
   hide("status", true);
   view?.light(state, result);
 }
@@ -393,6 +434,7 @@ async function render() {
   latestResult = null;
   hide("leaf-panel", true);
   hide("daily-panel", true);
+  hide("room-report", true);
   hide("status", false);
   q("status").textContent = "Обновляю сцену и считаю свет…";
   try {
@@ -405,14 +447,19 @@ async function render() {
     view?.update(state, pose, geometry);
     if (view) q("loading").hidden = true;
     q("caption").textContent =
-      `${luminaires[state.model].name} · сетка пола 20 см · ${geometry.sources.length} источник(а)${geometry.source.type === "bulb" ? " · форма колбы условная" : ""}`;
+      `${luminaires[state.model].name} · угол комнаты · ${geometry.sources.length} источник(а)${geometry.source.type === "bulb" ? " · форма колбы условная" : ""}`;
     q("driver-note").textContent = lightOutput(
       state,
       geometry.sources.length,
     ).note;
-    hide("collision", !geometry.collision);
+    hide("collision", !geometry.collision && !geometry.roomCollision);
     q("collision").textContent =
       "Крона или листья пересекают источник или экран. Подними конструкцию, сдвинь растение или измени его размер/наклон листьев: расчёт для этого положения остановлен.";
+    if (geometry.roomCollision)
+      q("collision").textContent =
+        geometry.roomCollision === "boundary"
+          ? "Растение выходит за границы комнаты. Уменьши или сдвинь его: расчёт для этого положения остановлен."
+          : "Листья пересекают кресло или кошку. Сдвинь кресло вправо или растение влево: расчёт для этого положения остановлен.";
     q("metrics").replaceChildren();
     q("budget").replaceChildren();
     for (const id of [
@@ -422,9 +469,10 @@ async function render() {
       "daily-note",
       "surface-summary",
       "receiver-note",
+      "room-numbers",
     ])
       q(id).textContent = "";
-    if (geometry.collision) {
+    if (geometry.collision || geometry.roomCollision) {
       q("status").textContent =
         "Показана геометрическая примерка; PPFD для пересечения не рассчитывается.";
       return;
@@ -497,7 +545,11 @@ for (const button of document.querySelectorAll("[data-view]"))
       other.setAttribute("aria-pressed", String(other === button));
     view?.setMode(button.dataset.view);
     hide("map-controls", button.dataset.view !== "map");
+    hide("ray-controls", button.dataset.view !== "rays");
   });
+q("ray-paths").addEventListener("change", () =>
+  view?.setPaths(q("ray-paths").checked),
+);
 q("reference-details").addEventListener("toggle", () =>
   view?.setReferenceVisible(q("reference-details").open),
 );

@@ -186,6 +186,8 @@ test("published worker is versioned and produces the same result as the shared c
     close(data.result.mean, expected.mean);
     assert.deepEqual(data.result.metrics, expected.metrics);
     assert.deepEqual(data.result.leaves, expected.leaves);
+    assert.deepEqual(data.result.room, expected.room);
+    assert.deepEqual(data.result.rays, expected.rays);
     assert.ok(Number.isFinite(data.reference.mean));
   } finally {
     await worker.terminate();
