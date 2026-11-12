@@ -43,9 +43,14 @@ for (const family of ["P00", "Soltech"]) {
 }
 for (const [id, p] of Object.entries(plants))
   q("plant").append(option(id, p.name));
-let view;
+let view,
+  latestResult = null,
+  selectedLeaf = 0;
 try {
-  view = createLuminaireView(q("view"));
+  view = createLuminaireView(q("view"), (id) => {
+    selectedLeaf = id;
+    renderLeafDetail();
+  });
 } catch {
   q("loading").textContent =
     "3D недоступно в этом браузере. Примерка по размерам и расчёт ниже работают; для сцены нужен WebGL 2.";
@@ -205,7 +210,37 @@ const budgetItems = [
 ];
 const fmt = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
 const dose = (n) => n.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+function renderLeafDetail() {
+  const leaf = latestResult?.leaves?.[selectedLeaf];
+  if (!leaf) return;
+  q("leaf-select").value = String(selectedLeaf);
+  view?.selectLeaf(selectedLeaf);
+  const values = leaf.sides.map(
+    (side, i) =>
+      `Сторона ${i === 0 ? "A" : "B"}: PPFD ${fmt(side.range[0])}–${fmt(side.range[1])}, DLI ${dose(plantModel.dli(side.range[0], state.hours))}–${dose(plantModel.dli(side.range[1], state.hours))}`,
+  );
+  q("leaf-detail").textContent =
+    `Лист ${selectedLeaf + 1} · площадь одной стороны ${fmt(leaf.area * 10000)} см². ${values.join(". ")}. PPFD: мкмоль/(м²·с); DLI: моль/(м²·сутки). A/B — стороны нарисованной сетки, не измеренные верх/низ живого листа.` +
+    (leaf.sides.some((s) => s.hits === 0)
+      ? " Ноль попаданий лучей не доказывает полную темноту: слабый свет может не попасть в выборку."
+      : "");
+}
 function renderResult(result, geometry) {
+  latestResult = result;
+  const leafMode = result.receiver === "leaves";
+  hide("leaf-panel", !leafMode);
+  if (leafMode) {
+    if (!result.leaves[selectedLeaf]) selectedLeaf = 0;
+    setOptions(
+      "leaf-select",
+      result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
+      String(selectedLeaf),
+    );
+    renderLeafDetail();
+  }
+  q("receiver-note").textContent = leafMode
+    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². PPFD усреднён по обеим поверхностям, включая теневые участки. Цвет — по четырём участкам на каждой стороне; листья затеняют друг друга. Форма и наклоны условные, пропускание и переотражения листьев не рассчитаны. Карта с ограниченной выборкой: цвет маленьких участков может быть шумным. Это другая модель, её среднее нельзя напрямую сравнивать со средним по оболочке.`
+    : "PPFD усредняется по всей внешней оболочке кроны, включая теневую сторону. Это другая область усреднения, чем на первой странице. Рисованные листья не участвуют в расчёте.";
   const { metrics, range, middle } = result,
     b = metrics[middle].budget;
   const ppfRange = [
@@ -218,7 +253,7 @@ function renderResult(result, geometry) {
       : fmt(ppfRange[0]) + "–" + fmt(ppfRange[1]);
   const ranged = range[1] - range[0] > 0.05;
   q("metrics").innerHTML =
-    `<div><span>Средний PPFD</span><strong>${ranged ? fmt(range[0]) + "–" + fmt(range[1]) : fmt(result.mean)}</strong><small>мкмоль/(м²·с) · вся крона</small></div><div><span>DLI за ${state.hours} ч</span><strong>${ranged ? dose(plantModel.dli(range[0], state.hours)) + "–" + dose(plantModel.dli(range[1], state.hours)) : dose(plantModel.dli(result.mean, state.hours))}</strong><small>моль/(м²·сутки)</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
+    `<div><span>Средний PPFD</span><strong>${ranged ? fmt(range[0]) + "–" + fmt(range[1]) : fmt(result.mean)}</strong><small>мкмоль/(м²·с) · ${leafMode ? "обе стороны листьев" : "вся крона"}</small></div><div><span>DLI за ${state.hours} ч</span><strong>${ranged ? dose(plantModel.dli(range[0], state.hours)) + "–" + dose(plantModel.dli(range[1], state.hours)) : dose(plantModel.dli(result.mean, state.hours))}</strong><small>моль/(м²·сутки)</small></div><div><span>PPF источников</span><strong>${ppfText}</strong><small>мкмоль/с · ${geometry.sources.length} шт.</small></div>`;
   const bar = document.createElement("div");
   bar.className = "model-budget";
   const labels = document.createElement("div");
@@ -228,12 +263,12 @@ function renderResult(result, geometry) {
     part.style.cssText = `width:${b[id] * 100}%;background:${color}`;
     bar.append(part);
     const text = document.createElement("span");
-    text.innerHTML = `<i style="background:${color}"></i>${label} ${fmt(b[id] * 100)}%`;
+    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : label} ${fmt(b[id] * 100)}%`;
     labels.append(text);
   }
   q("budget").replaceChildren(bar, labels);
   q("status").textContent =
-    `Из всего PPF на крону после отражений вернулось ${fmt(b.returned * 100)}%. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`;
+    `Из всего PPF на ${leafMode ? "листья" : "крону"} после отражений вернулось ${fmt(b.returned * 100)}%. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`;
   view?.light(state, result);
 }
 let serial = 0,
@@ -241,6 +276,8 @@ let serial = 0,
 async function render() {
   const run = ++serial;
   clearTimeout(timer);
+  latestResult = null;
+  hide("leaf-panel", true);
   try {
     const poses = await getCAD(state.model);
     if (run !== serial) return;
@@ -299,6 +336,10 @@ for (const button of document.querySelectorAll("[data-view]"))
       other.setAttribute("aria-pressed", String(other === button));
     view?.setMode(button.dataset.view);
   });
+q("leaf-select").addEventListener("input", () => {
+  selectedLeaf = Number(q("leaf-select").value);
+  renderLeafDetail();
+});
 q("focus").addEventListener("click", () => view?.fit(true));
 q("reset-view").addEventListener("click", () => view?.fit());
 render();

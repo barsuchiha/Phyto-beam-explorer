@@ -1,6 +1,7 @@
 import { luminaires, mounts, fittingSources } from "../data/luminaires.js";
 import { crownGeometry, add, sub, mul, dot, unit } from "./crown.js";
 import { sourceFit } from "./fitting.js";
+import { buildLeafGeometry } from "./leaf-geometry.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -247,6 +248,7 @@ export function buildLuminaireScene(state, pose) {
     source,
     sources,
     crown,
+    leafGeometry: buildLeafGeometry(crown, state.plant, state.plantSize),
     surfaces,
     screenSupports,
     screenDimensions,

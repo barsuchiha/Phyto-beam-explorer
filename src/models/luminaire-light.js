@@ -1,4 +1,5 @@
 import { bulbModel } from "./minifermer-bulbs.js";
+import { buildLeafBVH, hitLeaves } from "./leaf-bvh.js";
 import { hardware } from "./hardware.js";
 import { mini36Model } from "./mini36.js";
 import { eraModel } from "./era.js";
@@ -15,6 +16,7 @@ import {
 import { cross } from "./luminaire-scene.js";
 
 export const PREVIEW_RAYS = 32768;
+export const LEAF_RAYS = 131072;
 const EPS = 1e-7,
   TAU = 2 * Math.PI;
 function radical(i, base) {
@@ -127,7 +129,12 @@ export function tracePath(
     absorbed = 0;
   const path = [o];
   for (let bounce = 0; bounce <= maxBounces; bounce++) {
-    let distance = rayCrown(o, d, geometry.crown),
+    const leafHit = geometry.leafReceiver
+      ? hitLeaves(geometry.leafBVH, o, d)
+      : null;
+    let distance = geometry.leafReceiver
+        ? (leafHit?.distance ?? Infinity)
+        : rayCrown(o, d, geometry.crown),
       hit = null;
     for (const t of geometry.triangles) {
       const k = triangleDistance(o, d, t);
@@ -153,6 +160,9 @@ export function tracePath(
         absorbed,
         path,
         point: p,
+        leaf: leafHit?.leaf,
+        patch: leafHit?.patch,
+        side: leafHit?.side,
         bounces: bounce,
       };
     if (hit.kind === "housing")
@@ -174,7 +184,11 @@ export function tracePath(
   }
 }
 
-export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
+export function calculateLuminaire(
+  state,
+  scene,
+  rayCount = state.receiver === "leaves" ? LEAF_RAYS : PREVIEW_RAYS,
+) {
   const output = lightOutput(state, scene.sources.length),
     scenarioCount = output.fluxes.length,
     middle = Math.floor(scenarioCount / 2),
@@ -183,17 +197,33 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
   const geometry = {
     crown: scene.crown,
     triangles: triangles([...scene.surfaces, ...scene.boards]),
+    leafReceiver: state.receiver === "leaves",
+    leafBVH:
+      state.receiver === "leaves"
+        ? buildLeafBVH(scene.leafGeometry.triangles)
+        : null,
   };
-  const bins = Array.from({ length: nz * na }, (_, k) => {
-    const mu = -1 + (2 * (Math.floor(k / na) + 0.5)) / nz,
-      phi = (TAU * ((k % na) + 0.5)) / na;
-    const s = surfacePoint(scene.crown, mu, phi);
-    return {
-      p: s.p,
-      area: (((s.jacobian * 2) / nz) * TAU) / na,
-      power: Array(scenarioCount).fill(0),
-    };
-  });
+  const bins = geometry.leafReceiver
+    ? scene.leafGeometry.patches.flatMap((patch) =>
+        [0, 1].map((side) => ({
+          leaf: patch.leaf,
+          patch: patch.id,
+          side,
+          area: patch.area,
+          power: Array(scenarioCount).fill(0),
+          hits: 0,
+        })),
+      )
+    : Array.from({ length: nz * na }, (_, k) => {
+        const mu = -1 + (2 * (Math.floor(k / na) + 0.5)) / nz,
+          phi = (TAU * ((k % na) + 0.5)) / na;
+        const s = surfacePoint(scene.crown, mu, phi);
+        return {
+          p: s.p,
+          area: (((s.jacobian * 2) / nz) * TAU) / na,
+          power: Array(scenarioCount).fill(0),
+        };
+      });
   const budgets = Array.from({ length: scenarioCount }, () => ({
     target: 0,
     room: 0,
@@ -237,7 +267,10 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
       i,
     );
     let index = -1;
-    if (result.kind === "target") {
+    if (result.kind === "target" && geometry.leafReceiver) {
+      index = result.patch * 2 + result.side;
+      bins[index].hits++;
+    } else if (result.kind === "target") {
       const p = sub(result.point, scene.crown.center),
         cz = Math.max(-1, Math.min(1, p[2] / scene.crown.rz));
       const cp =
@@ -277,10 +310,34 @@ export function calculateLuminaire(state, scene, rayCount = PREVIEW_RAYS) {
   });
   bins.forEach((b) => {
     b.ppfd =
-      ((b.power[middle] / budgets[middle].total) * output.fluxes[middle]) /
-      b.area;
+      b.area > 0
+        ? ((b.power[middle] / budgets[middle].total) * output.fluxes[middle]) /
+          b.area
+        : 0;
   });
+  const leaves = geometry.leafReceiver
+    ? scene.leafGeometry.leaves.map((leaf) => {
+        const sides = [0, 1].map((side) => {
+          const cells = leaf.patches.map((id) => bins[id * 2 + side]);
+          const values = output.fluxes.map(
+            (flux, k) =>
+              ((cells.reduce((sum, b) => sum + b.power[k], 0) /
+                budgets[k].total) *
+                flux) /
+              leaf.area,
+          );
+          return {
+            mean: values[middle],
+            range: [Math.min(...values), Math.max(...values)],
+            hits: cells.reduce((sum, b) => sum + b.hits, 0),
+          };
+        });
+        return { id: leaf.id, area: leaf.area, sides };
+      })
+    : null;
   return {
+    receiver: geometry.leafReceiver ? "leaves" : "crown",
+    leaves,
     output,
     metrics,
     bins,

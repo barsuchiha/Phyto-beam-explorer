@@ -71,6 +71,16 @@ html > body {
   line-height: 1.55;
   color: var(--muted-foreground);
 }
+#lm-leaf-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+#lm-leaf-panel label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
 .model-preview {
   position: sticky;
   top: 16px;

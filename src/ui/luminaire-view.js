@@ -1,15 +1,12 @@
 import * as T from "../vendor/three.module.min.js";
 import { miniFermerBody } from "./bulb-mesh.js";
 import { OrbitControls } from "../vendor/OrbitControls.js";
-import { SVGLoader } from "../vendor/SVGLoader.js";
 import { plantIllustration } from "../models/plant-illustration.js";
-import { paths } from "./plant-drawing.js";
 import { add, mul, surfacePoint } from "../models/crown.js";
 import { plantModel } from "../models/plants.js";
 
 const vector = (p) => new T.Vector3(...p),
   colors = [0x3b8fea, 0xe6c64d, 0x56b879, 0xeb6b62, 0x7e2748];
-const svgLoader = new SVGLoader();
 function material(color, options = {}) {
   return new T.MeshStandardMaterial({
     color,
@@ -39,16 +36,16 @@ function box(group, size, position, mat) {
   group.add(m);
   return m;
 }
-function shapeGeometry(path) {
-  const data = svgLoader.parse(
-    `<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" /></svg>`,
+function leafMeshGeometry(triangles) {
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new T.Float32BufferAttribute(triangles.flat(2), 3),
   );
-  return new T.ShapeGeometry(
-    data.paths.flatMap((p) => SVGLoader.createShapes(p)),
-    16,
-  );
+  geometry.computeVertexNormals();
+  return geometry;
 }
-function plant(group, c, id, height) {
+function plant(group, c, id, height, leafGeometry) {
   const art = plantIllustration(id, height),
     sx = c.rx / art.radius,
     sz = c.height / art.top;
@@ -73,49 +70,38 @@ function plant(group, c, id, height) {
     }
     if (p.length) group.add(line(p, 0x55694b));
   }
-  [...art.leaves, ...art.flowers].forEach((leaf, i) => {
-    const geometry = shapeGeometry(leaf.path ?? paths[leaf.kind]);
-    const positions = geometry.attributes.position;
-    const length = Math.hypot(leaf.tx - leaf.x, leaf.ty - leaf.y),
-      dx = (leaf.tx - leaf.x) / length,
-      dz = (leaf.ty - leaf.y) / length;
-    const depth = Math.sin(i * 2.399) * c.ry * 0.55;
-    for (let j = 0; j < positions.count; j++) {
-      const x = positions.getX(j),
-        y = positions.getY(j);
-      const px = leaf.path ? x : leaf.x + dz * x * leaf.w + dx * y * length;
-      const pz = leaf.path ? y : leaf.y - dx * x * leaf.w + dz * y * length;
-      const py = leaf.path
-        ? depth * Math.min(1, pz)
-        : depth * Math.min(1, y * 2) + x * c.ry * 0.15;
-      positions.setXYZ(j, ...growPoint(px, pz, py));
-    }
-    geometry.computeVertexNormals();
-    const flower = i >= art.leaves.length;
+  for (const leaf of leafGeometry.leaves) {
+    const geometry = leafMeshGeometry(
+      leaf.patches.flatMap((id) => leafGeometry.patches[id].triangles),
+    );
     const mesh = new T.Mesh(
       geometry,
-      material(
-        flower
-          ? leaf.color === "red"
-            ? 0xb85659
-            : 0xe5e8ce
-          : i % 3 === 0
-            ? 0x728b59
-            : 0x536e49,
-        { metalness: 0, roughness: 0.95 },
+      material(leaf.id % 3 === 0 ? 0x728b59 : 0x536e49, {
+        metalness: 0,
+        roughness: 0.95,
+      }),
+    );
+    mesh.userData.leaf = leaf.id;
+    group.add(mesh);
+    const drawn = art.leaves[leaf.id],
+      depth = Math.sin(leaf.id * 2.399) * c.ry * 0.55;
+    if (!drawn.path) {
+      const vein = line(
+        [growPoint(drawn.x, drawn.y), growPoint(drawn.tx, drawn.ty, depth)],
+        drawn.pattern ? 0xc6ce88 : 0x94a878,
+        0.75,
+      );
+      vein.userData.leaf = leaf.id;
+      group.add(vein);
+    }
+  }
+  for (const flower of leafGeometry.decorations)
+    group.add(
+      new T.Mesh(
+        leafMeshGeometry(flower.triangles),
+        material(flower.color === "red" ? 0xb85659 : 0xe5e8ce),
       ),
     );
-    group.add(mesh);
-    if (!leaf.path) {
-      group.add(
-        line(
-          [growPoint(leaf.x, leaf.y), growPoint(leaf.tx, leaf.ty, depth)],
-          leaf.pattern ? 0xc6ce88 : 0x94a878,
-          0.75,
-        ),
-      );
-    }
-  });
   const radius = Math.max(0.06, Math.min(0.24, c.rx * 0.44));
   const pot = new T.Mesh(
     new T.CylinderGeometry(radius, radius * 0.78, c.potHeight, 40),
@@ -132,7 +118,7 @@ function plant(group, c, id, height) {
   group.add(soil);
 }
 
-export function createLuminaireView(host) {
+export function createLuminaireView(host, onLeaf = () => {}) {
   const scene = new T.Scene();
   scene.background = new T.Color(0x202420);
   const camera = new T.PerspectiveCamera(38, 1, 0.005, 100);
@@ -163,6 +149,7 @@ export function createLuminaireView(host) {
     opticGroup = new T.Group(),
     rayGroup = new T.Group(),
     heatGroup = new T.Group();
+  const selectedGroup = new T.Group();
   scene.add(
     modelGroup,
     plantGroup,
@@ -170,8 +157,10 @@ export function createLuminaireView(host) {
     opticGroup,
     rayGroup,
     heatGroup,
+    selectedGroup,
   );
-  let currentScene,
+  let currentResult,
+    currentScene,
     lastModel = "",
     viewMode = "plant";
   const draw = () => renderer.render(scene, camera);
@@ -223,6 +212,7 @@ export function createLuminaireView(host) {
   }
   function update(state, pose, geometry) {
     currentScene = geometry;
+    currentResult = null;
     for (const group of [
       modelGroup,
       plantGroup,
@@ -230,6 +220,7 @@ export function createLuminaireView(host) {
       opticGroup,
       rayGroup,
       heatGroup,
+      selectedGroup,
     ])
       dispose(group);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
@@ -406,7 +397,13 @@ export function createLuminaireView(host) {
         }
       }
     }
-    plant(plantGroup, geometry.crown, state.plant, state.plantSize);
+    plant(
+      plantGroup,
+      geometry.crown,
+      state.plant,
+      state.plantSize,
+      geometry.leafGeometry,
+    );
     host.dataset.plant = state.plant;
     host.dataset.model = state.model;
     host.dataset.source = state.source;
@@ -420,6 +417,7 @@ export function createLuminaireView(host) {
     } else draw();
   }
   function light(state, result) {
+    currentResult = result;
     dispose(rayGroup);
     dispose(heatGroup);
     for (const ray of result.rays)
@@ -434,6 +432,44 @@ export function createLuminaireView(host) {
           0.27,
         ),
       );
+    if (result.receiver === "leaves") {
+      for (const leaf of currentScene.leafGeometry.leaves)
+        for (const side of [0, 1]) {
+          const positions = [],
+            col = [];
+          for (const id of leaf.patches) {
+            const patch = currentScene.leafGeometry.patches[id],
+              bin = result.bins[id * 2 + side];
+            const k = plantModel.classify(
+              plantModel.dli(bin.ppfd, state.hours),
+              plantModel.plants[state.plant].group,
+            );
+            const color = new T.Color(colors[k]);
+            for (const tri of patch.triangles)
+              for (const p of tri) {
+                positions.push(...p);
+                col.push(...color.toArray());
+              }
+          }
+          const geometry = new T.BufferGeometry();
+          geometry.setAttribute(
+            "position",
+            new T.Float32BufferAttribute(positions, 3),
+          );
+          geometry.setAttribute("color", new T.Float32BufferAttribute(col, 3));
+          const mesh = new T.Mesh(
+            geometry,
+            new T.MeshBasicMaterial({
+              vertexColors: true,
+              side: side === 0 ? T.FrontSide : T.BackSide,
+            }),
+          );
+          mesh.userData.leaf = leaf.id;
+          heatGroup.add(mesh);
+        }
+      setMode(viewMode);
+      return;
+    }
     const positions = [],
       col = [];
     for (const [index, bin] of result.bins.entries()) {
@@ -479,9 +515,58 @@ export function createLuminaireView(host) {
   function setMode(mode) {
     viewMode = mode;
     heatGroup.visible = mode === "map";
-    plantGroup.visible = mode !== "map";
+    const leafMap = mode === "map" && currentResult?.receiver === "leaves";
+    plantGroup.visible = mode !== "map" || leafMap;
+    for (const child of plantGroup.children)
+      if (child.userData.leaf !== undefined) child.visible = !leafMap;
     rayGroup.visible = mode === "rays";
     draw();
   }
-  return { update, light, fit, setMode };
+  let pointerStart;
+  renderer.domElement.addEventListener("pointerdown", (event) => {
+    pointerStart = [event.clientX, event.clientY];
+  });
+  renderer.domElement.addEventListener("pointerup", (event) => {
+    if (
+      !pointerStart ||
+      Math.hypot(
+        event.clientX - pointerStart[0],
+        event.clientY - pointerStart[1],
+      ) > 6 ||
+      currentResult?.receiver !== "leaves"
+    )
+      return;
+    const rect = renderer.domElement.getBoundingClientRect(),
+      ray = new T.Raycaster();
+    ray.setFromCamera(
+      new T.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        1 - ((event.clientY - rect.top) / rect.height) * 2,
+      ),
+      camera,
+    );
+    const group = viewMode === "map" ? heatGroup : plantGroup;
+    const hit = ray.intersectObjects(
+      group.children.filter((m) => m.isMesh && m.userData.leaf !== undefined),
+      false,
+    )[0];
+    if (hit) onLeaf(hit.object.userData.leaf);
+  });
+  function selectLeaf(id) {
+    dispose(selectedGroup);
+    const leaf = currentScene?.leafGeometry.leaves[id];
+    if (!leaf) return;
+    const geometry = leafMeshGeometry(
+      leaf.patches.flatMap(
+        (k) => currentScene.leafGeometry.patches[k].triangles,
+      ),
+    );
+    const edges = new T.EdgesGeometry(geometry, 20);
+    geometry.dispose();
+    selectedGroup.add(
+      new T.LineSegments(edges, new T.LineBasicMaterial({ color: 0xfff4cf })),
+    );
+    draw();
+  }
+  return { update, light, fit, setMode, selectLeaf };
 }

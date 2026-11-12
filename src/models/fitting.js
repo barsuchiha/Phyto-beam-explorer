@@ -41,6 +41,7 @@ export const modelDefaults = {
   plantOffset: 0,
   dim: 70,
   hours: 12,
+  receiver: "crown",
   canopy: 105,
   flap: 45,
   screen: false,
@@ -79,6 +80,7 @@ export function normalizeFitting(input = {}) {
   s.plantOffset = clamp(s.plantOffset, -60, 60, 0);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.hours = clamp(s.hours, 6, 16, 12);
+  s.receiver = s.receiver === "leaves" ? "leaves" : "crown";
   s.canopy = clamp(s.canopy, 70, 140, 105);
   s.flap = clamp(s.flap, 25, 65, 45);
   s.screen = m.optic === "cone" && s.screen === true;
