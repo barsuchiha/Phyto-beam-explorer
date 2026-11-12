@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="3D-примерка компактных LED-панелей и лампочек к концепциям фитосветильников. Растения, размеры, раскрытие купола и отражённый свет."
+    />
+    <title>Примерка светильников — Свет вокруг растения</title>
+    <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
+    <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
+    <link rel="stylesheet" href="./styles/models.css?v=91de6a749433" />
+    <script type="importmap" id="pbe-importmap">
+      {
+        "imports": {
+          "./src/app.js": "./src/app.js?v=fc701ef12871",
+          "./src/calculate.js": "./src/calculate.js?v=01c5e6e8a373",
+          "./src/data/cad-assets.js": "./src/data/cad-assets.js?v=cfccb7a97d93",
+          "./src/data/era-ies.js": "./src/data/era-ies.js?v=d3fb1b7e0021",
+          "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
+          "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
+          "./src/data/luminaires.js": "./src/data/luminaires.js?v=8e0d77525c64",
+          "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
+          "./src/data/plants.js": "./src/data/plants.js?v=85068a262de7",
+          "./src/data/profiles.js": "./src/data/profiles.js?v=ce62b7808ee1",
+          "./src/models-app.js": "./src/models-app.js?v=b90a2c0aad81",
+          "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=61deb0084f59",
+          "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
+          "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=94419ab9cc7e",
+          "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
+          "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
+          "./src/models/layout.js": "./src/models/layout.js?v=cf70b6896f0b",
+          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=767f002d9299",
+          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=73ae36a02912",
+          "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
+          "./src/models/minifermer.js": "./src/models/minifermer.js?v=f451717e99c5",
+          "./src/models/photometry.js": "./src/models/photometry.js?v=8d9415abe938",
+          "./src/models/plant-illustration.js": "./src/models/plant-illustration.js?v=d717cf7a8dbd",
+          "./src/models/plants.js": "./src/models/plants.js?v=13ff71608c99",
+          "./src/models/reflections.js": "./src/models/reflections.js?v=211a2cac075a",
+          "./src/models/screen-geometry.js": "./src/models/screen-geometry.js?v=cecc4882e837",
+          "./src/state.js": "./src/state.js?v=f206d0e9e745",
+          "./src/ui/controls.js": "./src/ui/controls.js?v=283344de425b",
+          "./src/ui/details.js": "./src/ui/details.js?v=6c1436846b82",
+          "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
+          "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
+          "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=d58cac5f64e7",
+          "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=811c5f740039",
+          "./src/ui/results.js": "./src/ui/results.js?v=ee408453c7c5",
+          "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
+          "./src/ui/tooltips.js": "./src/ui/tooltips.js?v=d78d66fda803",
+          "./src/vendor/OrbitControls.js": "./src/vendor/OrbitControls.js?v=1a2490388ff2",
+          "./src/vendor/SVGLoader.js": "./src/vendor/SVGLoader.js?v=b63f23e790e7",
+          "./src/vendor/three.core.min.js": "./src/vendor/three.core.min.js?v=295a28f4a978",
+          "./src/vendor/three.module.min.js": "./src/vendor/three.module.min.js?v=979c1ae4b057"
+        }
+      }
+    </script>
+    <script type="module" src="./src/models-app.js?v=b90a2c0aad81"></script>
+  </head>
+  <body>
+    <nav class="page-nav" aria-label="Страницы проекта">
+      <a href="./index.html">Свет вокруг растения</a
+      ><a href="./models.html" aria-current="page">3D-примерка</a>
+    </nav>
+    <main id="luminaire-explorer">
+      <header class="model-header">
+        <h1>Примерка светильников</h1>
+        <p class="text-muted">Конструкция → подходящий источник → растение</p>
+      </header>
+      <div class="model-workspace">
+        <form class="model-controls" onsubmit="return false">
+          <label for="lm-model"
+            >Модель<select id="lm-model" class="form-select"></select
+          ></label>
+          <label for="lm-pose" id="lm-pose-field"
+            >Положение конструкции<select
+              id="lm-pose"
+              class="form-select"
+            ></select
+          ></label>
+          <label for="lm-mount"
+            >Головка<select id="lm-mount" class="form-select"></select
+          ></label>
+          <label for="lm-source"
+            >Источник по размеру<select
+              id="lm-source"
+              class="form-select"
+            ></select
+          ></label>
+          <p class="model-hint" id="lm-fit"></p>
+          <label for="lm-dim" id="lm-dim-field"
+            ><span>Яркость <output id="lm-dim-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-dim"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+          /></label>
+          <p class="model-hint" id="lm-fixed" hidden>
+            Лампочка работает на 100%: диммирование не подтверждено.
+          </p>
+          <hr />
+          <label for="lm-plant"
+            >Растение<select class="form-select" id="lm-plant"></select
+          ></label>
+          <label for="lm-plantSize"
+            ><span
+              >Высота от грунта <output id="lm-plantSize-value"></output></span
+            ><input class="form-range" id="lm-plantSize" type="range" step="5"
+          /></label>
+          <label for="lm-install" id="lm-install-field"
+            ><span id="lm-install-label">Высота установки</span
+            ><output id="lm-install-value"></output
+            ><input
+              class="form-range"
+              id="lm-install"
+              type="range"
+              min="50"
+              max="250"
+              step="5"
+          /></label>
+          <label for="lm-plantOffset"
+            ><span
+              >Сдвиг растения <output id="lm-plantOffset-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-plantOffset"
+              type="range"
+              min="-60"
+              max="60"
+              step="5"
+          /></label>
+          <label for="lm-hours"
+            ><span>Досветка в день <output id="lm-hours-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-hours"
+              type="range"
+              min="6"
+              max="16"
+              step="1"
+          /></label>
+          <hr />
+          <label for="lm-canopy" id="lm-canopy-field"
+            ><span
+              >Раскрытие гибкого купола
+              <output id="lm-canopy-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-canopy"
+              type="range"
+              min="70"
+              max="140"
+              step="1"
+          /></label>
+          <p class="model-hint" id="lm-canopy-note" hidden></p>
+          <label for="lm-flap" id="lm-flap-field"
+            ><span>Поворот отражателя <output id="lm-flap-value"></output></span
+            ><input
+              class="form-range"
+              id="lm-flap"
+              type="range"
+              min="25"
+              max="65"
+              step="1"
+          /></label>
+          <label for="lm-screen" id="lm-screen-field" class="model-check"
+            ><input id="lm-screen" type="checkbox" /> Добавить экран головки ·
+            проект</label
+          >
+          <div id="lm-cone-controls" hidden>
+            <label for="lm-opening"
+              ><span
+                >Раскрытие экрана <output id="lm-opening-value"></output></span
+              ><input
+                class="form-range"
+                id="lm-opening"
+                type="range"
+                min="0"
+                max="120"
+                step="5"
+            /></label>
+            <label for="lm-sector"
+              >Защищённый сектор<select class="form-select" id="lm-sector">
+                <option value="90">90°</option>
+                <option value="180">180°</option>
+                <option value="270">270°</option>
+                <option value="360">360°</option>
+              </select></label
+            >
+            <p class="model-hint">
+              Стенка 60 мм, радиальный зазор 10 мм вокруг корпуса.
+              Геометрический вариант, механизм регулировки не разработан.
+            </p>
+          </div>
+          <div id="lm-material-controls">
+            <label for="lm-material"
+              >Поверхность экрана<select class="form-select" id="lm-material">
+                <option value="absorb">Поглощающая</option>
+                <option value="mirror">Зеркальная</option>
+                <option value="diffuse">Матовая отражающая</option>
+              </select></label
+            >
+            <label for="lm-reflectance" id="lm-reflectance-field"
+              ><span
+                >Отражение · допущение
+                <output id="lm-reflectance-value"></output></span
+              ><input
+                class="form-range"
+                id="lm-reflectance"
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+            /></label>
+          </div>
+          <p class="model-hint" id="lm-no-screen" hidden>
+            У этого открытого подвеса нет регулируемого экрана. Купол поверх
+            радиатора лампочки не добавляется.
+          </p>
+        </form>
+        <section class="model-preview" aria-label="Примерка в масштабе">
+          <div class="model-toolbar">
+            <div class="view-tabs" role="group" aria-label="Режим 3D">
+              <button type="button" data-view="plant" aria-pressed="true">
+                Конструкция</button
+              ><button type="button" data-view="rays" aria-pressed="false">
+                Ход лучей</button
+              ><button type="button" data-view="map" aria-pressed="false">
+                Карта кроны
+              </button>
+            </div>
+            <button type="button" id="lm-focus">Головка крупно</button
+            ><button type="button" id="lm-reset-view">Вся сцена</button>
+          </div>
+          <div id="lm-view">
+            <p id="lm-loading">Загружаю сохранённую 3D-модель…</p>
+          </div>
+          <div class="model-caption">
+            <span id="lm-caption"></span
+            ><span
+              >Вращение — перетаскиванием · масштаб — колесом или щипком</span
+            >
+          </div>
+          <p id="lm-collision" class="model-warning" role="status" hidden></p>
+          <p id="lm-status" class="model-hint" role="status">
+            Расчёт после загрузки модели.
+          </p>
+          <div class="model-metrics" id="lm-metrics" aria-live="polite"></div>
+          <div id="lm-budget"></div>
+          <p class="model-hint">
+            PPFD усредняется по всей внешней оболочке кроны, включая теневую
+            сторону. Это другая область усреднения, чем на первой странице.
+            Рисованные листья не участвуют в расчёте.
+          </p>
+          <div class="model-legend" id="lm-legend">
+            <span style="--dot: #3b8fea">Не хватает</span
+            ><span style="--dot: #e6c64d">Условно хватает</span
+            ><span style="--dot: #56b879">Оптимально*</span
+            ><span style="--dot: #eb6b62">Слишком много*</span
+            ><span style="--dot: #7e2748">Опасно*</span>
+          </div>
+          <p class="model-hint">
+            * Цвета — сценарии суточной дозы DLI для группы растения, не
+            измеренные пределы повреждения. Карта учитывает только эту лампу;
+            свет из окна не добавлен.
+          </p>
+        </section>
+      </div>
+      <section class="model-detail">
+        <h2>Что помещается в эту конструкцию</h2>
+        <p id="lm-model-note"></p>
+        <p id="lm-mount-note"></p>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Источник</th>
+                <th>Габариты</th>
+                <th>Результат примерки</th>
+              </tr>
+            </thead>
+            <tbody id="lm-fits"></tbody>
+          </table>
+        </div>
+        <p class="model-hint">
+          Проверяем тип головки и посадочный габарит. Крепёж, охлаждение, масса,
+          электрика и полный набор пересечений CAD ещё требуют разработки.
+          Большие Quantum Board и длинные линейки остаются на первой странице.
+        </p>
+      </section>
+      <details class="model-detail">
+        <summary>Данные и допущения расчёта</summary>
+        <p id="lm-source-note"></p>
+        <p id="lm-driver-note"></p>
+        <p>
+          Источник равномерно распределён по выбранной плате или условному диску
+          колбы. Отражатель повторяет форму купола, желоба или створки;
+          учитываются повторные отражения и поглощение. Остальные детали CAD
+          показаны для примерки: в оптическом расчёте они заменены непрозрачными
+          плоскостями плат. Стойки, провода, патрон, стены, затенение листьями и
+          тепло не моделируются.
+        </p>
+        <p>
+          Баланс делит исходный PPF на попадание в оболочку кроны, уход в
+          комнату, поглощение экраном, возврат в источник и численный остаток.
+          «На растение» не означает поглощение настоящими листьями. Коэффициент
+          отражения — одинаковый во всём PAR, а не паспорт покрытия. Цвет и
+          экспозиция 3D-рендера не используются для расчёта.
+        </p>
+        <p>
+          32 768 детерминированных лучей, до 24 отражений. Карта разбита на 16 ×
+          32 участка; мелкие зеркальные пики могут быть не разрешены. Диапазон
+          PPFD показывает только сценарии источника и пучка, не все ошибки
+          модели.
+        </p>
+        <p>
+          <a href="./MODELS.md">Методика и происхождение моделей</a> ·
+          <a href="./index.html">Основной калькулятор света и драйверов</a>
+        </p>
+      </details>
+    </main>
+    <noscript>Для 3D-примерки и расчёта нужен JavaScript.</noscript>
+  </body>
+</html>

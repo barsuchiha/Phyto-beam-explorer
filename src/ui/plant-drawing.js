@@ -12,7 +12,7 @@ const outline = {
   "stroke-width": 0.8,
   "vector-effect": "non-scaling-stroke",
 };
-const paths = {
+export const paths = {
   oval: "M0 0C-.48 .12 -.52 .76 0 1C.52 .76 .48 .12 0 0Z",
   pointed: "M0 0C-.48 .12 -.45 .65 0 1C.42 .62 .42 .14 0 0Z",
   round: "M0 0C-.52 .02 -.67 .83 -.24 .96Q0 1.08 .24 .96C.67 .83 .52 .02 0 0Z",

@@ -32,23 +32,25 @@ const block = `<script type="importmap" id="pbe-importmap">\n${JSON.stringify(
   .split("\n")
   .map((line) => "      " + line)
   .join("\n")}\n    </script>`;
-const htmlPath = join(root, "index.html");
-let html = readFileSync(htmlPath, "utf8");
-if (html.includes('id="pbe-importmap"'))
+for (const page of ["index.html", "models.html"]) {
+  const htmlPath = join(root, page);
+  let html = readFileSync(htmlPath, "utf8");
+  if (html.includes('id="pbe-importmap"'))
+    html = html.replace(
+      /<script type="importmap" id="pbe-importmap">[\s\S]*?<\/script>/,
+      block,
+    );
+  else
+    html = html.replace(
+      '<script type="module"',
+      `${block}\n    <script type="module"`,
+    );
   html = html.replace(
-    /<script type="importmap" id="pbe-importmap">[\s\S]*?<\/script>/,
-    block,
+    /(src|href)="(\.\/(?:src\/[^"?]+\.js|styles\/[^"?]+\.css))(?:\?v=[a-f0-9]+)?"/g,
+    (_, attr, path) => `${attr}="${path}?v=${version(path)}"`,
   );
-else
-  html = html.replace(
-    '<script type="module"',
-    `${block}\n    <script type="module"`,
+  writeFileSync(htmlPath, html);
+  console.log(
+    `Versioned ${Object.keys(imports).length} modules and styles in ${page}`,
   );
-html = html.replace(
-  /(src|href)="(\.\/(?:src\/app\.js|styles\/[^"?]+\.css))(?:\?v=[a-f0-9]+)?"/g,
-  (_, attr, path) => `${attr}="${path}?v=${version(path)}"`,
-);
-writeFileSync(htmlPath, html);
-console.log(
-  `Versioned ${Object.keys(imports).length} modules and styles in index.html`,
-);
+}

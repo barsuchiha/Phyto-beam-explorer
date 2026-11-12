@@ -8,7 +8,7 @@
       content="Калькулятор PPFD и DLI для комнатных растений: модули Samsung, MiniFermer и ЭРА, диапазоны с допущениями и сравнение с замерами."
     />
     <title>Свет для растений — модули и диапазон PPFD</title>
-    <link rel="stylesheet" href="./styles/base.css?v=a670f2593415" />
+    <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
     <link rel="stylesheet" href="./styles/calculator.css?v=dc92fbecde00" />
     <script type="importmap" id="pbe-importmap">
@@ -16,18 +16,24 @@
         "imports": {
           "./src/app.js": "./src/app.js?v=fc701ef12871",
           "./src/calculate.js": "./src/calculate.js?v=01c5e6e8a373",
+          "./src/data/cad-assets.js": "./src/data/cad-assets.js?v=cfccb7a97d93",
           "./src/data/era-ies.js": "./src/data/era-ies.js?v=d3fb1b7e0021",
           "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
           "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
+          "./src/data/luminaires.js": "./src/data/luminaires.js?v=8e0d77525c64",
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
           "./src/data/plants.js": "./src/data/plants.js?v=85068a262de7",
           "./src/data/profiles.js": "./src/data/profiles.js?v=ce62b7808ee1",
+          "./src/models-app.js": "./src/models-app.js?v=b90a2c0aad81",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=61deb0084f59",
           "./src/models/crown.js": "./src/models/crown.js?v=047a8b7682cd",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=94419ab9cc7e",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/layout.js": "./src/models/layout.js?v=cf70b6896f0b",
+          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=767f002d9299",
+          "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=73ae36a02912",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer.js": "./src/models/minifermer.js?v=f451717e99c5",
           "./src/models/photometry.js": "./src/models/photometry.js?v=8d9415abe938",
@@ -41,10 +47,15 @@
           "./src/ui/diagrams.js": "./src/ui/diagrams.js?v=8a73d3065715",
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
-          "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=e8592de8a5c4",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=d58cac5f64e7",
+          "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=811c5f740039",
           "./src/ui/results.js": "./src/ui/results.js?v=ee408453c7c5",
           "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
-          "./src/ui/tooltips.js": "./src/ui/tooltips.js?v=d78d66fda803"
+          "./src/ui/tooltips.js": "./src/ui/tooltips.js?v=d78d66fda803",
+          "./src/vendor/OrbitControls.js": "./src/vendor/OrbitControls.js?v=1a2490388ff2",
+          "./src/vendor/SVGLoader.js": "./src/vendor/SVGLoader.js?v=b63f23e790e7",
+          "./src/vendor/three.core.min.js": "./src/vendor/three.core.min.js?v=295a28f4a978",
+          "./src/vendor/three.module.min.js": "./src/vendor/three.module.min.js?v=979c1ae4b057"
         }
       }
     </script>
@@ -52,6 +63,7 @@
   </head>
   <body>
     <noscript>Для расчёта света включите JavaScript в браузере.</noscript>
+    <nav class="page-nav" aria-label="Страницы проекта"><a href="./index.html" aria-current="page">Свет вокруг растения</a><a href="./models.html">3D-примерка</a></nav>
     <main>
       <div id="phyto-beam-explorer">
         <div>
