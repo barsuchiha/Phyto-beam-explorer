@@ -1,3 +1,4 @@
+import { plantAdditions } from "./plant-additions.js";
 export const groups = {
   low: { L: 3, U: 6 },
   medium: { L: 6, U: 10 },
@@ -132,3 +133,13 @@ export const categories = [
   { label: "Выше ориентира", color: "var(--pbe-red)" },
   { label: "Значительно выше ориентира", color: "var(--pbe-burgundy)" },
 ];
+
+Object.assign(
+  plants,
+  Object.fromEntries(
+    Object.entries(plantAdditions).map(([id, p]) => [
+      id,
+      (({ name, size, group, url }) => ({ name, size, group, url }))(p),
+    ]),
+  ),
+);

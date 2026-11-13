@@ -1,3 +1,4 @@
+import { plantAdditions } from "./plant-additions.js";
 // Practical modelling ranges for potted indoor specimens, not species maxima.
 // Height is measured from soil. Width/depth/crown proportions are design assumptions.
 export const plantShapes = {
@@ -184,3 +185,10 @@ export const plantShapes = {
     form: "spoon",
   },
 };
+
+Object.assign(
+  plantShapes,
+  Object.fromEntries(
+    Object.entries(plantAdditions).map(([id, p]) => [id, ((p) => p.shape)(p)]),
+  ),
+);

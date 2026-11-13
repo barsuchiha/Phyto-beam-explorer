@@ -1,3 +1,4 @@
+import { plantAdditions } from "./plant-additions.js";
 import { plants } from "./plants.js";
 
 // Botanical sources support qualitative habit, not these numerical angles.
@@ -192,9 +193,18 @@ export const plantArchitecture = {
     { cup: 0.13 },
   ),
 };
+Object.assign(
+  plantArchitecture,
+  Object.fromEntries(
+    Object.entries(plantAdditions).map(([id, p]) => [
+      id,
+      ((p) => p.architecture)(p),
+    ]),
+  ),
+);
 for (const [id, p] of Object.entries(plantArchitecture)) {
   // Approximate blade-length limits before height fitting; not cultivar maxima.
-  p.lengthLimit = {
+  p.lengthLimit ??= {
     monstera: 80,
     elastica: 30,
     lyrata: 45,

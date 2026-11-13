@@ -10,6 +10,7 @@ import { populateRoom, populateRoomLight } from "./room-view.js";
 import { populateRayLight } from "./ray-view.js";
 import { populateWindow } from "./window-view.js";
 import { visibleFixtureMesh } from "../models/lamp-placement.js";
+import { leafColor } from "./leaf-appearance.js";
 
 const vector = (p) => new T.Vector3(...p);
 function material(color, options = {}) {
@@ -55,16 +56,46 @@ function leafMeshGeometry(triangles) {
   return geometry;
 }
 export function populatePlant(group, c, id, height, leafGeometry) {
+  for (const body of leafGeometry.bodies ?? []) {
+    let mesh;
+    if (body.kind === "ellipsoid") {
+      mesh = new T.Mesh(new T.SphereGeometry(1, 24, 16), material(0x93846a));
+      mesh.position.copy(vector(body.center));
+      mesh.scale.set(...body.radii);
+    } else {
+      const a = vector(body.a),
+        b = vector(body.b),
+        d = b.clone().sub(a);
+      mesh = new T.Mesh(
+        new T.CylinderGeometry(body.top, body.bottom, d.length(), 24),
+        material(0x8b7c64),
+      );
+      mesh.position.copy(a.add(b).multiplyScalar(0.5));
+      mesh.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), d.normalize());
+    }
+    group.add(mesh);
+  }
   for (const stem of leafGeometry.stems) group.add(line(stem.points, 0x55694b));
   for (const leaf of leafGeometry.leaves) {
     const geometry = leafMeshGeometry(
       leaf.patches.flatMap((id) => leafGeometry.patches[id].triangles),
     );
+    const patterned = leafColor(leaf.pattern, 0, 0, leaf.id) !== null;
+    if (patterned) {
+      const colors = leaf.patches
+        .flatMap((id) => leafGeometry.patches[id].uvs)
+        .flat()
+        .flatMap(([x, y]) =>
+          new T.Color(leafColor(leaf.pattern, x, y, leaf.id)).toArray(),
+        );
+      geometry.setAttribute("color", new T.Float32BufferAttribute(colors, 3));
+    }
     const mesh = new T.Mesh(
       geometry,
-      material(leaf.id % 3 === 0 ? 0x728b59 : 0x536e49, {
+      material(patterned ? 0xffffff : leaf.id % 3 === 0 ? 0x728b59 : 0x536e49, {
         metalness: 0,
         roughness: 0.95,
+        vertexColors: patterned,
       }),
     );
     mesh.userData.leaf = leaf.id;

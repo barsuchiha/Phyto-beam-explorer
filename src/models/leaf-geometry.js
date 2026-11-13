@@ -1,5 +1,5 @@
-import { Shape, ShapeUtils } from "../vendor/three.module.min.js";
-import { paths } from "../data/leaf-paths.js";
+import { Shape, ShapeUtils, Vector2 } from "../vendor/three.module.min.js";
+import { paths, leafHoles } from "../data/leaf-paths.js";
 import { plantLayout, bladePoint } from "./plant-architecture.js";
 import { add, sub, mul, turnVector } from "./crown.js";
 
@@ -13,7 +13,7 @@ export const triangleArea = (a, b, c) =>
 
 // Our leaf outlines use only absolute M/L/Q/C/Z. No DOM or SVG renderer needed.
 // Triangulation is shared by the visible leaves and their optical receivers.
-export function outlineMesh(path) {
+export function outlineMesh(path, holeContours = []) {
   const tokens = path.match(
     /[MLCQZ]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/gi,
   );
@@ -31,7 +31,9 @@ export function outlineMesh(path) {
   }
   const points = shape.getPoints(16);
   if (points[0].equals(points.at(-1))) points.pop();
-  return { points, faces: ShapeUtils.triangulateShape(points, []) };
+  const holes = holeContours.map((h) => h.map((p) => new Vector2(...p)));
+  const faces = ShapeUtils.triangulateShape(points, holes);
+  return { points: [...points, ...holes.flat()], faces };
 }
 
 function clip(poly, threshold, above) {
@@ -53,8 +55,8 @@ function clip(poly, threshold, above) {
 const meshCache = new Map();
 function curvedMesh(kind) {
   if (meshCache.has(kind)) return meshCache.get(kind);
-  const mesh = outlineMesh(paths[kind]);
-  const steps = kind === "strap" ? 16 : 8;
+  const mesh = outlineMesh(paths[kind], leafHoles[kind]);
+  const steps = kind === "strap" ? 16 : kind === "pinna" ? 4 : 8;
   const low = Math.min(...mesh.points.map((p) => p.y));
   const high = Math.max(...mesh.points.map((p) => p.y));
   const cut = (poly, axis, boundary, above) =>
@@ -123,6 +125,7 @@ export function buildLeafGeometry(crown, id, height, tilt = 0) {
       leaf: i,
       area: 0,
       triangles: [],
+      uvs: [],
     }));
     const entry = {
       id: i,
@@ -156,6 +159,7 @@ export function buildLeafGeometry(crown, id, height, tilt = 0) {
       points.forEach(include);
       const patch = zones[cell.zone];
       patch.triangles.push(points);
+      patch.uvs.push(cell.points.map((p) => [p[0], p[1]]));
       patch.area += area;
       triangles.push({ points, leaf: i, patch: patch.id });
     }
@@ -185,6 +189,21 @@ export function buildLeafGeometry(crown, id, height, tilt = 0) {
     triangles,
     decorations,
     stems,
+    bodies: layout.bodies.map((body) =>
+      body.kind === "ellipsoid"
+        ? {
+            ...body,
+            center: world(body.center),
+            radii: body.radii.map((v) => v * scale),
+          }
+        : {
+            ...body,
+            a: world(body.a),
+            b: world(body.b),
+            bottom: body.bottom * scale,
+            top: body.top * scale,
+          },
+    ),
     bounds,
     height: bounds.max[2] - soil[2],
     area: leaves.reduce((s, l) => s + l.area, 0),

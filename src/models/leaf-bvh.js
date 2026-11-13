@@ -25,8 +25,14 @@ export function buildLeafBVH(input) {
     leafTriangle(t.points, { leaf: t.leaf, patch: t.patch }),
   );
   function node(items) {
-    const min = [0, 1, 2].map((i) => Math.min(...items.map((t) => t.min[i]))),
-      max = [0, 1, 2].map((i) => Math.max(...items.map((t) => t.max[i])));
+    // Dense compound foliage can exceed the JS engine's function argument limit.
+    const min = [Infinity, Infinity, Infinity],
+      max = [-Infinity, -Infinity, -Infinity];
+    for (const t of items)
+      for (let i = 0; i < 3; i++) {
+        min[i] = Math.min(min[i], t.min[i]);
+        max[i] = Math.max(max[i], t.max[i]);
+      }
     if (items.length <= 8) return { min, max, items };
     const axis = [0, 1, 2].sort(
       (a, b) => max[b] - min[b] - (max[a] - min[a]),

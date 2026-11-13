@@ -61,7 +61,7 @@ const state = normalizeFitting({
   dim: 100,
 });
 
-test("all 20 displayed plants share finite leaf triangles, zones and physical surface areas", () => {
+test("all 40 displayed plants share finite leaf triangles, zones and physical surface areas", () => {
   for (const [id, p] of Object.entries(plantShapes)) {
     for (const height of [p.min, p.initial, p.max]) {
       const c = crownGeometry({ plant: id, plantSize: height });
@@ -145,7 +145,11 @@ test("Lambertian disk interception matches R²/(R²+h²); map and both-face mean
     crown: sphere,
     leafGeometry: receiver([disk]),
   };
-  const migrated = calculateLuminaire({ ...state, receiver: "crown" }, scene, 4096);
+  const migrated = calculateLuminaire(
+    { ...state, receiver: "crown" },
+    scene,
+    4096,
+  );
   assert.equal(migrated.receiver, "leaves");
   assert.deepEqual(migrated, calculateLuminaire(state, scene, 4096));
   const r = calculateLuminaire(state, scene, 131072),

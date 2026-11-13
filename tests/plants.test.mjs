@@ -7,20 +7,23 @@ import {
   plantIllustration,
   plantArt,
 } from "../src/models/plant-illustration.js";
-import { defaults, restoreState, updateState } from "../src/state.js";
-import { createCalculator } from "../src/calculate.js";
+import { normalizeFitting, changeFitting } from "../src/models/fitting.js";
+import { plantLightNotes } from "../src/data/plant-light-notes.js";
+import { buildLeafGeometry } from "../src/models/leaf-geometry.js";
+import { crownGeometry } from "../src/models/crown.js";
+import { calculateLuminaire } from "../src/models/luminaire-light.js";
 
-test("all 20 plants have matching art, geometry, working light groups and selectable options", () => {
+test("all 40 plants have matching art, geometry, working light groups and selectable options", () => {
   const ids = Object.keys(plants).sort();
-  assert.equal(ids.length, 20);
+  assert.equal(ids.length, 40);
   assert.deepEqual(Object.keys(plantShapes).sort(), ids);
   assert.deepEqual(Object.keys(plantArt).sort(), ids);
-  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-  const select = html.match(/<select[^>]*id="pbe-plant"[\s\S]*?<\/select>/)[0];
-  const options = [...select.matchAll(/<option value="([^"]+)"/g)]
-    .map((m) => m[1])
-    .sort();
-  assert.deepEqual(options, ids);
+  assert.deepEqual(Object.keys(plantLightNotes).sort(), ids);
+  const app = readFileSync(
+    new URL("../src/models-app.js", import.meta.url),
+    "utf8",
+  );
+  assert.match(app, /Object.entries\(plants\)/);
   for (const id of ids) {
     const p = plants[id],
       s = plantShapes[id];
@@ -28,13 +31,10 @@ test("all 20 plants have matching art, geometry, working light groups and select
     assert.ok(p.url.startsWith("https://"));
     assert.ok(s.min < s.initial && s.initial < s.max);
     assert.equal(
-      updateState(defaults, "plant", id).plantSize,
-      id === "monstera" ? defaults.plantSize : s.initial,
+      changeFitting(normalizeFitting({}), "plant", id).plantSize,
+      s.initial,
     );
-    assert.equal(
-      restoreState({ schema: "phyto-beams-v9", ...defaults, plant: id }).plant,
-      id,
-    );
+    assert.equal(normalizeFitting({ plant: id }).plant, id);
   }
 });
 
@@ -72,26 +72,55 @@ test("visual leaf and leaflet counts grow monotonically within every species ran
   }
 });
 
-test("every added plant calculates finite PPFD, retains its height bounds and preserves source flux", () => {
-  const calculate = createCalculator();
-  for (const id of Object.keys(plants).slice(10)) {
+test("all 20 additions calculate leaf PPFD at three sizes without changing source PPF", () => {
+  for (const id of Object.keys(plants).slice(20)) {
     const spec = plantShapes[id];
     let flux;
     for (const height of [spec.min, spec.initial, spec.max]) {
-      const state = restoreState({
-        schema: "phyto-beams-v9",
-        ...defaults,
+      const state = normalizeFitting({
+        model: "A2",
+        mount: "large",
+        source: "mf36",
         plant: id,
         plantSize: height,
-        count: 1,
-        orbit: 45,
+        dim: 100,
       });
-      const r = calculate(state);
-      assert.ok(Number.isFinite(r.metrics.mean) && r.metrics.mean > 0);
+      const crown = crownGeometry(state);
+      crown.soil = [0, 0, 0.2];
+      const leafGeometry = buildLeafGeometry(crown, id, height);
+      const scene = {
+        crown,
+        leafGeometry,
+        surfaces: [],
+        boards: [],
+        sources: [
+          {
+            p: [0, 0, leafGeometry.bounds.max[2] + 0.25],
+            n: [0, 0, -1],
+            u: [1, 0, 0],
+            v: [0, 1, 0],
+            w: 1e-9,
+            d: 1e-9,
+          },
+        ],
+      };
+      const r = calculateLuminaire(state, scene, 4096);
+      assert.ok(Number.isFinite(r.mean) && r.mean > 0, id + " PPFD");
       assert.equal(state.plantSize, height);
-      if (flux !== undefined) assert.equal(r.flux, flux);
-      flux = r.flux;
-      assert.equal(r.assessment.percentages.length, 5);
+      const m = r.metrics[r.middle];
+      if (flux !== undefined) assert.equal(m.flux, flux);
+      flux = m.flux;
+      const incident = r.leaves.reduce(
+        (sum, leaf) =>
+          sum +
+          leaf.area *
+            leaf.sides.reduce((s, side) => s + side.values[r.middle], 0),
+        0,
+      );
+      assert.ok(
+        Math.abs(incident - m.budget.target * m.flux) < 1e-9,
+        id + " flux conservation",
+      );
     }
   }
 });

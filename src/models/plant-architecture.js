@@ -18,6 +18,8 @@ const bezier = (a, b, c, t) =>
   a.map((v, i) => (1 - t) ** 2 * v + 2 * t * (1 - t) * b[i] + t * t * c[i]);
 const attachment = {
   split: 0.08,
+  perforated: 0.08,
+  coin: 0.5,
   heart: 0.14,
   "heart-long": 0.18,
   arrow: 0.24,
@@ -31,7 +33,8 @@ export function plantLayout(id, heightCm) {
     count = art.leaves.length,
     leaves = [],
     stems = [],
-    flowers = [];
+    flowers = [],
+    bodies = [];
   const stem = (a, b, c = b, width = 1) =>
     stems.push({
       points: Array.from({ length: 17 }, (_, j) => bezier(a, b, c, j / 16)),
@@ -67,8 +70,9 @@ export function plantLayout(id, heightCm) {
     const spine = (z) => [0.015 * Math.sin(z * 7), 0.012 * Math.sin(z * 11), z];
     stem([0, 0, 0], spine(0.45), spine(0.96), 2);
     for (let i = 0; i < count; i++) {
-      const q = (i + 0.5) / count,
-        a = i * golden - 0.8,
+      const node = p.opposite ? Math.floor(i / 2) : i,
+        q = (node + 0.5) / (p.opposite ? Math.ceil(count / 2) : count),
+        a = node * golden - 0.8 + (p.opposite ? (i % 2) * Math.PI : 0),
         root = spine(0.2 + 0.66 * q),
         base = add(
           root,
@@ -76,6 +80,61 @@ export function plantLayout(id, heightCm) {
         );
       stem(root, add(root, polar(a, p.petiole * 0.55, 0.04)), base);
       leaf(base, a, i);
+    }
+  } else if (habit === "palmate" || habit === "trifoliate") {
+    const n = p.leaflets ?? 3,
+      groups = count / n,
+      trifoliate = habit === "trifoliate";
+    if (!trifoliate) stem([0, 0, 0], [0, 0, 0.5], [0, 0, 0.95], 2);
+    for (let i = 0; i < groups; i++) {
+      const a = i * golden,
+        q = (i + 0.5) / groups;
+      const root = trifoliate ? [0, 0, 0] : [0, 0, 0.25 + 0.6 * q];
+      const base = trifoliate
+        ? polar(a, 0.08 + 0.2 * organic(i), 0.6 + 0.18 * organic(i + 3))
+        : add(root, polar(a, p.petiole, 0.08));
+      stem(root, base);
+      for (let j = 0; j < n; j++)
+        leaf(base, a + (j * 2 * Math.PI) / n, leaves.length, { group: i });
+    }
+  } else if (habit === "ponytail") {
+    stem([0, 0, 0], [0, 0, 0.4], [0, 0, 0.72], 4);
+    bodies.push(
+      { kind: "ellipsoid", center: [0, 0, 0.13], radii: [0.14, 0.14, 0.15] },
+      {
+        kind: "trunk",
+        a: [0, 0, 0.12],
+        b: [0, 0, 0.72],
+        bottom: 0.065,
+        top: 0.025,
+      },
+    );
+    for (let i = 0; i < count; i++) {
+      const q = organic(i + 2),
+        inner = q < 0.18;
+      leaf(polar(i * golden, 0.018, 0.72), i * golden, i, {
+        pitch: mix(p.pitch[1], p.pitch[0], q),
+        bend: inner ? -45 : p.bend,
+        length: p.length * (inner ? 0.55 : 0.85 + 0.15 * q),
+      });
+    }
+  } else if (habit === "leafRosette" || habit === "distichous") {
+    const twoRanks = habit === "distichous";
+    for (let i = 0; i < count; i++) {
+      const q = i / Math.max(1, count - 1),
+        a = twoRanks ? (i % 2) * Math.PI + 0.08 * organic(i) : i * golden;
+      const base = polar(
+        a,
+        twoRanks ? 0.015 : 0.03 * (1 - q),
+        0.12 + (twoRanks ? 0.32 : 0.15) * q,
+      );
+      stem([0, 0, 0], base);
+      leaf(base, a, i, {
+        pitch: mix(p.pitch[0], p.pitch[1], q),
+        length: p.length * (1 - 0.5 * q),
+        width: p.width * (1 - 0.45 * q),
+        bend: p.bend * (1 - 0.7 * q),
+      });
     }
   } else if (habit === "basal" || habit === "fan") {
     for (let i = 0; i < count; i++) {
@@ -126,7 +185,7 @@ export function plantLayout(id, heightCm) {
             ? canes[i % 3]
             : polar(a, habit === "swords" ? 0.06 + 0.09 * q : 0.025 * q, 0.015),
         inner = q < 0.25,
-        kind = habit === "swords" ? "sword" : "strap";
+        kind = p.leafKind ?? (habit === "swords" ? "sword" : "strap");
       leaf(base, a, i, {
         kind,
         length:
@@ -147,21 +206,28 @@ export function plantLayout(id, heightCm) {
               : p.bend * (0.8 + 0.2 * q),
       });
     }
-  } else if (habit === "compound" || habit === "palm") {
-    const palm = habit === "palm",
+  } else if (habit === "compound" || habit === "palm" || habit === "fern") {
+    const fern = habit === "fern",
+      palm = habit === "palm" || fern,
       fronds = Math.floor(mix(...plantArt[id].count, art.growth) + 1e-8),
-      pairs = (palm ? 7 : 3) + Math.floor(art.growth * (palm ? 4 : 3));
+      pairs =
+        (fern ? 14 : palm ? 7 : 3) +
+        Math.floor(art.growth * (fern ? 10 : palm ? 4 : 3));
     for (let i = 0; i < fronds; i++) {
       const q = organic(i),
         a = i * golden,
-        root = polar(a, 0.025, palm ? 0.28 : 0),
-        control = polar(a, palm ? 0.16 : 0.07, palm ? 1.05 : 0.56),
+        root = polar(a, 0.025, palm && !fern ? 0.28 : 0),
+        control = polar(
+          a,
+          fern ? 0.25 : palm ? 0.16 : 0.07,
+          fern ? 1.5 : palm ? 1.05 : 0.56,
+        ),
         end = polar(
           a,
-          palm ? 0.32 + 0.16 * q : 0.12 + 0.15 * q,
-          0.86 - 0.18 * q,
+          fern ? 0.7 + 0.2 * q : palm ? 0.32 + 0.16 * q : 0.12 + 0.15 * q,
+          fern ? 0.35 + 0.25 * q : 0.86 - 0.18 * q,
         );
-      if (palm) stem([0, 0, 0], root, root, 1.5);
+      if (palm && !fern) stem([0, 0, 0], root, root, 1.5);
       stem(root, control, end, 1.2);
       for (let j = 0; j < pairs; j++) {
         const t = 0.23 + (0.7 * (j + 0.5)) / pairs,
@@ -173,14 +239,14 @@ export function plantLayout(id, heightCm) {
             width: p.width * (0.7 + 0.3 * Math.sin(Math.PI * t)),
             group: i,
             pair: j,
-            kind: palm ? "lance" : "oval",
+            kind: fern ? "pinna" : palm ? "lance" : "oval",
           });
         }
       }
       leaf(end, a, leaves.length, {
         length: palm ? 0.13 : 0.13,
         width: palm ? 0.035 : 0.08,
-        kind: palm ? "lance" : "oval",
+        kind: fern ? "pinna" : palm ? "lance" : "oval",
         group: i,
         pair: -1,
       });
@@ -233,7 +299,7 @@ export function plantLayout(id, heightCm) {
       });
     }
   }
-  return { leaves, stems, flowers, profile: p };
+  return { leaves, stems, flowers, bodies, profile: p };
 }
 
 // A curved midrib with a gently cupped/twisted lamina. Adding pitch rotates

@@ -1,3 +1,4 @@
+import { plantAdditions } from "../data/plant-additions.js";
 import { plantShapes } from "../data/plant-shapes.js";
 
 // Visual growth scenarios, not botanical leaf-count measurements or optical meshes.
@@ -38,6 +39,12 @@ export const plantArt = {
   benjamina: { habit: "weeping", leaf: "pointed", count: [22, 110] },
   peperomia: { habit: "succulent", leaf: "spoon", count: [10, 42] },
 };
+Object.assign(
+  plantArt,
+  Object.fromEntries(
+    Object.entries(plantAdditions).map(([id, p]) => [id, p.art]),
+  ),
+);
 const mix = (a, b, t) => a + (b - a) * t;
 const fraction = (x) => x - Math.floor(x);
 const organic = (i) => fraction((i + 1) * 0.61803398875);
@@ -83,7 +90,17 @@ export function plantIllustration(id, heightCm) {
       bounds: [Math.min(x, tx) - w * 2, Math.max(x, tx) + w * 2, 0, arch],
       ...extra,
     });
-  if (art.habit === "rosette") {
+  if (art.habit === "palmate") {
+    for (let i = 0; i < count; i++) {
+      const x = (organic(i) - 0.5) * 0.7,
+        y = 0.3 + 0.5 * organic(i + 3);
+      stem(0, 0, x, y);
+      for (let j = 0; j < art.leaflets; j++) {
+        const a = (2 * Math.PI * j) / art.leaflets;
+        leaf(x, y, x + 0.25 * Math.cos(a), y + 0.25 * Math.sin(a), 0.15);
+      }
+    }
+  } else if (art.habit === "rosette") {
     for (let i = 0; i < count; i++) {
       const side = i % 2 ? -1 : 1,
         q = (Math.floor(i / 2) + 1) / (Math.ceil(count / 2) + 1);
@@ -124,8 +141,13 @@ export function plantIllustration(id, heightCm) {
         top = 0.55 + 0.45 * organic(i + 7);
       leaf(x, 0.02, x + (q - 0.5) * 0.35, top, 0.15 + 0.05 * organic(i + 3));
     }
-  } else if (art.habit === "compound" || art.habit === "palm") {
-    const palm = art.habit === "palm";
+  } else if (
+    art.habit === "compound" ||
+    art.habit === "palm" ||
+    art.habit === "fern"
+  ) {
+    const fern = art.habit === "fern",
+      palm = art.habit === "palm" || fern;
     for (let i = 0; i < count; i++) {
       const side = i % 2 ? -1 : 1,
         q = (Math.floor(i / 2) + 0.3) / Math.ceil(count / 2),
@@ -140,7 +162,9 @@ export function plantIllustration(id, heightCm) {
         d: `M${baseX} ${baseY}Q${cx} ${cy} ${endX} ${endY}`,
         width: palm ? 0.85 : 1.4,
       });
-      const pairs = (palm ? 7 : 3) + Math.floor(growth * (palm ? 4 : 3));
+      const pairs =
+        (fern ? 14 : palm ? 7 : 3) +
+        Math.floor(growth * (fern ? 10 : palm ? 4 : 3));
       for (let j = 0; j < pairs; j++) {
         const t = 0.23 + (0.7 * (j + 0.5)) / pairs,
           x = (1 - t) ** 2 * baseX + 2 * (1 - t) * t * cx + t * t * endX,

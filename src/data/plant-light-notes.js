@@ -1,3 +1,4 @@
+import { plantAdditions } from "./plant-additions.js";
 // Plain-language light preferences, paraphrased from each plant's linked
 // NC State Extension / RHS profile, checked 2026-11-13.
 // Numerical targets remain the calculator's broad light-group assumptions.
@@ -43,3 +44,13 @@ export const plantLightNotes = {
 
 export const lightGroupSource =
   "https://yardandgarden.extension.iastate.edu/how-to/growing-indoor-plants-under-supplemental-lights/important-considerations-providing-supplemental-light-indoor-plants";
+
+Object.assign(
+  plantLightNotes,
+  Object.fromEntries(
+    Object.entries(plantAdditions).map(([id, p]) => [
+      id,
+      ((p) => p.lightNote)(p),
+    ]),
+  ),
+);

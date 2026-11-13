@@ -1,4 +1,9 @@
 export const paths = {
+  pinna: "M0 0L-.38 .15L-.42 .45L-.22 .8L0 1L.22 .8L.42 .45L.38 .15Z",
+  perforated:
+    "M0 .08C-.18 -.03 -.45 .06 -.45 .3C-.44 .64 -.2 .88 0 1C.2 .88 .44 .64 .45 .3C.45 .06 .18 -.03 0 .08Z",
+  coin: "M0 0C-.276 0 -.5 .224 -.5 .5C-.5 .776 -.276 1 0 1C.276 1 .5 .776 .5 .5C.5 .224 .276 0 0 0Z",
+  triangle: "M0 0L-.5 .6Q-.25 .82 0 1Q.25 .82 .5 .6Z",
   strap:
     "M0 0C-.30 .08 -.5 .25 -.42 .6Q-.3 .88 0 1Q.3 .88 .42 .6C.5 .25 .30 .08 0 0Z",
   oval: "M0 0C-.48 .12 -.52 .76 0 1C.52 .76 .48 .12 0 0Z",
@@ -21,4 +26,20 @@ export const paths = {
   sword: "M-.25 0C-.48 .3 -.26 .73 0 1C.28 .73 .46 .3 .25 0Z",
   split:
     "M0 .08C-.16 -.03 -.43 .02 -.48 .16L-.13 .20L-.49 .25Q-.52 .33 -.44 .39L-.12 .36L-.40 .48Q-.38 .55 -.31 .62L-.08 .55L-.23 .73Q-.1 .9 0 1Q.1 .9 .23 .73L.08 .55L.31 .62Q.38 .55 .4 .48L.12 .36L.44 .39Q.52 .33 .49 .25L.13 .20L.48 .16C.43 .02 .16 -.03 0 .08Z",
+};
+
+// Holes are removed from the same mesh used for drawing AND ray intersections.
+// Six representative fenestrations, not a measured leaf scan.
+export const leafHoles = {
+  perforated: [0.29, 0.49, 0.68].flatMap((y, row) =>
+    [-1, 1].map((side) => {
+      const x = side * (0.21 - row * 0.035),
+        rx = 0.065 - row * 0.007,
+        ry = 0.075;
+      return Array.from({ length: 16 }, (_, i) => {
+        const a = (2 * Math.PI * i) / 16;
+        return [x + rx * Math.cos(a), y + ry * Math.sin(a)];
+      });
+    }),
+  ),
 };
