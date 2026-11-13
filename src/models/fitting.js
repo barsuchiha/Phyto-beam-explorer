@@ -46,6 +46,7 @@ export const modelDefaults = {
   install: 150,
   plantOffset: 0,
   chairOffset: 0,
+  lampDistance: null,
   dim: 70,
   hours: 12,
   windowWeather: "off",
@@ -98,6 +99,9 @@ export function normalizeFitting(input = {}) {
   s.install = clamp(s.install, 50, 250, m.install ?? 130);
   s.plantOffset = clamp(s.plantOffset, -60, 60, 0);
   s.chairOffset = clamp(s.chairOffset, -60, 80, 0);
+  // Old saves keep their placement until this control is first used.
+  s.lampDistance =
+    s.lampDistance == null ? null : clamp(s.lampDistance, 0, 500, 100);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.hours = clamp(s.hours, 6, 16, 12);
   s.windowWeather = ["off", "cloudy", "sunny"].includes(s.windowWeather)

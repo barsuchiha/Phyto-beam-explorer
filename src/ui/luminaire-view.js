@@ -9,6 +9,7 @@ import { ppfdMapColor } from "../models/light-readout.js";
 import { populateRoom, populateRoomLight } from "./room-view.js";
 import { populateRayLight } from "./ray-view.js";
 import { populateWindow } from "./window-view.js";
+import { visibleFixtureMesh } from "../models/lamp-placement.js";
 
 const vector = (p) => new T.Vector3(...p);
 function material(color, options = {}) {
@@ -151,6 +152,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     lastModel = "",
     lastChair,
     lastWindowY,
+    lastLampY,
     viewMode = "rays",
     showPaths = false;
   const draw = () => renderer.render(scene, camera);
@@ -242,18 +244,10 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     if (geometry.room) populateRoom(roomGroup, geometry.room);
     daylight(state);
     const enlarged = ["large", "pendantPanel"].includes(state.mount);
+    modelGroup.position.y = geometry.lampPlacement.y;
     if (geometry.olive) populateOlive(modelGroup, pose, geometry, state);
     for (const m of pose.meshes) {
-      if (/light_output_placeholder/i.test(m.name)) continue;
-      if (state.model === "G2" && /Reflector_(back|surface)/.test(m.name))
-        continue;
-      if (
-        enlarged &&
-        /Light_module_shell|Removable_top_cover|Yoke_side|Passive_suspension_crossbar/.test(
-          m.name,
-        )
-      )
-        continue;
+      if (!visibleFixtureMesh(state, m)) continue;
       const g = new T.BufferGeometry();
       g.setAttribute(
         "position",
@@ -413,7 +407,11 @@ export function createLuminaireView(host, onLeaf = () => {}) {
             opticGroup.add(
               line(
                 [
-                  [x, side ? 0.012 : -0.012, geometry.zShift + 0.01],
+                  [
+                    x,
+                    geometry.lampPlacement.y + (side ? 0.012 : -0.012),
+                    geometry.zShift + 0.01,
+                  ],
                   [x, q.d[1], q.d[2]],
                 ],
                 0x9ea695,
@@ -468,14 +466,18 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       state.plantSize,
     ).leaves.length;
     host.dataset.referenceHeight = String(detector.center[2]);
+    host.dataset.lampY = String(geometry.lampPlacement.y);
+    host.dataset.lampGap = String(geometry.lampPlacement.gap);
     if (
       lastModel !== state.model ||
       lastChair !== state.chairOffset ||
-      lastWindowY !== geometry.window.y
+      lastWindowY !== geometry.window.y ||
+      lastLampY !== geometry.lampPlacement.y
     ) {
       lastModel = state.model;
       lastChair = state.chairOffset;
       lastWindowY = geometry.window.y;
+      lastLampY = geometry.lampPlacement.y;
       fit();
     } else draw();
   }

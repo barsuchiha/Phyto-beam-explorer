@@ -6,6 +6,7 @@ import { leafSurfaceCollision } from "./leaf-collision.js";
 import { oliveAssembly } from "./olive.js";
 import { buildRoom, roomLeafCollision } from "./room.js";
 import { placeWindow } from "./window-geometry.js";
+import { fixtureDepth, translateFixture } from "./lamp-placement.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -242,6 +243,36 @@ export function buildLuminaireScene(state, pose) {
     state.plantSize,
     state.leafTilt ?? 0,
   );
+  const fixtureGeometry = {
+    sources,
+    surfaces,
+    boards,
+    screenSupports,
+    olive,
+    mount,
+    source,
+  };
+  const depth = fixtureDepth(state, pose, fixtureGeometry);
+  // Once a wall distance is chosen, the wall is placed from the plant and the
+  // lamp follows it at that distance. The lamp slider never moves the plant.
+  const window = placeWindow(
+    state,
+    leafGeometry,
+    state.lampDistance == null
+      ? [...boards, ...surfaces, ...(olive?.collisionSurfaces ?? [])]
+      : [],
+  );
+  const lampShift =
+    state.lampDistance == null
+      ? 0
+      : window.y - depth.back - state.lampDistance / 100;
+  translateFixture(fixtureGeometry, lampShift);
+  const lampPlacement = {
+    y: lampShift,
+    gap: window.y - depth.back - lampShift,
+    front: depth.front + lampShift,
+    back: depth.back + lampShift,
+  };
   const collision =
     sources.some((s) =>
       [
@@ -261,12 +292,11 @@ export function buildLuminaireScene(state, pose) {
       ...surfaces,
       ...(olive?.collisionSurfaces ?? []),
     ]);
-  const window = placeWindow(state, leafGeometry, [
-    ...boards,
-    ...surfaces,
-    ...(olive?.collisionSurfaces ?? []),
-  ]);
-  const room = buildRoom(1.6 + (state.chairOffset ?? 0) / 100, window.y);
+  const room = buildRoom(
+    1.6 + (state.chairOffset ?? 0) / 100,
+    window.y,
+    Math.min(-1.7, lampPlacement.front - 0.3),
+  );
   return {
     model,
     mount,
@@ -284,6 +314,7 @@ export function buildLuminaireScene(state, pose) {
     fixture: olive?.fixture,
     room,
     window,
+    lampPlacement,
     roomCollision: roomLeafCollision(room, leafGeometry),
   };
 }

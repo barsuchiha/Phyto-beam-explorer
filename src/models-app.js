@@ -185,6 +185,15 @@ function renderControls(poses, geometry) {
   }
   renderMapLegend();
   renderWindowControls(geometry);
+  const lampGap = geometry.lampPlacement.gap;
+  q("lampDistance").value = state.lampDistance ?? Math.round(lampGap * 20) * 5;
+  q("lampDistance-value").textContent =
+    lampGap.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " м";
+  q("lamp-distance-note").textContent =
+    "От ближайшей части корпуса до стены. 0 — вплотную, 5 м — в глубине комнаты. Растение остаётся на месте." +
+    (["V2", "luna", "archetto", "pinocchio"].includes(state.model)
+      ? " Вынос настенного крепления — условная примерка; потребуется отдельная опора."
+      : "");
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
@@ -214,7 +223,7 @@ function renderControls(poses, geometry) {
     .map((a) => fmt(wrap(a)) + "°")
     .join(
       " / ",
-    )}. 0° — в сторону растения справа от лампы. Средний поворачивает и верхний блок; верхний ползунок доворачивает его отдельно.`;
+    )}. 0° — вправо вдоль комнаты. После перемещения лампы направление блоков можно поправить. Средний поворачивает и верхний блок; верхний ползунок доворачивает его отдельно.`;
   q("focus").textContent =
     state.model === "olive" ? "Блок крупно" : "Головка крупно";
   const architecture = plantArchitecture[state.plant];
@@ -495,7 +504,7 @@ async function render() {
     ).note;
     hide("collision", !geometry.collision && !geometry.roomCollision);
     q("collision").textContent =
-      "Крона или листья пересекают источник или экран. Подними конструкцию, сдвинь растение или измени его размер/наклон листьев: расчёт для этого положения остановлен.";
+      "Крона или листья пересекают источник или экран. Измени расстояние лампы от стены, подними конструкцию или сдвинь растение: расчёт для этого положения остановлен.";
     if (geometry.roomCollision)
       q("collision").textContent =
         geometry.roomCollision === "boundary"
@@ -642,10 +651,24 @@ q("daily-switch").addEventListener("click", () => {
 });
 q("focus").addEventListener("click", () => view?.fit(true));
 q("reset-view").addEventListener("click", () => view?.fit());
+q("lamp-reset").addEventListener("click", () => {
+  state = changeFitting(state, "lampDistance", null);
+  save();
+  render();
+});
 for (const button of document.querySelectorAll("[data-olive-preset]"))
   button.addEventListener("click", () => {
-    const [towerTurn, jointMiddle, jointTop] =
+    let [towerTurn, jointMiddle, jointTop] =
       OLIVE_PRESETS[button.dataset.olivePreset];
+    if (button.dataset.olivePreset === "toward" && latestGeometry) {
+      const [x, y] = latestGeometry.crown.soil;
+      towerTurn =
+        Math.round(
+          (Math.atan2(y - latestGeometry.lampPlacement.y, x) * 180) /
+            Math.PI /
+            5,
+        ) * 5;
+    }
     state = normalizeFitting({ ...state, towerTurn, jointMiddle, jointTop });
     save();
     render();

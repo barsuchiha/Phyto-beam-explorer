@@ -3,7 +3,11 @@
 const EPS = 1e-7;
 export const ROOM_BOUNDS = { min: [-1.1, -1.7, 0], max: [3.1, 1.15, 2.8] };
 
-export function roomObjects(chairX = 1.6, backY = ROOM_BOUNDS.max[1]) {
+export function roomObjects(
+  chairX = 1.6,
+  backY = ROOM_BOUNDS.max[1],
+  frontY = ROOM_BOUNDS.min[1],
+) {
   const objects = [];
   const plane = (
     id,
@@ -27,7 +31,7 @@ export function roomObjects(chairX = 1.6, backY = ROOM_BOUNDS.max[1]) {
       color,
       visible,
     });
-  const min = ROOM_BOUNDS.min,
+  const min = [ROOM_BOUNDS.min[0], frontY, ROOM_BOUNDS.min[2]],
     max = [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]];
   plane(
     "floor",
@@ -244,10 +248,14 @@ export function intersectRoomObject(
   };
 }
 
-export function buildRoom(chairX = 1.6, backY = ROOM_BOUNDS.max[1]) {
-  const objects = roomObjects(chairX, backY);
+export function buildRoom(
+  chairX = 1.6,
+  backY = ROOM_BOUNDS.max[1],
+  frontY = ROOM_BOUNDS.min[1],
+) {
+  const objects = roomObjects(chairX, backY, frontY);
   const bounds = {
-    min: [...ROOM_BOUNDS.min],
+    min: [ROOM_BOUNDS.min[0], frontY, ROOM_BOUNDS.min[2]],
     max: [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]],
   };
   const planes = objects.slice(0, 6),
