@@ -49,6 +49,7 @@ export const modelDefaults = {
   dim: 70,
   hours: 12,
   windowWeather: "off",
+  windowDistance: null,
   windowLevel: 100,
   daylightHours: 10,
   sunHours: 3,
@@ -103,6 +104,9 @@ export function normalizeFitting(input = {}) {
     ? s.windowWeather
     : "off";
   s.windowLevel = clamp(s.windowLevel, 0, 200, 100);
+  // null preserves the old wall position until the distance is first changed.
+  s.windowDistance =
+    s.windowDistance == null ? null : clamp(s.windowDistance, 5, 500, 100);
   s.daylightHours = clamp(s.daylightHours, 4, 16, 10);
   s.sunHours = clamp(s.sunHours, 0, Math.min(8, s.daylightHours), 3);
   s.receiver = s.receiver === "leaves" ? "leaves" : "crown";

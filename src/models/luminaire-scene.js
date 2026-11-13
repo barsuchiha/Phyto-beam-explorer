@@ -5,6 +5,7 @@ import { buildLeafGeometry } from "./leaf-geometry.js";
 import { leafSurfaceCollision } from "./leaf-collision.js";
 import { oliveAssembly } from "./olive.js";
 import { buildRoom, roomLeafCollision } from "./room.js";
+import { placeWindow } from "./window-geometry.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -260,7 +261,12 @@ export function buildLuminaireScene(state, pose) {
       ...surfaces,
       ...(olive?.collisionSurfaces ?? []),
     ]);
-  const room = buildRoom(1.6 + (state.chairOffset ?? 0) / 100);
+  const window = placeWindow(state, leafGeometry, [
+    ...boards,
+    ...surfaces,
+    ...(olive?.collisionSurfaces ?? []),
+  ]);
+  const room = buildRoom(1.6 + (state.chairOffset ?? 0) / 100, window.y);
   return {
     model,
     mount,
@@ -277,6 +283,7 @@ export function buildLuminaireScene(state, pose) {
     olive,
     fixture: olive?.fixture,
     room,
+    window,
     roomCollision: roomLeafCollision(room, leafGeometry),
   };
 }

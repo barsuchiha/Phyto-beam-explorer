@@ -3,7 +3,7 @@
 const EPS = 1e-7;
 export const ROOM_BOUNDS = { min: [-1.1, -1.7, 0], max: [3.1, 1.15, 2.8] };
 
-export function roomObjects(chairX = 1.6) {
+export function roomObjects(chairX = 1.6, backY = ROOM_BOUNDS.max[1]) {
   const objects = [];
   const plane = (
     id,
@@ -27,7 +27,8 @@ export function roomObjects(chairX = 1.6) {
       color,
       visible,
     });
-  const { min, max } = ROOM_BOUNDS;
+  const min = ROOM_BOUNDS.min,
+    max = [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]];
   plane(
     "floor",
     "floor",
@@ -113,7 +114,8 @@ export function roomObjects(chairX = 1.6) {
       color,
       visible: true,
     });
-  const cy = 0.28;
+  // Keep the chair in front of a wall moved close to the plant.
+  const cy = Math.min(0.28, backY - 0.47);
   for (const x of [-0.3, 0.3])
     for (const y of [-0.25, 0.25])
       ellipsoid(
@@ -242,15 +244,25 @@ export function intersectRoomObject(
   };
 }
 
-export function buildRoom(chairX = 1.6) {
-  const objects = roomObjects(chairX);
+export function buildRoom(chairX = 1.6, backY = ROOM_BOUNDS.max[1]) {
+  const objects = roomObjects(chairX, backY);
+  const bounds = {
+    min: [...ROOM_BOUNDS.min],
+    max: [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]],
+  };
   const planes = objects.slice(0, 6),
     furniture = objects.slice(6);
-  const lo = [chairX - 0.51, -0.14, 0],
-    hi = [chairX + 0.51, 0.71, 1.2];
+  const lo = [0, 1, 2].map((i) =>
+      Math.min(...furniture.map((o) => o.center[i] - o.radius[i])),
+    ),
+    hi = [0, 1, 2].map((i) =>
+      Math.max(...furniture.map((o) => o.center[i] + o.radius[i])),
+    );
   return {
     objects,
     chairX,
+    chairY: Math.min(0.28, backY - 0.47),
+    bounds,
     hit(origin, direction, limit = Infinity) {
       let best = null;
       for (const object of planes) {
@@ -291,7 +303,7 @@ export function buildRoom(chairX = 1.6) {
 }
 
 export function roomLeafCollision(room, leafGeometry) {
-  const { min, max } = ROOM_BOUNDS;
+  const { min, max } = room.bounds ?? ROOM_BOUNDS;
   for (const { points } of leafGeometry.triangles) {
     if (points.some((p) => p.some((v, i) => v <= min[i] || v >= max[i])))
       return "boundary";

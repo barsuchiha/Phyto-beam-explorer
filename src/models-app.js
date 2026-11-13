@@ -125,7 +125,7 @@ function renderMapLegend() {
   q("continuous-note").textContent =
     "PPFD от лампы · мкмоль/(м²·с). Свет окна + лампы за день — в значке солнца под сценой. Шкала общая, логарифмическая; 300+ — верхний цвет.";
 }
-function renderWindowControls() {
+function renderWindowControls(geometry = latestGeometry) {
   for (const name of [
     "windowWeather",
     "windowLevel",
@@ -140,11 +140,23 @@ function renderWindowControls() {
   ])
     q(name + "-value").textContent = fmt(state[name]) + unit;
   hide("window-settings", state.windowWeather === "off");
+  hide("window-distance-controls", state.windowWeather === "off");
+  const aperture = geometry?.window;
+  const distance = aperture?.gap ?? (state.windowDistance ?? 100) / 100;
+  q("windowDistance").value =
+    state.windowDistance ?? Math.round(distance * 20) * 5;
+  q("windowDistance-value").textContent =
+    distance.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " м";
+  q("window-distance-note").textContent =
+    "От ближайшего края растения до стекла. Вплотную — 5 см." +
+    (aperture?.limitedByFixture
+      ? " Стену удерживает габарит светильника: показано фактическое расстояние."
+      : "");
   hide("sun-hours-field", state.windowWeather !== "sunny");
   q("sunHours").max = Math.min(8, state.daylightHours);
   const s = windowSettings(state);
   q("window-assumptions").textContent =
-    `Окно 140 × 160 см на задней стене, подоконник 70 см. При 100% яркости: пасмурно — средний рассеянный PPFD 80; солнечно — 200 плюс прямой поток 600 мкмоль/(м²·с). Рассеянный свет задан на вертикальном датчике в 50 см от центра окна, прямой — на перпендикулярной лучу поверхности, оба уже после стекла. Сейчас: рассеянный ${fmt(s.diffuse)} × ${s.hours} ч; прямой ${fmt(s.beam)} × ${s.sunHours} ч. Диапазон яркости 0,6–1,4 от сценария — допущение, не доверительный интервал. Солнце представлено тремя направлениями: высоты 25°/35°/25°, азимуты −15°/0°/15° относительно окна, равные доли времени. Учтены наклоны и взаимные тени листьев. Экраны и корпус затеняют окно как непрозрачные; отражения от комнаты, экрана и листьев, пропускание через листья, оконная рама и движение солнца по дате не рассчитаны. Положение окна фиксировано; текущая сцена не является обмером квартиры.`;
+    `Окно 140 × 160 см на задней стене, подоконник 70 см. При 100% яркости: пасмурно — средний рассеянный PPFD 80; солнечно — 200 плюс прямой поток 600 мкмоль/(м²·с). Рассеянный свет задан на вертикальном датчике в 50 см от центра окна, прямой — на перпендикулярной лучу поверхности, оба уже после стекла. Сейчас: рассеянный ${fmt(s.diffuse)} × ${s.hours} ч; прямой ${fmt(s.beam)} × ${s.sunHours} ч. Диапазон яркости 0,6–1,4 от сценария — допущение, не доверительный интервал. Солнце представлено тремя направлениями: высоты 25°/35°/25°, азимуты −15°/0°/15° относительно окна, равные доли времени. Учтены наклоны и взаимные тени листьев. Экраны и корпус затеняют окно как непрозрачные; отражения от комнаты, экрана и листьев, пропускание через листья, оконная рама и движение солнца по дате не рассчитаны. Стена с окном движется по ползунку расстояния; яркость в опорной точке в 50 см от окна сохраняется. Текущая сцена не является обмером квартиры.`;
 }
 function renderControls(poses, geometry) {
   const m = luminaires[state.model],
@@ -172,7 +184,7 @@ function renderControls(poses, geometry) {
     else el.value = state[name];
   }
   renderMapLegend();
-  renderWindowControls();
+  renderWindowControls(geometry);
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
@@ -471,6 +483,7 @@ async function render() {
     state.pose = Math.min(state.pose, poses.length - 1);
     const pose = poses[state.pose],
       geometry = buildLuminaireScene(state, pose);
+    latestGeometry = geometry;
     renderControls(poses, geometry);
     view?.update(state, pose, geometry);
     if (view) q("loading").hidden = true;
@@ -509,7 +522,7 @@ async function render() {
     timer = setTimeout(() => {
       if (run !== serial) return;
       try {
-        if (state.model === "olive" && typeof Worker !== "undefined") {
+        if (typeof Worker !== "undefined") {
           lightWorker = new Worker(
             new URL("../data/workers/" + lightWorkerFile, import.meta.url),
             { type: "module" },

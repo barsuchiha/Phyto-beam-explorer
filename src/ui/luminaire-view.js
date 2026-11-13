@@ -150,6 +150,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     currentScene,
     lastModel = "",
     lastChair,
+    lastWindowY,
     viewMode = "rays",
     showPaths = false;
   const draw = () => renderer.render(scene, camera);
@@ -172,6 +173,8 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       for (const child of roomGroup.children)
         if (["chair", "cat"].includes(child.userData.roomReceiver))
           bounds.union(new T.Box3().setFromObject(child));
+    if (!close && windowGroup.children.length)
+      bounds.union(new T.Box3().setFromObject(windowGroup));
     let center = bounds.getCenter(new T.Vector3()),
       size = Math.max(...bounds.getSize(new T.Vector3()).toArray());
     if (close) {
@@ -465,9 +468,14 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       state.plantSize,
     ).leaves.length;
     host.dataset.referenceHeight = String(detector.center[2]);
-    if (lastModel !== state.model || lastChair !== state.chairOffset) {
+    if (
+      lastModel !== state.model ||
+      lastChair !== state.chairOffset ||
+      lastWindowY !== geometry.window.y
+    ) {
       lastModel = state.model;
       lastChair = state.chairOffset;
+      lastWindowY = geometry.window.y;
       fit();
     } else draw();
   }
@@ -660,9 +668,12 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     setMode(viewMode);
   }
   function daylight(state) {
+    const hadWindow = windowGroup.children.length > 0;
     dispose(windowGroup);
-    populateWindow(windowGroup, state);
-    draw();
+    populateWindow(windowGroup, state, currentScene?.window);
+    host.dataset.windowY = String(currentScene?.window.y ?? "");
+    if (hadWindow !== windowGroup.children.length > 0 && currentResult) fit();
+    else draw();
   }
   return {
     update,

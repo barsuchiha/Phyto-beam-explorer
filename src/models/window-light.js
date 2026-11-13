@@ -4,12 +4,8 @@ import { triangleArea } from "./leaf-geometry.js";
 
 // Design scenario, not a weather service or a measurement of the user's window.
 // All photon levels are AFTER glazing. The luminous aperture is on the back wall.
-export const WINDOW = {
-  x: [-0.4, 1],
-  y: 1.15,
-  z: [0.7, 2.3],
-  reference: [0.3, 0.65, 1.5], // 0.5 m inside, facing the centre of the window
-};
+import { WINDOW } from "./window-geometry.js";
+export { WINDOW } from "./window-geometry.js";
 export const WINDOW_PRESETS = {
   off: { label: "Без окна", diffuse: 0, beam: 0 },
   cloudy: { label: "Пасмурно", diffuse: 80, beam: 0 },
@@ -55,45 +51,95 @@ export function windowDose(side, state) {
     (side.diffuse * s.diffuse * s.hours + side.beam * s.beam * s.sunHours)
   );
 }
-function apertureSamples(columns, rows) {
-  return Array.from({ length: columns * rows }, (_, i) => [
-    WINDOW.x[0] +
-      ((WINDOW.x[1] - WINDOW.x[0]) * ((i % columns) + 0.5)) / columns,
-    WINDOW.y,
-    WINDOW.z[0] +
-      ((WINDOW.z[1] - WINDOW.z[0]) * (Math.floor(i / columns) + 0.5)) / rows,
-  ]);
+const corners = (x, z, y) => [
+  [x[0], y, z[0]],
+  [x[1], y, z[0]],
+  [x[1], y, z[1]],
+  [x[0], y, z[1]],
+];
+// Exact projected solid angle of a rectangular cell after clipping to the
+// receiving face's hemisphere. This stays finite at a nearby area source.
+function polygonIntegral(p, n, polygon) {
+  const clipped = [];
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i],
+      b = polygon[(i + 1) % polygon.length];
+    const da = dot(n, sub(a, p)),
+      db = dot(n, sub(b, p));
+    if (da >= 0) clipped.push(a);
+    if (da >= 0 !== db >= 0)
+      clipped.push(add(a, mul(sub(b, a), da / (da - db))));
+  }
+  if (clipped.length < 3) return { weight: 0 };
+  const directions = clipped.map((q) => unit(sub(q, p)));
+  let weight = 0;
+  for (let i = 0; i < directions.length; i++) {
+    const a = directions[i],
+      b = directions[(i + 1) % directions.length],
+      c = cross(a, b),
+      length = Math.hypot(...c);
+    if (length > 1e-12)
+      weight +=
+        (dot(n, c) * Math.atan2(length, Math.max(-1, Math.min(1, dot(a, b))))) /
+        length /
+        2;
+  }
+  const center = clipped.reduce(
+    (sum, q) => add(sum, mul(q, 1 / clipped.length)),
+    [0, 0, 0],
+  );
+  return { weight: Math.abs(weight), center };
 }
-function apertureKernel(p, n, q) {
-  const delta = sub(q, p),
-    distance = Math.hypot(...delta),
-    d = mul(delta, 1 / distance);
-  // Radiance integral: receiver cosine × aperture cosine × dA / r².
-  return {
-    d,
-    distance,
-    weight:
-      (Math.max(0, dot(n, d)) * Math.max(0, d[1])) / (distance * distance),
+export function windowDiffuseIntegral(p, n, aperture = WINDOW) {
+  if (p[1] >= aperture.y) return 0;
+  return polygonIntegral(p, n, corners(aperture.x, aperture.z, aperture.y))
+    .weight;
+}
+export function windowAtPoint(
+  p,
+  n,
+  { columns = 6, rows = 6 } = {},
+  visible = () => true,
+  aperture = WINDOW,
+) {
+  if (p[1] >= aperture.y) return { diffuse: 0, beam: 0 };
+  const depth = aperture.y - p[1];
+  // Angular spacing concentrates visibility samples near the projection of a
+  // close leaf. Each cell has an exact irradiance weight, not a point-source 1/r².
+  const edges = (bounds, coordinate, count) => {
+    const lo = Math.atan((bounds[0] - coordinate) / depth),
+      hi = Math.atan((bounds[1] - coordinate) / depth);
+    return Array.from(
+      { length: count + 1 },
+      (_, i) => coordinate + depth * Math.tan(lo + ((hi - lo) * i) / count),
+    );
   };
-}
-export function windowAtPoint(p, n, samples, visible = () => true) {
-  const area = (WINDOW.x[1] - WINDOW.x[0]) * (WINDOW.z[1] - WINDOW.z[0]);
+  const xs = edges(aperture.x, p[0], columns),
+    zs = edges(aperture.z, p[2], rows);
   let diffuse = 0,
     beam = 0;
-  for (const q of samples) {
-    const k = apertureKernel(p, n, q);
-    if (k.weight > 0 && visible(p, k.d, k.distance))
-      diffuse += (k.weight * area) / samples.length;
-  }
+  for (let x = 0; x < columns; x++)
+    for (let z = 0; z < rows; z++) {
+      const cell = polygonIntegral(
+        p,
+        n,
+        corners([xs[x], xs[x + 1]], [zs[z], zs[z + 1]], aperture.y),
+      );
+      if (cell.weight <= 1e-14) continue;
+      const delta = sub(cell.center, p),
+        distance = Math.hypot(...delta),
+        d = mul(delta, 1 / distance);
+      if (visible(p, d, distance)) diffuse += cell.weight;
+    }
   for (const d of sunDirections) {
-    const distance = (WINDOW.y - p[1]) / d[1],
+    const distance = (aperture.y - p[1]) / d[1],
       q = add(p, mul(d, distance));
     if (
       distance > 0 &&
-      q[0] >= WINDOW.x[0] &&
-      q[0] <= WINDOW.x[1] &&
-      q[2] >= WINDOW.z[0] &&
-      q[2] <= WINDOW.z[1] &&
+      q[0] >= aperture.x[0] &&
+      q[0] <= aperture.x[1] &&
+      q[2] >= aperture.z[0] &&
+      q[2] <= aperture.z[1] &&
       dot(n, d) > 0 &&
       visible(p, d, distance)
     )
@@ -142,8 +188,13 @@ export function calculateWindowLight(
 ) {
   const geometry = scene.leafGeometry;
   if (!geometry?.leaves.length) return { leaves: [] };
-  const samples = apertureSamples(columns, rows);
-  const reference = windowAtPoint(WINDOW.reference, [0, 1, 0], samples).diffuse;
+  const aperture = scene.window ?? WINDOW;
+  const sampling = { columns, rows };
+  const reference = windowDiffuseIntegral(
+    aperture.reference,
+    [0, 1, 0],
+    aperture,
+  );
   const leafBVH = buildLeafBVH(geometry.triangles);
   const blockers = buildLeafBVH(
     [...(scene.surfaces ?? []), ...(scene.boards ?? [])].flatMap((s) => [
@@ -174,11 +225,17 @@ export function calculateWindowLight(
       leaf = geometry.leaves.find((l) => l.id === patch.leaf);
     for (const { p, n } of samplePatch(patch, patchSamples))
       for (const side of [0, 1]) {
-        const value = windowAtPoint(p, mul(n, side ? -1 : 1), samples, visible);
+        const value = windowAtPoint(
+          p,
+          mul(n, side ? -1 : 1),
+          sampling,
+          visible,
+          aperture,
+        );
         const weight = patch.area / (leaf.area * patchSamples);
         target.sides[side].diffuse += (value.diffuse / reference) * weight;
         target.sides[side].beam += value.beam * weight;
       }
   }
-  return { leaves, patchSamples, apertureSamples: samples.length };
+  return { leaves, patchSamples, apertureSamples: columns * rows };
 }

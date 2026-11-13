@@ -10,6 +10,7 @@ function stroke(group, points, color, width = 1) {
   );
 }
 export function populateRoom(group, room) {
+  const { min, max } = room.bounds;
   for (const object of room.objects) {
     if (!object.visible) continue;
     const mat = new T.MeshStandardMaterial({
@@ -57,21 +58,21 @@ export function populateRoom(group, room) {
     group.add(mesh);
   }
   // Quiet floorboard seams and skirting; decorative details are not receivers.
-  for (let x = -1; x <= 3; x += 0.28)
+  for (let x = min[0] + 0.1; x <= max[0]; x += 0.28)
     stroke(
       group,
       [
-        [x, -1.7, 0.001],
-        [x, 1.15, 0.001],
+        [x, min[1], 0.001],
+        [x, max[1], 0.001],
       ],
       0x776f63,
     );
   stroke(
     group,
     [
-      [-1.099, -1.7, 0.075],
-      [-1.099, 1.149, 0.075],
-      [3.1, 1.149, 0.075],
+      [min[0] + 0.001, min[1], 0.075],
+      [min[0] + 0.001, max[1] - 0.001, 0.075],
+      [max[0], max[1] - 0.001, 0.075],
     ],
     0xd0cbbb,
   );
@@ -80,7 +81,7 @@ export function populateRoom(group, room) {
   // ears, face and fur lines are small illustrative details only.
   const x = room.chairX,
     hx = x - 0.18,
-    hy = 0.04,
+    hy = room.chairY - 0.24,
     hz = 0.84;
   for (const side of [-1, 1]) {
     const ear = new T.Mesh(
@@ -124,7 +125,7 @@ export function populateRoom(group, room) {
         const a = 0.12 + (i / 24) * 2.8;
         return [
           x + 0.02 + dx,
-          0.18 + 0.157 * scale * Math.cos(a),
+          room.chairY - 0.1 + 0.157 * scale * Math.cos(a),
           0.68 + 0.152 * scale * Math.sin(a),
         ];
       }),
