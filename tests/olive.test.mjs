@@ -166,7 +166,12 @@ test("published worker is versioned and produces the same result as the shared c
     .digest("hex")
     .slice(0, 12);
   assert.equal(lightWorkerFile, `light-${hash}.js`);
-  const s = state({ lampDistance: 30, windowDistance: 150 }),
+  const s = state({
+      lampDistance: 30,
+      windowDistance: 150,
+      plantTurn: 95,
+      windowWallY: 1.7,
+    }),
     expected = calculateLuminaire(s, buildLuminaireScene(s, pose), 2048);
   const code = `import {parentPort,workerData} from 'node:worker_threads';
     globalThis.self={postMessage:data=>parentPort.postMessage(data)};

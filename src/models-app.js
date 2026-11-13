@@ -144,11 +144,16 @@ function renderWindowControls(geometry = latestGeometry) {
   const aperture = geometry?.window;
   const distance = aperture?.gap ?? (state.windowDistance ?? 100) / 100;
   q("windowDistance").value =
-    state.windowDistance ?? Math.round(distance * 20) * 5;
+    state.windowWallY != null
+      ? Math.round(distance * 20) * 5
+      : (state.windowDistance ?? Math.round(distance * 20) * 5);
   q("windowDistance-value").textContent =
     distance.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " м";
   q("window-distance-note").textContent =
     "От ближайшего края растения до стекла. Вплотную — 5 см." +
+    (state.windowWallY != null
+      ? " После поворота горшка показан текущий зазор; стена осталась на месте."
+      : "") +
     (aperture?.limitedByFixture
       ? " Стену удерживает габарит светильника: показано фактическое расстояние."
       : "");
@@ -198,6 +203,7 @@ function renderControls(poses, geometry) {
     ["dim", "%"],
     ["plantSize", " см"],
     ["leafTilt", "°"],
+    ["plantTurn", "°"],
     ["install", " см"],
     ["plantOffset", " см"],
     ["chairOffset", " см"],
@@ -582,6 +588,8 @@ for (const [name, control] of Object.entries(controls))
   control.addEventListener("input", () => {
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
+    if (name === "plantTurn" && latestGeometry)
+      state = { ...state, windowWallY: latestGeometry.window.y };
     state = changeFitting(state, name, value);
     if (
       [

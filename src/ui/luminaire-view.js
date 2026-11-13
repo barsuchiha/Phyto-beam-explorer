@@ -81,19 +81,34 @@ export function populatePlant(group, c, id, height, leafGeometry) {
       ),
     );
   const radius = Math.max(0.06, Math.min(0.24, c.rx * 0.44));
+  const potGroup = new T.Group();
+  potGroup.position.set(c.soil[0], c.soil[1], 0);
+  potGroup.rotation.z = ((c.turn ?? 0) * Math.PI) / 180;
+  group.add(potGroup);
   const pot = new T.Mesh(
     new T.CylinderGeometry(radius, radius * 0.78, c.potHeight, 40),
     material(0xa1927e),
   );
   pot.rotation.x = Math.PI / 2;
-  pot.position.set(c.soil[0], c.soil[1], c.potHeight / 2);
-  group.add(pot);
+  pot.position.z = c.potHeight / 2;
+  potGroup.add(pot);
   const soil = new T.Mesh(
     new T.CircleGeometry(radius * 0.94, 40),
     material(0x4c453a),
   );
-  soil.position.set(c.soil[0], c.soil[1], c.potHeight + 0.001);
-  group.add(soil);
+  soil.position.z = c.potHeight + 0.001;
+  potGroup.add(soil);
+  // Small mark makes rotation visible on an otherwise circular pot.
+  potGroup.add(
+    line(
+      [0.62, 0.91].map((h) => [
+        0,
+        -radius * (0.78 + 0.22 * h) - 0.001,
+        c.potHeight * h,
+      ]),
+      0xe9d8b7,
+    ),
+  );
 }
 
 export function createLuminaireView(host, onLeaf = () => {}) {
@@ -459,6 +474,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       ),
     );
     host.dataset.plant = state.plant;
+    host.dataset.plantTurn = String(state.plantTurn ?? 0);
     host.dataset.model = state.model;
     host.dataset.source = state.source;
     host.dataset.leafCount = plantIllustration(

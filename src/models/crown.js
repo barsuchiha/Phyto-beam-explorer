@@ -8,6 +8,15 @@ export const sub = (a, b) => a.map((v, i) => v - b[i]);
 export const mul = (a, s) => a.map((v) => v * s);
 export const unit = (a) => mul(a, 1 / Math.hypot(...a));
 const rad = (d) => (d * Math.PI) / 180;
+export function turnVector(p, degrees = 0) {
+  const angle = rad(degrees % 360);
+  if (!angle) return p;
+  const c = Math.cos(angle),
+    s = Math.sin(angle);
+  return [p[0] * c - p[1] * s, p[0] * s + p[1] * c, p[2]];
+}
+export const crownLocal = (c, p) =>
+  turnVector(sub(p, c.center), -(c.turn ?? 0));
 
 export function crownGeometry(state) {
   const spec = plantShapes[state.plant],
@@ -15,16 +24,27 @@ export function crownGeometry(state) {
   const rx = (height * spec.width) / 2,
     ry = rx * spec.depth,
     rz = (height * spec.crown) / 2;
-  return { height, rx, ry, rz, center: [0, 0, height - rz], spec };
+  return {
+    height,
+    rx,
+    ry,
+    rz,
+    center: [0, 0, height - rz],
+    spec,
+    turn: state.plantTurn ?? 0,
+  };
 }
 export function surfacePoint(c, mu, phi) {
   const q = Math.sqrt(Math.max(0, 1 - mu * mu));
   const s = [q * Math.cos(phi), q * Math.sin(phi), mu];
-  const p = add(c.center, [c.rx * s[0], c.ry * s[1], c.rz * s[2]]);
+  const p = add(
+    c.center,
+    turnVector([c.rx * s[0], c.ry * s[1], c.rz * s[2]], c.turn),
+  );
   const gradient = [s[0] / c.rx, s[1] / c.ry, s[2] / c.rz];
   return {
     p,
-    normal: unit(gradient),
+    normal: turnVector(unit(gradient), c.turn),
     jacobian: c.rx * c.ry * c.rz * Math.hypot(...gradient),
   };
 }
@@ -115,8 +135,9 @@ export function screenHit(origin, d, rig) {
   return wallDistance(...origin, ...d, rig);
 }
 export function rayCrown(origin, d, c) {
-  const p = sub(origin, c.center),
+  const p = crownLocal(c, origin),
     r = [c.rx, c.ry, c.rz];
+  d = turnVector(d, -(c.turn ?? 0));
   let a = 0,
     b = 0,
     cc = -1;

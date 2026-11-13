@@ -1,5 +1,13 @@
 import { luminaires, mounts, fittingSources } from "../data/luminaires.js";
-import { crownGeometry, add, sub, mul, dot, unit } from "./crown.js";
+import {
+  crownGeometry,
+  crownLocal,
+  add,
+  sub,
+  mul,
+  dot,
+  unit,
+} from "./crown.js";
 import { sourceFit } from "./fitting.js";
 import { buildLeafGeometry } from "./leaf-geometry.js";
 import { leafSurfaceCollision } from "./leaf-collision.js";
@@ -231,11 +239,15 @@ export function buildLuminaireScene(state, pose) {
     ),
   );
   if (olive) boards.push(...olive.holders);
-  const inside = (p) =>
-    ((p[0] - crown.center[0]) / crown.rx) ** 2 +
-      ((p[1] - crown.center[1]) / crown.ry) ** 2 +
-      ((p[2] - crown.center[2]) / crown.rz) ** 2 <
-    1;
+  const inside = (p) => {
+    const local = crownLocal(crown, p);
+    return (
+      (local[0] / crown.rx) ** 2 +
+        (local[1] / crown.ry) ** 2 +
+        (local[2] / crown.rz) ** 2 <
+      1
+    );
+  };
   // Conservative envelope check. This is not full CAD collision detection.
   const leafGeometry = buildLeafGeometry(
     crown,

@@ -23,11 +23,14 @@ export function placeWindow(state, leafGeometry, surfaces = []) {
     -Infinity,
     ...surfaces.flatMap((s) => [s.a, s.b, s.c, s.d].map((p) => p[1])),
   );
-  const y = Math.max(edge + requested, fixtureBack + WINDOW_CLEARANCE);
+  // Turning the pot pins the existing wall; touching the distance control
+  // again restores placement relative to the current edge of the plant.
+  const target = state.windowWallY ?? edge + requested;
+  const y = Math.max(target, fixtureBack + WINDOW_CLEARANCE);
   return {
     ...windowAtY(y),
     plantEdge: edge,
     gap: y - edge,
-    limitedByFixture: y > edge + requested + 1e-8,
+    limitedByFixture: y > target + 1e-8,
   };
 }

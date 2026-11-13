@@ -7,6 +7,7 @@ import {
   intensity,
   rayCrown,
   surfacePoint,
+  crownLocal,
   add,
   sub,
   mul,
@@ -331,7 +332,7 @@ export function calculateLuminaire(
       index = result.patch * 2 + result.side;
       bins[index].hits++;
     } else if (result.kind === "target") {
-      const p = sub(result.point, scene.crown.center),
+      const p = crownLocal(scene.crown, result.point),
         cz = Math.max(-1, Math.min(1, p[2] / scene.crown.rz));
       const cp =
         (Math.atan2(p[1] / scene.crown.ry, p[0] / scene.crown.rx) + TAU) % TAU;

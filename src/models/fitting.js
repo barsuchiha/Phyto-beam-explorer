@@ -43,6 +43,7 @@ export const modelDefaults = {
   plant: "monstera",
   plantSize: 100,
   leafTilt: 0,
+  plantTurn: 0,
   install: 150,
   plantOffset: 0,
   chairOffset: 0,
@@ -51,6 +52,7 @@ export const modelDefaults = {
   hours: 12,
   windowWeather: "off",
   windowDistance: null,
+  windowWallY: null,
   windowLevel: 100,
   daylightHours: 10,
   sunHours: 3,
@@ -84,6 +86,7 @@ export function normalizeFitting(input = {}) {
   const p = plantShapes[s.plant];
   s.plantSize = clamp(s.plantSize, p.min, p.max, p.initial);
   s.leafTilt = clamp(s.leafTilt, -20, 20, 0);
+  s.plantTurn = clamp(s.plantTurn, 0, 360, 0);
   s.pose = Math.round(
     clamp(
       s.pose,
@@ -111,6 +114,8 @@ export function normalizeFitting(input = {}) {
   // null preserves the old wall position until the distance is first changed.
   s.windowDistance =
     s.windowDistance == null ? null : clamp(s.windowDistance, 5, 500, 100);
+  s.windowWallY =
+    s.windowWallY == null ? null : clamp(s.windowWallY, 0.05, 10, null);
   s.daylightHours = clamp(s.daylightHours, 4, 16, 10);
   s.sunHours = clamp(s.sunHours, 0, Math.min(8, s.daylightHours), 3);
   s.receiver = s.receiver === "leaves" ? "leaves" : "crown";
@@ -137,6 +142,17 @@ export function normalizeFitting(input = {}) {
 }
 export function changeFitting(state, key, value) {
   const next = { ...state, [key]: value };
+  if (
+    [
+      "windowDistance",
+      "plant",
+      "plantSize",
+      "plantOffset",
+      "leafTilt",
+    ].includes(key) ||
+    (key === "model" && value !== state.model)
+  )
+    next.windowWallY = null;
   if (key === "model" && luminaires[value]) {
     next.pose = 0;
     next.install = luminaires[value].install ?? 130;

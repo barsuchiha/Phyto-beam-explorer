@@ -1,7 +1,7 @@
 import { Shape, ShapeUtils } from "../vendor/three.module.min.js";
 import { paths } from "../data/leaf-paths.js";
 import { plantLayout, bladePoint } from "./plant-architecture.js";
-import { add, sub, mul } from "./crown.js";
+import { add, sub, mul, turnVector } from "./crown.js";
 
 const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -102,7 +102,8 @@ export function buildLeafGeometry(crown, id, height, tilt = 0) {
     for (const p of stem.points) top = Math.max(top, p[2]);
   const scale = crown.height / top,
     soil = crown.soil ?? [crown.center[0], crown.center[1], 0];
-  const world = (p) => p.map((v, i) => soil[i] + scale * v);
+  const world = (p) =>
+    turnVector(p, crown.turn).map((v, i) => soil[i] + scale * v);
   const leaves = [],
     patches = [],
     triangles = [],
