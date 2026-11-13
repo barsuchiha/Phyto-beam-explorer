@@ -85,7 +85,9 @@ export function normalizeFitting(input = {}) {
   if (!Object.hasOwn(plantShapes, s.plant)) s.plant = "monstera";
   const p = plantShapes[s.plant];
   s.plantSize = clamp(s.plantSize, p.min, p.max, p.initial);
-  s.leafTilt = clamp(s.leafTilt, -20, 20, 0);
+  // Retired manual tilt: old saves use the species' natural posture again.
+  // This keeps the height control equal to the actual height above the soil.
+  s.leafTilt = 0;
   s.plantTurn = clamp(s.plantTurn, 0, 360, 0);
   s.pose = Math.round(
     clamp(

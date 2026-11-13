@@ -10,7 +10,7 @@
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=26477ee8e206" />
+    <link rel="stylesheet" href="./styles/models.css?v=b585853403f9" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -24,17 +24,18 @@
           "./src/data/luminaires.js": "./src/data/luminaires.js?v=c7cb744ea4e4",
           "./src/data/minifermer-bulbs.js": "./src/data/minifermer-bulbs.js?v=8848c75d27d7",
           "./src/data/plant-architecture.js": "./src/data/plant-architecture.js?v=e20a38e2a3ca",
+          "./src/data/plant-light-notes.js": "./src/data/plant-light-notes.js?v=eb795e620033",
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=56ea29dbd9c8",
           "./src/data/plants.js": "./src/data/plants.js?v=ac1847f6b1e0",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
           "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=17753bc7a1b6",
-          "./src/models-app.js": "./src/models-app.js?v=f3649be2bc71",
+          "./src/models-app.js": "./src/models-app.js?v=ab99387faa7e",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=4de0fabe3d44",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=ab1589fe8a19",
           "./src/models/daily-light.js": "./src/models/daily-light.js?v=38ed2288cbfc",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=a91ca88557d4",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=5d36096d55fc",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/lamp-placement.js": "./src/models/lamp-placement.js?v=f666261715d8",
@@ -84,7 +85,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=f3649be2bc71"></script>
+    <script type="module" src="./src/models-app.js?v=ab99387faa7e"></script>
   </head>
   <body>
     <nav class="page-nav" aria-label="Страницы проекта">
@@ -670,8 +671,7 @@
           ></label>
           <label for="lm-plantSize"
             ><span
-              >Высота при типовом наклоне
-              <output id="lm-plantSize-value"></output></span
+              >Высота растения <output id="lm-plantSize-value"></output></span
             ><input class="form-range" id="lm-plantSize" type="range" step="5"
           /></label>
           <label for="lm-plantTurn">
@@ -691,27 +691,35 @@
             Горшок и растение поворачиваются вместе. Метка на горшке показывает
             угол; свет и тени пересчитываются.
           </p>
-          <label for="lm-leafTilt">
-            <span
-              >Поправка наклона листьев <output id="lm-leafTilt-value"></output
-            ></span>
-            <input
-              class="form-range"
-              id="lm-leafTilt"
-              type="range"
-              min="-20"
-              max="20"
-              step="5"
-            />
-          </label>
-          <p class="model-hint" id="lm-posture-note"></p>
-          <details class="model-hint" id="lm-architecture-details">
-            <summary>Как устроено это растение</summary>
-            <p id="lm-architecture-note"></p>
-            <a id="lm-architecture-source" target="_blank" rel="noopener"
-              >Ботаническое описание формы</a
-            >
-          </details>
+          <section class="model-hint plant-light-guide" aria-labelledby="lm-plant-light-heading">
+            <h3 class="model-controls-heading" id="lm-plant-light-heading">
+              Какой свет нужен
+            </h3>
+            <p id="lm-plant-light-note"></p>
+            <p id="lm-plant-light-target"></p>
+            <details>
+              <summary>Что означают цифры</summary>
+              <p>
+                Это суточная порция света, или DLI. Солнышко сравнивает свет на
+                растении с этим ориентиром. Диапазон принят для световой группы,
+                а не как точная норма для каждого экземпляра. Сорт и привычные
+                условия тоже имеют значение.
+              </p>
+              <p>
+                <a id="lm-plant-light-source" target="_blank" rel="noopener"
+                  >Рекомендации для этого растения</a
+                >
+              </p>
+              <p>
+                <a
+                  id="lm-plant-light-groups-source"
+                  target="_blank"
+                  rel="noopener"
+                  >Диапазоны света · Iowa State</a
+                >
+              </p>
+            </details>
+          </section>
           <label for="lm-receiver"
             >Где считаем свет
             <select class="form-select" id="lm-receiver">

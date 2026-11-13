@@ -85,13 +85,16 @@ test("habit constraints distinguish swords, broad leaves, arched ribbons and pin
   }
 });
 
-test("existing saved settings default to typical posture and species changes reset the correction", () => {
+test("retired manual tilt migrates to species posture so the height remains literal", () => {
   assert.equal(normalizeFitting({}).leafTilt, 0);
-  assert.equal(normalizeFitting({ leafTilt: 80 }).leafTilt, 20);
-  assert.equal(normalizeFitting({ leafTilt: -80 }).leafTilt, -20);
+  assert.equal(normalizeFitting({ leafTilt: 80 }).leafTilt, 0);
+  assert.equal(normalizeFitting({ leafTilt: -80 }).leafTilt, 0);
   const s = normalizeFitting({ leafTilt: 15 });
   assert.equal(changeFitting(s, "plant", "snake").leafTilt, 0);
-  assert.equal(changeFitting(s, "install", 160).leafTilt, 15);
+  assert.equal(changeFitting(s, "install", 160).leafTilt, 0);
+  const c = crownGeometry({ ...s, plant: "strelitzia", plantSize: 150 });
+  const g = buildLeafGeometry(c, "strelitzia", 150, s.leafTilt);
+  assert.ok(Math.abs(g.height - 1.5) < 1e-9);
 });
 
 test("optical surfaces detect leaf contact outside the old crown, including coplanar contact", () => {

@@ -3,7 +3,7 @@ import { luminaires, mounts, fittingSources } from "./data/luminaires.js";
 import { cadAssets } from "./data/cad-assets.js";
 import { plants } from "./data/plants.js";
 import { plantShapes } from "./data/plant-shapes.js";
-import { plantArchitecture } from "./data/plant-architecture.js";
+import { plantLightNotes, lightGroupSource } from "./data/plant-light-notes.js";
 import {
   normalizeFitting,
   changeFitting,
@@ -202,7 +202,6 @@ function renderControls(poses, geometry) {
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
-    ["leafTilt", "°"],
     ["plantTurn", "°"],
     ["install", " см"],
     ["plantOffset", " см"],
@@ -232,12 +231,16 @@ function renderControls(poses, geometry) {
     )}. 0° — вправо вдоль комнаты. После перемещения лампы направление блоков можно поправить. Средний поворачивает и верхний блок; верхний ползунок доворачивает его отдельно.`;
   q("focus").textContent =
     state.model === "olive" ? "Блок крупно" : "Головка крупно";
-  const architecture = plantArchitecture[state.plant];
-  q("posture-note").textContent =
-    `0° — типовая форма; минус опускает кончики, плюс поднимает. Сейчас высота от грунта ${fmt(geometry.leafGeometry.height * 100)} см. Площадь листьев при повороте сохраняется.${state.receiver === "crown" ? " Чтобы наклон влиял на свет на растении, выбери «На листьях»." : ""}`;
-  q("architecture-note").textContent =
-    `${architecture.note} Наклон оси пластинки у основания: ${architecture.pitch.join("…")}° к горизонту; изменение к кончику: ${architecture.bend}°. Эти углы, размеры и густота — допущения, не паспорт вида. Поправка задаёт статичное положение на весь расчёт; фототропизм и суточное движение не моделируются.`;
-  q("architecture-source").href = architecture.url;
+  const plant = plants[state.plant],
+    { L, U } = plantModel.groups[plant.group];
+  q("plant-light-note").textContent = plantLightNotes[state.plant];
+  q("plant-light-target").textContent =
+    `Ориентир в калькуляторе: ${L}–${U} моль/м² за день — от окна и лампы вместе.`;
+  q("plant-light-source").href = plant.url;
+  q("plant-light-source").textContent = plant.url.includes("rhs.org.uk")
+    ? "Рекомендации RHS для этого растения"
+    : "Рекомендации NC State для этого растения";
+  q("plant-light-groups-source").href = lightGroupSource;
   const flex = flexibleSection(state.canopy);
   q("canopy-value").textContent = (flex.gap * 100).toFixed(1) + " см";
   // Slider increases to the right while the CAD's bend decreases.
