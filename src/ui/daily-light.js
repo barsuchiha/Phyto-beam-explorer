@@ -43,7 +43,6 @@ function shares(lamp, window) {
 export function renderDailyLight(state, result, selectedLeaf) {
   const summary = dailyPlantLight(result, state);
   q("panel").hidden = false;
-  q("switch").hidden = Boolean(summary);
   q("reference").hidden = !summary;
   q("coverage").hidden = !summary;
   q("tip").hidden = !summary;
@@ -56,14 +55,14 @@ export function renderDailyLight(state, result, selectedLeaf) {
   );
   if (!summary) {
     q("calculation").textContent =
-      "Общее солнце требует геометрии листьев; оболочка не заменяет листву.";
-    q("title").textContent = "Для оценки выбери листья";
-    q("amount").textContent = "Для общего солнца нужен расчёт по всей листве.";
+      "Для оценки нужны данные освещения листьев.";
+    q("title").textContent = "Нет данных по листьям";
+    q("amount").textContent = "Не удалось получить расчёт по всей листве.";
     q("context").textContent =
-      "Переключись на листья, чтобы сравнить их досветку с ориентиром растения.";
+      "Попробуй изменить положение светильника или растения.";
     q("icon").setAttribute(
       "aria-label",
-      "Оценка по листьям недоступна в режиме оболочки",
+      "Нет данных для оценки света на листьях",
     );
     return null;
   }

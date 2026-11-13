@@ -5,9 +5,6 @@ import { mini36Model } from "./mini36.js";
 import { eraModel } from "./era.js";
 import {
   intensity,
-  rayCrown,
-  surfacePoint,
-  crownLocal,
   add,
   sub,
   mul,
@@ -16,7 +13,6 @@ import {
 } from "./crown.js";
 import { cross } from "./luminaire-scene.js";
 
-export const PREVIEW_RAYS = 32768;
 export const LEAF_RAYS = 131072;
 const EPS = 1e-7,
   TAU = 2 * Math.PI;
@@ -134,12 +130,8 @@ export function tracePath(
     reflections = 0;
   const path = [o];
   for (let bounce = 0; bounce <= maxBounces; bounce++) {
-    const leafHit = geometry.leafReceiver
-      ? hitLeaves(geometry.leafBVH, o, d)
-      : null;
-    let distance = geometry.leafReceiver
-        ? (leafHit?.distance ?? Infinity)
-        : rayCrown(o, d, geometry.crown),
+    const leafHit = hitLeaves(geometry.leafBVH, o, d);
+    let distance = leafHit?.distance ?? Infinity,
       hit = null;
     for (const t of geometry.triangles) {
       const k = triangleDistance(o, d, t);
@@ -237,45 +229,27 @@ export function tracePath(
 export function calculateLuminaire(
   state,
   scene,
-  rayCount = state.receiver === "leaves" ? LEAF_RAYS : PREVIEW_RAYS,
+  rayCount = LEAF_RAYS,
 ) {
   const output = lightOutput(state, scene.sources.length),
     scenarioCount = output.fluxes.length,
-    middle = Math.floor(scenarioCount / 2),
-    nz = 16,
-    na = 32;
+    middle = Math.floor(scenarioCount / 2);
   const geometry = {
-    crown: scene.crown,
     triangles: triangles([...scene.surfaces, ...scene.boards]),
-    leafReceiver: state.receiver === "leaves",
     fixture: scene.fixture,
     room: scene.room,
-    leafBVH:
-      state.receiver === "leaves"
-        ? buildLeafBVH(scene.leafGeometry.triangles)
-        : null,
+    leafBVH: buildLeafBVH(scene.leafGeometry.triangles),
   };
-  const bins = geometry.leafReceiver
-    ? scene.leafGeometry.patches.flatMap((patch) =>
-        [0, 1].map((side) => ({
-          leaf: patch.leaf,
-          patch: patch.id,
-          side,
-          area: patch.area,
-          power: Array(scenarioCount).fill(0),
-          hits: 0,
-        })),
-      )
-    : Array.from({ length: nz * na }, (_, k) => {
-        const mu = -1 + (2 * (Math.floor(k / na) + 0.5)) / nz,
-          phi = (TAU * ((k % na) + 0.5)) / na;
-        const s = surfacePoint(scene.crown, mu, phi);
-        return {
-          p: s.p,
-          area: (((s.jacobian * 2) / nz) * TAU) / na,
-          power: Array(scenarioCount).fill(0),
-        };
-      });
+  const bins = scene.leafGeometry.patches.flatMap((patch) =>
+    [0, 1].map((side) => ({
+      leaf: patch.leaf,
+      patch: patch.id,
+      side,
+      area: patch.area,
+      power: Array(scenarioCount).fill(0),
+      hits: 0,
+    })),
+  );
   const budgets = Array.from({ length: scenarioCount }, () => ({
     target: 0,
     room: 0,
@@ -328,17 +302,9 @@ export function calculateLuminaire(
     let index = -1;
     const roomKind = result.roomHit?.receiver ?? "escape";
     if (result.kind === "room") roomHits[roomKind]++;
-    if (result.kind === "target" && geometry.leafReceiver) {
+    if (result.kind === "target") {
       index = result.patch * 2 + result.side;
       bins[index].hits++;
-    } else if (result.kind === "target") {
-      const p = crownLocal(scene.crown, result.point),
-        cz = Math.max(-1, Math.min(1, p[2] / scene.crown.rz));
-      const cp =
-        (Math.atan2(p[1] / scene.crown.ry, p[0] / scene.crown.rx) + TAU) % TAU;
-      index =
-        Math.min(nz - 1, Math.floor((cz + 1) * 0.5 * nz)) * na +
-        Math.min(na - 1, Math.floor((cp / TAU) * na));
     }
     for (let k = 0; k < scenarioCount; k++) {
       const w = (TAU * intensity(output.curves[k], mu, phi)) / rayCount;
@@ -409,35 +375,31 @@ export function calculateLuminaire(
           b.area
         : 0;
   });
-  const leaves = geometry.leafReceiver
-    ? scene.leafGeometry.leaves.map((leaf) => {
-        const sides = [0, 1].map((side) => {
-          const cells = leaf.patches.map((id) => bins[id * 2 + side]);
-          const values = output.fluxes.map(
-            (flux, k) =>
-              ((cells.reduce((sum, b) => sum + b.power[k], 0) /
-                budgets[k].total) *
-                flux) /
-              leaf.area,
-          );
-          return {
-            mean: values[middle],
-            values,
-            range: [Math.min(...values), Math.max(...values)],
-            hits: cells.reduce((sum, b) => sum + b.hits, 0),
-          };
-        });
-        return { id: leaf.id, area: leaf.area, sides };
-      })
-    : null;
+  const leaves = scene.leafGeometry.leaves.map((leaf) => {
+    const sides = [0, 1].map((side) => {
+      const cells = leaf.patches.map((id) => bins[id * 2 + side]);
+      const values = output.fluxes.map(
+        (flux, k) =>
+          ((cells.reduce((sum, b) => sum + b.power[k], 0) /
+            budgets[k].total) *
+            flux) /
+          leaf.area,
+      );
+      return {
+        mean: values[middle],
+        values,
+        range: [Math.min(...values), Math.max(...values)],
+        hits: cells.reduce((sum, b) => sum + b.hits, 0),
+      };
+    });
+    return { id: leaf.id, area: leaf.area, sides };
+  });
   return {
-    receiver: geometry.leafReceiver ? "leaves" : "crown",
+    receiver: "leaves",
     leaves,
     output,
     metrics,
     bins,
-    nz,
-    na,
     rays,
     room: scene.room
       ? {

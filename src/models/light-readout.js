@@ -1,6 +1,5 @@
 // Presentation of existing incident-light results. No transport or PPF changes.
 // The fixed log scale resolves weak side light without normalising each scene.
-import { plantModel } from "./plants.js";
 export const PPFD_MAP_MAX = 300;
 export const ppfdMapStops = [
   [0, "#292038"],
@@ -54,14 +53,11 @@ export function surfaceReadout(result) {
   };
 }
 // Detailed readouts stay in PPFD. The simple daily indicator is separate.
-export function surfaceMetricCards(result, { hours }) {
-  const r = surfaceReadout(result),
-    leafMode = result.receiver === "leaves";
-  const range = (values, daily = false) => {
+export function surfaceMetricCards(result) {
+  const r = surfaceReadout(result);
+  const range = (values) => {
     const text = values.map((v) =>
-      (daily ? plantModel.dli(v, hours) : v).toLocaleString("ru-RU", {
-        maximumFractionDigits: daily ? 2 : 1,
-      }),
+      v.toLocaleString("ru-RU", { maximumFractionDigits: 1 }),
     );
     return text[0] === text[1] ? text[0] : text.join("–");
   };
@@ -73,23 +69,17 @@ export function surfaceMetricCards(result, { hours }) {
       : percentText(result.metrics[result.middle].budget.target);
   return [
     [
-      `PPFD · среднее по ${leafMode ? "листьям" : "оболочке"}`,
+      "PPFD · среднее по листьям",
       range(r.meanRange),
-      `${leafMode ? "обе стороны" : "вся оболочка"} · ${unit}`,
+      `обе стороны · ${unit}`,
     ],
-    leafMode
-      ? [
-          "PPFD · самая освещённая сторона",
-          range(r.brightest.range),
-          `лист ${r.brightest.leaf + 1}, сторона ${r.brightest.side === 0 ? "A" : "B"} · ${unit}`,
-        ]
-      : [
-          `DLI от лампы · ${hours} ч`,
-          range(r.meanRange, true),
-          "моль/(м²·сутки) · вся оболочка",
-        ],
     [
-      leafMode ? "На листья" : "На крону",
+      "PPFD · самая освещённая сторона",
+      range(r.brightest.range),
+      `лист ${r.brightest.leaf + 1}, сторона ${r.brightest.side === 0 ? "A" : "B"} · ${unit}`,
+    ],
+    [
+      "На листья",
       captured,
       r.emitting ? "доля исходного PPF" : "лампа выключена",
     ],

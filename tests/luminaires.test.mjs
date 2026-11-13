@@ -297,32 +297,6 @@ test("mirror follows reflection law, including a horizontal normal for diffuse s
   assert.equal(r.kind, "room");
   assert.ok(Math.abs(r.absorbed + 0.9 - 1) < 1e-10);
 });
-test("Lambertian point-source sphere capture agrees with R²/D²", () => {
-  const state = normalizeFitting({
-    model: "A2",
-    mount: "large",
-    source: "mf36",
-    material: "absorb",
-  });
-  const scene = {
-    sources: [
-      {
-        p: [0, 0, 2],
-        n: [0, 0, -1],
-        u: [1, 0, 0],
-        v: [0, 1, 0],
-        w: 1e-7,
-        d: 1e-7,
-      },
-    ],
-    surfaces: [],
-    boards: [],
-    crown: { center: [0, 0, 0], rx: 0.5, ry: 0.5, rz: 0.5 },
-  };
-  const r = calculateLuminaire(state, scene, 16384);
-  assert.ok(Math.abs(r.metrics[1].budget.target - 0.5 ** 2 / 2 ** 2) < 0.001);
-  assert.ok(Math.abs(r.mean - r.metrics[1].flux / (16 * Math.PI)) < 0.01);
-});
 test("B3 balances all photon endpoints and converges across ray counts", () => {
   const data = cad("B3flex")[0];
   for (const material of ["absorb", "mirror", "diffuse"]) {

@@ -316,7 +316,7 @@ function renderControls(poses, geometry) {
   );
 }
 const budgetItems = [
-  ["target", "На крону", "#8bb997"],
+  ["target", "На листья", "#8bb997"],
   ["room", "В комнату", "#c5a571"],
   ["screen", "В экран", "#8c9290"],
   ["housing", "В корпус / источник", "#7584a1"],
@@ -366,26 +366,19 @@ function renderResult(result, geometry, reference, updateView = true) {
   latestResult = result;
   latestGeometry = geometry;
   latestReference = reference;
-  const leafMode = result.receiver === "leaves";
-  hide("leaf-panel", !leafMode);
-  if (leafMode) {
-    if (!result.leaves.some((l) => l.id === selectedLeaf)) selectedLeaf = -1;
-    setOptions(
-      "leaf-select",
-      [
-        [-1, "Всё растение"],
-        ...result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
-      ],
-      String(selectedLeaf),
-    );
-    renderLeafDetail();
-  } else {
-    renderDailyLight(state, result, selectedLeaf);
-    q("leaf-detail").textContent = "";
-  }
-  q("receiver-note").textContent = leafMode
-    ? `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее взвешено по площади и включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Второе число — среднее по самой освещённой стороне одного листа, не точечный пик. Это показатели распределения, не оценка достаточности света. Форма и наклоны — допущения; значения маленьких участков могут быть шумными.`
-    : "Среднее включает всю оболочку и её теневую сторону. Это показатель распределения, не оценка достаточности света для растения. Его нельзя напрямую сравнивать с датчиком сверху или средним на первой странице. Рисованные листья в этом режиме не участвуют в расчёте.";
+  hide("leaf-panel", false);
+  if (!result.leaves.some((l) => l.id === selectedLeaf)) selectedLeaf = -1;
+  setOptions(
+    "leaf-select",
+    [
+      [-1, "Всё растение"],
+      ...result.leaves.map((l) => [l.id, `Лист ${l.id + 1}`]),
+    ],
+    String(selectedLeaf),
+  );
+  renderLeafDetail();
+  q("receiver-note").textContent =
+    `${result.leaves.length} листьев/листочков · площадь обеих сторон ${fmt(result.area)} м². Среднее взвешено по площади и включает теневые стороны: например, 150 сверху и 0 снизу дают 75. Второе число — среднее по самой освещённой стороне одного листа, не точечный пик. Это показатели распределения, не оценка достаточности света. Форма и наклоны — допущения; значения маленьких участков могут быть шумными.`;
   const { metrics, range, middle } = result,
     b = metrics[middle].budget;
   const ppfRange = [
@@ -417,9 +410,7 @@ function renderResult(result, geometry, reference, updateView = true) {
       : "");
   q("daily-note").textContent =
     `Условный ориентир выбранной световой группы: DLI ${target.L}–${target.U} моль/(м²·сутки) за весь день. Солнце и оценка листа учитывают окно + лампу. Карта PPFD, датчик сверху и баланс ниже относятся к лампе. Диапазон суммарного DLI учитывает сценарии лампы и яркости окна, но не все ошибки модели. Дозы складываются независимо от совпадения часов работы; режим дня и ночи отдельно не оценивается.`;
-  q("surface-summary").textContent = leafMode
-    ? `DLI от лампы за ${state.hours} ч: ${rangeText(dliRange(range), dose)} в среднем по обеим сторонам листьев; ${rangeText(dliRange(best.range), dose)} на самой освещённой стороне листа. Единица: моль/(м²·сутки).`
-    : `Среднее по всей оболочке включает её теневую сторону.`;
+  q("surface-summary").textContent = `DLI от лампы за ${state.hours} ч: ${rangeText(dliRange(range), dose)} в среднем по обеим сторонам листьев; ${rangeText(dliRange(best.range), dose)} на самой освещённой стороне листа. Единица: моль/(м²·сутки).`;
   const bar = document.createElement("div");
   bar.className = "model-budget";
   const labels = document.createElement("div");
@@ -429,13 +420,13 @@ function renderResult(result, geometry, reference, updateView = true) {
     part.style.cssText = `width:${b[id] * 100}%;background:${color}`;
     bar.append(part);
     const text = document.createElement("span");
-    text.innerHTML = `<i style="background:${color}"></i>${id === "target" && leafMode ? "На листья" : id === "screen" && state.model === "olive" ? "В панелях" : label} ${percentText(b[id])}`;
+    text.innerHTML = `<i style="background:${color}"></i>${id === "screen" && state.model === "olive" ? "В панелях" : label} ${percentText(b[id])}`;
     labels.append(text);
   }
   q("budget").replaceChildren(bar, labels);
   hide("budget", !readout.emitting);
   q("status").textContent = readout.emitting
-    ? `Всего на ${leafMode ? "листья" : "крону"}: ${percentText(b.target)} исходного PPF; в том числе после отражений: ${percentText(b.returned)} исходного PPF. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`
+    ? `Всего на листья: ${percentText(b.target)} исходного PPF; в том числе после отражений: ${percentText(b.returned)} исходного PPF. Баланс: ${fmt(budgetItems.reduce((s, [id]) => s + b[id], 0) * 100)}%. ${result.rayCount.toLocaleString("ru-RU")} лучей.`
     : "Лампа выключена: её вклад в PPFD и DLI равен нулю. Доля попавшего света не определяется без исходного потока.";
   q("trace-note").textContent = q("status").textContent;
   const room = result.room;
@@ -608,16 +599,6 @@ for (const [name, control] of Object.entries(controls))
       q("hours-value").textContent = fmt(state.hours) + " ч";
       renderWindowControls();
       view?.daylight(state);
-      if (
-        name === "windowWeather" &&
-        state.windowWeather !== "off" &&
-        state.receiver !== "leaves"
-      ) {
-        state = changeFitting(state, "receiver", "leaves");
-        save();
-        render();
-        return;
-      }
       save();
       if (latestResult)
         renderResult(latestResult, latestGeometry, latestReference, false);
@@ -653,12 +634,6 @@ q("leaf-select").addEventListener("input", () => {
 q("leaf-clear").addEventListener("click", () => {
   selectedLeaf = -1;
   renderLeafDetail();
-});
-q("daily-switch").addEventListener("click", () => {
-  selectedLeaf = -1;
-  state = changeFitting(state, "receiver", "leaves");
-  save();
-  render();
 });
 q("focus").addEventListener("click", () => view?.fit(true));
 q("reset-view").addEventListener("click", () => view?.fit());

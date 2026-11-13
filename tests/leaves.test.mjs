@@ -107,15 +107,16 @@ test("first-hit leaves cast mutual shadows on both sides, and gaps do not hit an
   assert.equal(hitLeaves(bvh, [0, 0, -1], [0, 0, 1]).side, 1);
   assert.equal(hitLeaves(bvh, [2, 0, 2], [0, 0, -1]), null);
   const empty = tracePath(
-    { leafReceiver: true, leafBVH: null, crown: sphere, triangles: [] },
+    { leafBVH: null, crown: sphere, triangles: [] },
     [0, 0, 2],
     [0, 0, -1],
     "absorb",
     0,
   );
   assert.equal(empty.kind, "room");
-  assert.equal(normalizeFitting({}).receiver, "crown");
-  assert.equal(normalizeFitting({ receiver: "invalid" }).receiver, "crown");
+  assert.equal(normalizeFitting({}).receiver, "leaves");
+  assert.equal(normalizeFitting({ receiver: "crown" }).receiver, "leaves");
+  assert.equal(normalizeFitting({ receiver: "invalid" }).receiver, "leaves");
   assert.equal(
     normalizeFitting(
       JSON.parse(JSON.stringify(changeFitting(state, "receiver", "leaves"))),
@@ -144,6 +145,9 @@ test("Lambertian disk interception matches R²/(R²+h²); map and both-face mean
     crown: sphere,
     leafGeometry: receiver([disk]),
   };
+  const migrated = calculateLuminaire({ ...state, receiver: "crown" }, scene, 4096);
+  assert.equal(migrated.receiver, "leaves");
+  assert.deepEqual(migrated, calculateLuminaire(state, scene, 4096));
   const r = calculateLuminaire(state, scene, 131072),
     m = r.metrics[r.middle];
   assert.ok(Math.abs(m.budget.target - 0.25 / 4.25) < 0.0002);

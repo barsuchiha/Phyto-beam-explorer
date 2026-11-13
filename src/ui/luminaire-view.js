@@ -2,7 +2,7 @@ import * as T from "../vendor/three.module.min.js";
 import { miniFermerBody } from "./bulb-mesh.js";
 import { OrbitControls } from "../vendor/OrbitControls.js";
 import { plantIllustration } from "../models/plant-illustration.js";
-import { add, mul, surfacePoint } from "../models/crown.js";
+import { add, mul } from "../models/crown.js";
 import { referenceDetector } from "../models/reference-light.js";
 import { populateOlive } from "./olive-view.js";
 import { ppfdMapColor } from "../models/light-readout.js";
@@ -507,108 +507,68 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     populateRoomLight(roomLightGroup, result);
     populateRayLight(rayGroup, pathGroup, result.rays);
     const lightColor = (ppfd) => new T.Color(ppfdMapColor(ppfd));
-    if (result.receiver === "leaves") {
-      for (const leaf of currentScene.leafGeometry.leaves)
-        for (const side of [0, 1]) {
-          const positions = [],
-            col = [],
-            warmColors = [];
-          for (const id of leaf.patches) {
-            const patch = currentScene.leafGeometry.patches[id],
-              bin = result.bins[id * 2 + side];
-            const color = lightColor(bin.ppfd);
-            for (const tri of patch.triangles)
-              for (const p of tri) {
-                positions.push(...p);
-                col.push(...color.toArray());
-                warmColors.push(
-                  ...new T.Color(1, 0.78, 0.42)
-                    .multiplyScalar(0.65 * (1 - Math.exp(-bin.ppfd / 65)))
-                    .toArray(),
-                );
-              }
-          }
-          const geometry = new T.BufferGeometry();
-          geometry.setAttribute(
-            "position",
-            new T.Float32BufferAttribute(positions, 3),
-          );
-          geometry.setAttribute("color", new T.Float32BufferAttribute(col, 3));
-          const mesh = new T.Mesh(
-            geometry,
+    for (const leaf of currentScene.leafGeometry.leaves)
+      for (const side of [0, 1]) {
+        const positions = [],
+          col = [],
+          warmColors = [];
+        for (const id of leaf.patches) {
+          const patch = currentScene.leafGeometry.patches[id],
+            bin = result.bins[id * 2 + side];
+          const color = lightColor(bin.ppfd);
+          for (const tri of patch.triangles)
+            for (const p of tri) {
+              positions.push(...p);
+              col.push(...color.toArray());
+              warmColors.push(
+                ...new T.Color(1, 0.78, 0.42)
+                  .multiplyScalar(0.65 * (1 - Math.exp(-bin.ppfd / 65)))
+                  .toArray(),
+              );
+            }
+        }
+        const geometry = new T.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new T.Float32BufferAttribute(positions, 3),
+        );
+        geometry.setAttribute("color", new T.Float32BufferAttribute(col, 3));
+        const mesh = new T.Mesh(
+          geometry,
+          new T.MeshBasicMaterial({
+            vertexColors: true,
+            side: side === 0 ? T.FrontSide : T.BackSide,
+          }),
+        );
+        mesh.userData.leaf = leaf.id;
+        heatGroup.add(mesh);
+        const warmGeometry = geometry.clone();
+        warmGeometry.setAttribute(
+          "color",
+          new T.Float32BufferAttribute(warmColors, 3),
+        );
+        warmGroup.add(
+          new T.Mesh(
+            warmGeometry,
             new T.MeshBasicMaterial({
               vertexColors: true,
               side: side === 0 ? T.FrontSide : T.BackSide,
+              transparent: true,
+              depthWrite: false,
+              blending: T.AdditiveBlending,
+              polygonOffset: true,
+              polygonOffsetFactor: -1,
             }),
-          );
-          mesh.userData.leaf = leaf.id;
-          heatGroup.add(mesh);
-          const warmGeometry = geometry.clone();
-          warmGeometry.setAttribute(
-            "color",
-            new T.Float32BufferAttribute(warmColors, 3),
-          );
-          warmGroup.add(
-            new T.Mesh(
-              warmGeometry,
-              new T.MeshBasicMaterial({
-                vertexColors: true,
-                side: side === 0 ? T.FrontSide : T.BackSide,
-                transparent: true,
-                depthWrite: false,
-                blending: T.AdditiveBlending,
-                polygonOffset: true,
-                polygonOffsetFactor: -1,
-              }),
-            ),
-          );
-        }
-      setMode(viewMode);
-      return;
-    }
-    const positions = [],
-      col = [];
-    for (const [index, bin] of result.bins.entries()) {
-      const row = Math.floor(index / result.na),
-        column = index % result.na;
-      const corners = [
-        [row, column],
-        [row + 1, column],
-        [row + 1, column + 1],
-        [row, column + 1],
-      ].map(
-        ([i, j]) =>
-          surfacePoint(
-            currentScene.crown,
-            -1 + (2 * i) / result.nz,
-            (2 * Math.PI * j) / result.na,
-          ).p,
-      );
-      const c = lightColor(bin.ppfd);
-      for (const corner of [0, 1, 2, 0, 2, 3]) {
-        positions.push(...corners[corner]);
-        col.push(...c.toArray());
+          ),
+        );
       }
-    }
-    const g = new T.BufferGeometry();
-    g.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-    g.setAttribute("color", new T.Float32BufferAttribute(col, 3));
-    heatGroup.add(
-      new T.Mesh(
-        g,
-        new T.MeshBasicMaterial({
-          vertexColors: true,
-          side: T.DoubleSide,
-        }),
-      ),
-    );
     setMode(viewMode);
   }
   function setMode(mode) {
     viewMode = mode;
     heatGroup.visible = mode === "map";
-    const leafMap = mode === "map" && currentResult?.receiver === "leaves";
-    plantGroup.visible = mode !== "map" || leafMap;
+    const leafMap = mode === "map" && Boolean(currentResult);
+    plantGroup.visible = true;
     for (const child of plantGroup.children)
       if (child.userData.leaf !== undefined) child.visible = !leafMap;
     rayGroup.visible = mode === "rays";
@@ -630,7 +590,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
         event.clientX - pointerStart[0],
         event.clientY - pointerStart[1],
       ) > 6 ||
-      currentResult?.receiver !== "leaves"
+      !currentResult
     )
       return;
     const rect = renderer.domElement.getBoundingClientRect(),

@@ -56,7 +56,7 @@ export const modelDefaults = {
   windowLevel: 100,
   daylightHours: 10,
   sunHours: 3,
-  receiver: "crown",
+  receiver: "leaves",
   colorMetric: "ppfd",
   canopy: 105,
   flap: 45,
@@ -120,7 +120,8 @@ export function normalizeFitting(input = {}) {
     s.windowWallY == null ? null : clamp(s.windowWallY, 0.05, 10, null);
   s.daylightHours = clamp(s.daylightHours, 4, 16, 10);
   s.sunHours = clamp(s.sunHours, 0, Math.min(8, s.daylightHours), 3);
-  s.receiver = s.receiver === "leaves" ? "leaves" : "crown";
+  // Migrate old shell settings: incident light is always calculated on leaves.
+  s.receiver = "leaves";
   // Migrate saved DLI maps to the single PPFD map.
   s.colorMetric = "ppfd";
   s.canopy = clamp(s.canopy, 70, 140, 105);
