@@ -32,7 +32,7 @@ const block = `<script type="importmap" id="pbe-importmap">\n${JSON.stringify(
   .split("\n")
   .map((line) => "      " + line)
   .join("\n")}\n    </script>`;
-for (const page of ["index.html", "models.html"]) {
+for (const page of ["models.html"]) {
   const htmlPath = join(root, page);
   let html = readFileSync(htmlPath, "utf8");
   if (html.includes('id="pbe-importmap"'))

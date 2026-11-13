@@ -7,7 +7,7 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 const version = (path) =>
   createHash("sha256").update(read(path)).digest("hex").slice(0, 12);
-for (const page of ["index.html", "models.html"])
+for (const page of ["models.html"])
   test(`${page} versions every module and stylesheet, including transitive imports`, () => {
     const html = read(page),
       match = html.match(
@@ -33,7 +33,7 @@ for (const page of ["index.html", "models.html"])
         assert.ok(imports["./" + relative], `Import map missing ${relative}`);
       }
     }
-    const entry = page === "index.html" ? "src/app.js" : "src/models-app.js";
+    const entry = "src/models-app.js";
     assert.ok(html.includes(`src="./${entry}?v=${version(entry)}"`));
     assert.ok(html.indexOf('type="importmap"') < html.indexOf('type="module"'));
     for (const [, path] of html.matchAll(/href="\.\/(styles\/[^?]+\.css)\?/g))
