@@ -9,7 +9,7 @@ export const WINDOW_CLEARANCE = 0.05;
 export function windowAtY(y) {
   return { ...WINDOW, y, reference: [0.3, y - 0.5, 1.5] };
 }
-export function placeWindow(state, leafGeometry, surfaces = []) {
+export function placeWindow(state, leafGeometry, surfaces = [], leftX = -Infinity) {
   const edge =
     leafGeometry.bounds?.max[1] ??
     Math.max(
@@ -27,8 +27,14 @@ export function placeWindow(state, leafGeometry, surfaces = []) {
   // again restores placement relative to the current edge of the plant.
   const target = state.windowWallY ?? edge + requested;
   const y = Math.max(target, fixtureBack + WINDOW_CLEARANCE);
+  // Keep the whole window and its frame inside the corner when the left wall
+  // meets a wall-mounted CAD. Preserve aperture width and reference geometry.
+  const xShift = Math.max(0, leftX + 0.1 - WINDOW.x[0]);
+  const aperture = windowAtY(y);
   return {
-    ...windowAtY(y),
+    ...aperture,
+    x: aperture.x.map((x) => x + xShift),
+    reference: [aperture.reference[0] + xShift, ...aperture.reference.slice(1)],
     plantEdge: edge,
     gap: y - edge,
     limitedByFixture: y > target + 1e-8,

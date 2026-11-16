@@ -515,6 +515,8 @@ export function createLuminaireView(host, onLeaf = () => {}) {
     host.dataset.referenceHeight = String(detector.center[2]);
     host.dataset.lampY = String(geometry.lampPlacement.y);
     host.dataset.lampGap = String(geometry.lampPlacement.gap);
+    host.dataset.mountWall = geometry.lampPlacement.wallMount?.wall ?? "";
+    host.dataset.leftWallX = String(geometry.room.bounds.min[0]);
     if (
       lastModel !== state.model ||
       lastChair !== state.chairOffset ||

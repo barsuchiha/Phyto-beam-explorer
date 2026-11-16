@@ -1,6 +1,18 @@
 import { add, mul, sub } from "./crown.js";
 import { olivePoint } from "./olive.js";
 
+// All five wall CADs face +X. Their mounting backs, not the lamp envelope,
+// define the left wall. Keep the lamp and plant in their original coordinates.
+export function fixtureWallMount(model, pose) {
+  if (!model.wallMountMeshes) return null;
+  const backs = model.wallMountMeshes.map((name) => {
+    const mesh = pose.meshes.find((m) => m.name === name);
+    if (!mesh) throw new Error(`Missing wall mount CAD part: ${name}`);
+    return Math.min(...mesh.v.filter((_, i) => i % 3 === 0)) / 10000;
+  });
+  return { wall: "left-wall", axis: 0, coordinate: Math.min(...backs) };
+}
+
 // Use the same CAD parts for the drawing and the wall-clearance envelope.
 export function visibleFixtureMesh(state, mesh) {
   if (/light_output_placeholder/i.test(mesh.name)) return false;

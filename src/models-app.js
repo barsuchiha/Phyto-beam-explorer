@@ -217,21 +217,25 @@ function renderControls(poses, geometry) {
   q("dim").disabled = !state.enabled;
   q("plantSize").min = spec.min;
   q("plantSize").max = spec.max;
+  q("install").max = geometry.model.installMax ?? 250;
   for (const [name, el] of Object.entries(controls)) {
     if (el.type === "checkbox") el.checked = state[name];
     else el.value = state[name];
   }
   renderMapLegend();
   renderWindowControls(geometry);
+  const wallMounted = Boolean(geometry.lampPlacement.wallMount);
+  hide("lamp-distance-control", wallMounted);
+  hide("lamp-reset-control", wallMounted);
+  q("lampDistance").disabled = wallMounted;
+  q("lamp-reset").disabled = wallMounted;
   const lampGap = geometry.lampPlacement.gap;
   q("lampDistance").value = state.lampDistance ?? Math.round(lampGap * 20) * 5;
   q("lampDistance-value").textContent =
     lampGap.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " м";
-  q("lamp-distance-note").textContent =
-    "От ближайшей части корпуса до стены. 0 — вплотную, 5 м — в глубине комнаты. Растение остаётся на месте." +
-    (["V2", "luna", "archetto", "pinocchio"].includes(state.model)
-      ? " Вынос настенного крепления — условная примерка; потребуется отдельная опора."
-      : "");
+  q("lamp-distance-note").textContent = wallMounted
+    ? "Закреплён на боковой стене · без отступа. Высота и положение плеча меняются в пределах выбранной модели; крепление остаётся на стене."
+    : "От ближайшей части корпуса до стены. 0 — вплотную, 5 м — в глубине комнаты. Растение остаётся на месте.";
   for (const [name, unit] of [
     ["dim", "%"],
     ["plantSize", " см"],
@@ -553,11 +557,18 @@ async function render() {
     ).note;
     hide("collision", !geometry.collision && !geometry.roomCollision);
     q("collision").textContent =
-      "Крона или листья пересекают источник или экран. Измени расстояние лампы от стены, подними конструкцию или сдвинь растение: расчёт для этого положения остановлен.";
+      "Крона или листья пересекают источник или экран. " +
+      (geometry.lampPlacement.wallMount
+        ? "Измени положение головки или сдвинь растение"
+        : "Измени расстояние лампы от стены, подними конструкцию или сдвинь растение") +
+      ": расчёт для этого положения остановлен.";
     if (geometry.roomCollision)
       q("collision").textContent =
         geometry.roomCollision === "boundary"
-          ? "Растение выходит за границы комнаты. Уменьши или сдвинь его: расчёт для этого положения остановлен."
+          ? geometry.lampPlacement.wallMount &&
+            geometry.leafGeometry.bounds.min[0] <= geometry.room.bounds.min[0]
+            ? "Листья пересекают стену крепления. Сдвинь растение вправо или уменьши его: расчёт для этого положения остановлен."
+            : "Растение выходит за границы комнаты. Уменьши или сдвинь его: расчёт для этого положения остановлен."
           : "Листья пересекают кресло или кошку. Сдвинь кресло вправо или растение влево: расчёт для этого положения остановлен.";
     q("metrics").replaceChildren();
     q("budget").replaceChildren();

@@ -111,12 +111,14 @@ export function normalizeFitting(input = {}) {
       0,
     ),
   );
-  s.install = clamp(s.install, 50, 250, m.install ?? 130);
+  s.install = clamp(s.install, 50, m.installMax ?? 250, m.install ?? 130);
   s.plantOffset = clamp(s.plantOffset, -60, 60, 0);
   s.chairOffset = clamp(s.chairOffset, -60, 80, 0);
-  // Old saves keep their placement until this control is first used.
+  // Wall mounts also discard free placement from old saves / model switches.
   s.lampDistance =
-    s.lampDistance == null ? null : clamp(s.lampDistance, 0, 500, 100);
+    m.wallMountMeshes || s.lampDistance == null
+      ? null
+      : clamp(s.lampDistance, 0, 500, 100);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
   s.enabled = s.enabled !== false;
   const currents = modules[s.source]?.rows.map((row) => row[0]);

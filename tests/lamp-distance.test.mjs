@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { cadAssets } from "../src/data/cad-assets.js";
+import { luminaires } from "../src/data/luminaires.js";
 import { normalizeFitting } from "../src/models/fitting.js";
 import { buildLuminaireScene } from "../src/models/luminaire-scene.js";
 import { calculateLuminaire } from "../src/models/luminaire-light.js";
@@ -25,9 +26,10 @@ const oliveState = normalizeFitting({
   windowDistance: 150,
 });
 
-test("every CAD pose moves its emitters without moving the plant or window and stays inside the room", () => {
+test("every freely placed CAD pose moves without moving the plant or window and stays inside the room", () => {
   for (const [model, options] of Object.entries(poses))
     for (const [poseIndex, pose] of options.entries()) {
+      if (luminaires[model].wallMountMeshes) continue;
       const state = normalizeFitting({
         model,
         pose: poseIndex,

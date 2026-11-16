@@ -14,7 +14,7 @@ import { leafSurfaceCollision } from "./leaf-collision.js";
 import { oliveAssembly } from "./olive.js";
 import { buildRoom, roomLeafCollision } from "./room.js";
 import { placeWindow } from "./window-geometry.js";
-import { fixtureDepth, translateFixture } from "./lamp-placement.js";
+import { fixtureDepth, fixtureWallMount, translateFixture } from "./lamp-placement.js";
 
 export const cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
@@ -265,21 +265,26 @@ export function buildLuminaireScene(state, pose) {
     source,
   };
   const depth = fixtureDepth(state, pose, fixtureGeometry);
+  const wallMount = fixtureWallMount(model, pose);
+  // Enforce the constraint here too: callers may bypass state normalisation.
+  const lampDistance = wallMount ? null : state.lampDistance;
   // Once a wall distance is chosen, the wall is placed from the plant and the
   // lamp follows it at that distance. The lamp slider never moves the plant.
   const window = placeWindow(
     state,
     leafGeometry,
-    state.lampDistance == null
+    lampDistance == null
       ? [...boards, ...surfaces, ...(olive?.collisionSurfaces ?? [])]
       : [],
+    wallMount?.coordinate,
   );
   const lampShift =
-    state.lampDistance == null
+    lampDistance == null
       ? 0
-      : window.y - depth.back - state.lampDistance / 100;
+      : window.y - depth.back - lampDistance / 100;
   translateFixture(fixtureGeometry, lampShift);
   const lampPlacement = {
+    wallMount,
     y: lampShift,
     gap: window.y - depth.back - lampShift,
     front: depth.front + lampShift,
@@ -308,6 +313,7 @@ export function buildLuminaireScene(state, pose) {
     1.6 + (state.chairOffset ?? 0) / 100,
     window.y,
     Math.min(-1.7, lampPlacement.front - 0.3),
+    wallMount?.coordinate,
   );
   return {
     model,

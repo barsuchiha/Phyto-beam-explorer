@@ -7,6 +7,7 @@ export function roomObjects(
   chairX = 1.6,
   backY = ROOM_BOUNDS.max[1],
   frontY = ROOM_BOUNDS.min[1],
+  leftX = ROOM_BOUNDS.min[0],
 ) {
   const objects = [];
   const plane = (
@@ -31,7 +32,7 @@ export function roomObjects(
       color,
       visible,
     });
-  const min = [ROOM_BOUNDS.min[0], frontY, ROOM_BOUNDS.min[2]],
+  const min = [leftX, frontY, ROOM_BOUNDS.min[2]],
     max = [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]];
   plane(
     "floor",
@@ -252,10 +253,11 @@ export function buildRoom(
   chairX = 1.6,
   backY = ROOM_BOUNDS.max[1],
   frontY = ROOM_BOUNDS.min[1],
+  leftX = ROOM_BOUNDS.min[0],
 ) {
-  const objects = roomObjects(chairX, backY, frontY);
+  const objects = roomObjects(chairX, backY, frontY, leftX);
   const bounds = {
-    min: [ROOM_BOUNDS.min[0], frontY, ROOM_BOUNDS.min[2]],
+    min: [leftX, frontY, ROOM_BOUNDS.min[2]],
     max: [ROOM_BOUNDS.max[0], backY, ROOM_BOUNDS.max[2]],
   };
   const planes = objects.slice(0, 6),
