@@ -10,6 +10,7 @@
 
 ## Текущее приложение
 
+- 14 конструкций разделены по месту установки: напольные, настольные, настенные, подвесные и под полкой. Сначала выбирается тип, затем модель с понятным названием. [Каталог и прежние обозначения](MODELS.md#каталог-конструкций).
 - [Открыть 3D-примерочную](https://barsuchiha.github.io/Phyto-beam-explorer/models.html).
 - Разметка: `models.html`; запуск: `src/models-app.js`; трассировка: `src/models/luminaire-light.js` и `src/models-light-worker.js`.
 - [Модели светильников](MODELS.md), [расчёт по листьям](LEAF_MODEL.md), [геометрия растений](PLANT_ARCHITECTURE.md), [комната](ROOM.md).

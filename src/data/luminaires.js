@@ -1,10 +1,25 @@
 import { minifermerBulbs, bulbScreenNote } from "./minifermer-bulbs.js";
 
+// The picker follows installation, while family keeps the CAD provenance.
+// Model IDs remain stable for saved settings, links and geometry.
+export const luminaireGroups = [
+  { id: "floor", name: "Напольные", models: ["olive", "A2", "stello"] },
+  { id: "table", name: "Настольные", models: ["A1", "G2"] },
+  {
+    id: "wall",
+    name: "Настенные",
+    models: ["V2", "B2", "luna", "archetto", "pinocchio"],
+  },
+  { id: "pendant", name: "Подвесные", models: ["V4", "B3flex", "B3"] },
+  { id: "shelf", name: "Под полкой", models: ["B1"] },
+];
+
 // Dimensions from the project's P00 / Soltech / flexible-B3 CAD sketches.
 // These are concept envelopes, not manufacturing or thermal approvals.
 export const luminaires = {
   olive: {
-    name: "Оливковая · Три поворотных блока",
+    name: "Башенка с поворотными секциями",
+    reference: "Оливковая · Три поворотных блока",
     family: "Авторская",
     mounts: ["oliveCassette"],
     optic: "olive",
@@ -13,7 +28,8 @@ export const luminaires = {
     note: "Твоя башенка из CAD: три блока по 400 мм, два узла по 18 мм, общая высота 1290 мм, основание Ø360 мм. Нижний блок закреплён на основании; верхние поворачиваются относительно соседнего. Диапазон ползунков — пространство примерки, механические ограничения и запас провода ещё не определены.",
   },
   B3flex: {
-    name: "Б3 · Жёсткий паз и гибкий купол",
+    name: "Подвес с гибким куполом",
+    reference: "Б3 · Жёсткий паз и гибкий купол",
     family: "P00",
     mounts: ["original"],
     optic: "flex",
@@ -22,7 +38,8 @@ export const luminaires = {
     note: "Паз 720 × 60 × 24 мм. Два модуля на X = ±180 мм. Длина изгибаемой части каждого листа — 165 мм; при раскрытии она сохраняется.",
   },
   A1: {
-    name: "А1 · Настольный журавль",
+    name: "Настольный журавль",
+    reference: "А1 · Настольный журавль",
     family: "P00",
     mounts: ["original"],
     optic: "cone",
@@ -31,7 +48,8 @@ export const luminaires = {
     note: "Два сохранённых положения: стойка 480 / 650 мм, вылет 270 / 370 мм. Основание 240 × 180 мм.",
   },
   A2: {
-    name: "А2 · Торшер с выносным плечом",
+    name: "Торшер с выносным плечом",
+    reference: "А2 · Торшер с выносным плечом",
     family: "P00",
     mounts: ["original", "large"],
     optic: "cone",
@@ -40,7 +58,8 @@ export const luminaires = {
     note: "Стойка 1400 мм; вылет 400 / 620 мм. Увеличенная головка — новый проектный вариант: массу и устойчивость ещё нужно проверить.",
   },
   B1: {
-    name: "Б1 · Рейка под полкой",
+    name: "Рейка с двумя головками",
+    reference: "Б1 · Рейка под полкой",
     family: "P00",
     mounts: ["original"],
     optic: "cone",
@@ -49,7 +68,8 @@ export const luminaires = {
     note: "Рейка 720 × 36 × 24 мм; две каретки. Во втором положении головки наклонены на ±15°.",
   },
   B2: {
-    name: "Б2 · Вертикальный световой ствол",
+    name: "Вертикальная рейка с головками",
+    reference: "Б2 · Вертикальный световой ствол",
     family: "P00",
     mounts: ["original"],
     optic: "cone",
@@ -58,7 +78,8 @@ export const luminaires = {
     note: "Направляющая 1250 мм. Сохранены варианты с одной и двумя головками на разных высотах.",
   },
   B3: {
-    name: "Б3 · Жёсткий световой желоб",
+    name: "Подвес с жёстким отражателем",
+    reference: "Б3 · Жёсткий световой желоб",
     family: "P00",
     mounts: ["original"],
     optic: "trough",
@@ -67,7 +88,8 @@ export const luminaires = {
     note: "Жёсткая оболочка 720 × 200 мм. Глубины 40 / 70 / 110 мм — три разных корпуса, а не гибкая регулировка.",
   },
   V2: {
-    name: "В2 · Модуль на стене",
+    name: "Поворотный кронштейн",
+    reference: "В2 · Модуль на стене",
     family: "P00",
     mounts: ["original", "large"],
     optic: "cone",
@@ -76,7 +98,8 @@ export const luminaires = {
     note: "Кронштейн с вылетом 300 мм, поворот 0 / 35°. Увеличенная головка требует проверки стыка и нагрузки на стену.",
   },
   V4: {
-    name: "В4 · Модуль на подвесе",
+    name: "Одиночный подвес",
+    reference: "В4 · Модуль на подвесе",
     family: "P00",
     mounts: ["original", "large"],
     optic: "cone",
@@ -85,7 +108,8 @@ export const luminaires = {
     note: "Подвес с общей съёмной головкой. Увеличенная головка показана с проектной рамкой под её ширину.",
   },
   G2: {
-    name: "Г2 · Поворотный отражатель",
+    name: "Стойка с поворотным отражателем",
+    reference: "Г2 · Поворотный отражатель",
     family: "P00",
     mounts: ["original"],
     optic: "flap",
@@ -94,7 +118,8 @@ export const luminaires = {
     note: "Источник смотрит вбок и остаётся на месте. Вращается только створка 180 × 170 мм; купол здесь не добавляется.",
   },
   luna: {
-    name: "Luna · Настенная дуга",
+    name: "Настенная дуга · Luna",
+    reference: "Luna · Настенная дуга",
     family: "Soltech",
     mounts: ["e27", "pendantPanel"],
     optic: "cone",
@@ -103,7 +128,8 @@ export const luminaires = {
     note: "Референсная реконструкция дуги с вылетом 381 мм. Подвесная головка — наша примерка, не штатная комплектация Soltech.",
   },
   stello: {
-    name: "Stello · Напольный подвес",
+    name: "Торшер с подвесом · Stello",
+    reference: "Stello · Напольный подвес",
     family: "Soltech",
     mounts: ["e27", "pendantPanel"],
     optic: "cone",
@@ -112,7 +138,8 @@ export const luminaires = {
     note: "Сохранены высоты стойки 1828,8 / 2286 мм. Новый подвес требует проверки массы и крепления кабеля.",
   },
   archetto: {
-    name: "Archetto · Прозрачная дуга",
+    name: "Прозрачная дуга · Archetto",
+    reference: "Archetto · Прозрачная дуга",
     family: "Soltech",
     mounts: ["e27", "pendantPanel"],
     optic: "cone",
@@ -121,7 +148,8 @@ export const luminaires = {
     note: "Референсная реконструкция с вылетом 400 мм. Неизвестна допустимая масса нашей головки; несущая способность не подтверждена.",
   },
   pinocchio: {
-    name: "Pinocchio · Переставное плечо",
+    name: "Переставное плечо · Pinocchio",
+    reference: "Pinocchio · Переставное плечо",
     family: "Soltech",
     mounts: ["e27", "pendantPanel"],
     optic: "cone",

@@ -21,7 +21,7 @@
           "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
           "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
           "./src/data/leaf-paths.js": "./src/data/leaf-paths.js?v=8a3786b88939",
-          "./src/data/luminaires.js": "./src/data/luminaires.js?v=c7cb744ea4e4",
+          "./src/data/luminaires.js": "./src/data/luminaires.js?v=a48f5863a859",
           "./src/data/minifermer-bulbs.js": "./src/data/minifermer-bulbs.js?v=8848c75d27d7",
           "./src/data/plant-additions.js": "./src/data/plant-additions.js?v=282637e82db5",
           "./src/data/plant-architecture.js": "./src/data/plant-architecture.js?v=bd17194f5798",
@@ -29,8 +29,8 @@
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=e05cbe44a913",
           "./src/data/plants.js": "./src/data/plants.js?v=506620e95c48",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
-          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=c559f5cc4e72",
-          "./src/models-app.js": "./src/models-app.js?v=1429fa2b8f9d",
+          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=fb17735f6f77",
+          "./src/models-app.js": "./src/models-app.js?v=deb4753b726f",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=4de0fabe3d44",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=ab1589fe8a19",
@@ -87,7 +87,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=1429fa2b8f9d"></script>
+    <script type="module" src="./src/models-app.js?v=deb4753b726f"></script>
   </head>
   <body>
     <main id="luminaire-explorer">
@@ -104,9 +104,13 @@
           <h2 class="model-controls-heading" id="lm-lamp-heading">
             Светильник
           </h2>
-          <label for="lm-model"
-            >Модель<select id="lm-model" class="form-select"></select
+          <label for="lm-model-group"
+            >Тип конструкции<select id="lm-model-group" class="form-select"></select
           ></label>
+          <label for="lm-model"
+            >Модель<select id="lm-model" class="form-select" aria-describedby="lm-model-origin"></select
+          ></label>
+          <p class="model-hint" id="lm-model-origin"></p>
           <label for="lm-lampDistance">
             <span
               >От стены с окном <output id="lm-lampDistance-value"></output

@@ -1,5 +1,10 @@
 import { bulbScreenNote, minifermerBulbs } from "./data/minifermer-bulbs.js";
-import { luminaires, mounts, fittingSources } from "./data/luminaires.js";
+import {
+  luminaires,
+  luminaireGroups,
+  mounts,
+  fittingSources,
+} from "./data/luminaires.js";
 import { cadAssets } from "./data/cad-assets.js";
 import { plants } from "./data/plants.js";
 import { plantShapes } from "./data/plant-shapes.js";
@@ -48,18 +53,9 @@ const controls = Object.fromEntries(
     .filter(([, el]) => el),
 );
 const option = (value, label) => new Option(label, value);
-for (const family of ["Авторская", "P00", "Soltech"]) {
-  const group = document.createElement("optgroup");
-  group.label =
-    family === "Авторская"
-      ? "Твоя оливковая лампа"
-      : family === "P00"
-        ? "Наши конструкции P00"
-        : "Крепления по референсам Soltech";
-  for (const [id, m] of Object.entries(luminaires))
-    if (m.family === family) group.append(option(id, m.name));
-  q("model").append(group);
-}
+for (const group of luminaireGroups)
+  q("model-group").append(option(group.id, group.name));
+renderModelPicker();
 for (const [id, p] of Object.entries(plants))
   q("plant").append(option(id, p.name));
 let view,
@@ -109,6 +105,29 @@ function setOptions(id, items, value) {
     select.dataset.options = signature;
   }
   select.value = value;
+}
+function renderModelPicker() {
+  const group = luminaireGroups.find((g) => g.models.includes(state.model));
+  q("model-group").value = group.id;
+  setOptions(
+    "model",
+    group.models.map((id) => [id, luminaires[id].name]),
+    state.model,
+  );
+  q("model-origin").textContent =
+    luminaires[state.model].family === "Soltech"
+      ? "По референсу Soltech · реконструкция"
+      : "Авторская конструкция · концепт";
+}
+function selectModel(model) {
+  state = changeFitting(state, "model", model);
+  selectedLeaf = -1;
+  renderModelPicker();
+  const url = new URL(location.href);
+  url.searchParams.set("model", state.model);
+  history.replaceState(null, "", url);
+  save();
+  render();
 }
 function renderMapLegend() {
   q("continuous-gradient").style.background =
@@ -167,6 +186,7 @@ function renderControls(poses, geometry) {
   const m = luminaires[state.model],
     source = fittingSources[state.source],
     spec = plantShapes[state.plant];
+  renderModelPicker();
   setOptions(
     "pose",
     poses.map((p, i) => [i, p.label]),
@@ -284,7 +304,7 @@ function renderControls(poses, geometry) {
   hide("no-screen", m.optic !== "none");
   q("fit").textContent =
     `${source.size[0]} × ${source.size[1]}${source.size[2] ? " × " + source.size[2] : ""} мм · ${sourceFit(state.mount, state.source).ok ? "входит по посадочному габариту" : "не входит"}${source.size[2] === null ? " · толщина/длина не подтверждена" : ""}`;
-  q("model-note").textContent = m.note;
+  q("model-note").textContent = `${m.reference}. ${m.note}`;
   q("mount-note").textContent = mounts[state.mount].note;
   q("source-note").replaceChildren(
     document.createTextNode(source.evidence + " "),
@@ -578,8 +598,16 @@ async function render() {
     console.error(error);
   }
 }
+q("model-group").addEventListener("input", () => {
+  const group = luminaireGroups.find((g) => g.id === q("model-group").value);
+  selectModel(group.models[0]);
+});
 for (const [name, control] of Object.entries(controls))
   control.addEventListener("input", () => {
+    if (name === "model") {
+      selectModel(control.value);
+      return;
+    }
     let value = control.type === "checkbox" ? control.checked : control.value;
     if (name === "canopy") value = 210 - Number(value);
     if (name === "plantTurn" && latestGeometry)
@@ -604,12 +632,7 @@ for (const [name, control] of Object.entries(controls))
         renderResult(latestResult, latestGeometry, latestReference, false);
       return;
     }
-    if (name === "plant" || name === "model") selectedLeaf = -1;
-    if (name === "model") {
-      const url = new URL(location.href);
-      url.searchParams.set("model", state.model);
-      history.replaceState(null, "", url);
-    }
+    if (name === "plant") selectedLeaf = -1;
     save();
     render();
   });
