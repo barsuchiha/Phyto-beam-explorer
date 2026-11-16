@@ -644,6 +644,18 @@ a:focus-visible {
   border-top: 0;
   padding-top: 8px;
 }
+.running-costs {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 8px;
+}
+.running-costs h2 { font-size: 15px; font-weight: 600; }
+.running-costs .model-metrics { border-top: 0; padding-top: 4px; }
+.running-costs .model-metrics strong { font-size: 21px; }
+.running-controls { margin: 14px 0; }
+.running-facts { display: grid; gap: 6px; font-size: 12px; }
+.running-facts dt { color: var(--muted-foreground); margin-top: 8px; }
+.running-facts dd { margin: 0; }
 @media (max-width: 680px) {
   .daily-overview {
     grid-template-columns: 64px minmax(0, 1fr);

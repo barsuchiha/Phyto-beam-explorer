@@ -28,6 +28,10 @@ import { calculateWindowLight, windowSettings } from "./models/window-light.js";
 import { plantModel } from "./models/plants.js";
 import { OLIVE_PRESETS, oliveAngles } from "./models/olive.js";
 import { lightWorkerFile } from "./data/worker-asset.js";
+import { modules as sourceModules } from "./data/hardware.js";
+import { coolingScenarios } from "./data/source-specs.js";
+import { renderSourceBudget } from "./ui/source-budget.js";
+import { sourcePoint } from "./models/source-budget.js";
 import {
   surfaceReadout,
   surfaceMetricCards,
@@ -55,6 +59,8 @@ const controls = Object.fromEntries(
 const option = (value, label) => new Option(label, value);
 for (const group of luminaireGroups)
   q("model-group").append(option(group.id, group.name));
+for (const [id, cooling] of Object.entries(coolingScenarios))
+  q("cooling").append(option(id, cooling.name));
 renderModelPicker();
 for (const [id, p] of Object.entries(plants))
   q("plant").append(option(id, p.name));
@@ -202,6 +208,13 @@ function renderControls(poses, geometry) {
     compatibleSources(state.mount).map((id) => [id, fittingSources[id].name]),
     state.source,
   );
+  const sourceRows = sourceModules[state.source]?.rows;
+  hide("source-current-field", !sourceRows);
+  if (sourceRows)
+    setOptions("sourceCurrent", sourceRows.map(([current, voltage]) => [
+      current, `${current} мА · ${fmt(current * voltage / 1000)} Вт/плата`,
+    ]), state.sourceCurrent);
+  q("dim").disabled = !state.enabled;
   q("plantSize").min = spec.min;
   q("plantSize").max = spec.max;
   for (const [name, el] of Object.entries(controls)) {
@@ -318,22 +331,37 @@ function renderControls(poses, geometry) {
   q("fits").replaceChildren(
     ...Object.entries(fittingSources).map(([id, s]) => {
       const fit = sourceFit(state.mount, id),
+        current = sourceModules[id]?.rows.some((row) => row[0] === state.sourceCurrent)
+          ? state.sourceCurrent : 350,
+        point = sourcePoint(id, current),
         tr = document.createElement("tr");
       for (const value of [
         s.name,
         s.type === "bulb"
           ? `Ø${s.size[0]} × ${s.size[2] ?? "?"} мм`
           : s.size.map((x) => x ?? "?").join(" × ") + " мм",
+        `${fmt(point.watts)} Вт${sourceModules[id] ? ` · ${current} мА` : ""}`,
+        point.fluxes[0] === point.fluxes.at(-1)
+          ? fmt(point.ppf)
+          : `${fmt(point.fluxes[0])}–${fmt(point.fluxes.at(-1))}`,
         fit.ok ? "Входит по габариту · проверка сборки впереди" : fit.reason,
       ]) {
         const td = document.createElement("td");
         td.textContent = value;
         tr.append(td);
       }
+      const sourceLink = document.createElement("a");
+      sourceLink.href = s.url;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noopener";
+      sourceLink.textContent = s.name;
+      sourceLink.title = s.evidence;
+      tr.firstChild.replaceChildren(sourceLink);
       tr.lastChild.className = fit.ok ? "fit-ok" : "fit-no";
       return tr;
     }),
   );
+  renderSourceBudget(state, geometry);
 }
 const budgetItems = [
   ["target", "На листья", "#8bb997"],
@@ -386,6 +414,7 @@ function renderResult(result, geometry, reference, updateView = true) {
   latestResult = result;
   latestGeometry = geometry;
   latestReference = reference;
+  renderSourceBudget(state, geometry, result);
   hide("leaf-panel", false);
   if (!result.leaves.some((l) => l.id === selectedLeaf)) selectedLeaf = -1;
   setOptions(
@@ -613,6 +642,11 @@ for (const [name, control] of Object.entries(controls))
     if (name === "plantTurn" && latestGeometry)
       state = { ...state, windowWallY: latestGeometry.window.y };
     state = changeFitting(state, name, value);
+    if (["tariff", "driverEfficiency", "cooling", "ambient"].includes(name)) {
+      renderSourceBudget(state, latestGeometry, latestResult);
+      save();
+      return;
+    }
     if (
       [
         "hours",
@@ -626,6 +660,7 @@ for (const [name, control] of Object.entries(controls))
       // and reuse the current PPFD rather than restarting the ray calculation.
       q("hours-value").textContent = fmt(state.hours) + " ч";
       renderWindowControls();
+      renderSourceBudget(state, latestGeometry, latestResult);
       view?.daylight(state);
       save();
       if (latestResult)

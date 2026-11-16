@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="3D-примерка компактных LED-панелей и лампочек к концепциям фитосветильников. Растения, размеры, раскрытие купола и отражённый свет."
+      content="3D-примерка LED-плат, COB-матриц и лампочек к конструкциям фитосветильников. Свет по листьям, расход электричества и сценарная оценка нагрева."
     />
     <title>Примерка светильников — Свет вокруг растения</title>
     <link rel="stylesheet" href="./styles/base.css?v=d02a4ee6d2dd" />
     <link rel="stylesheet" href="./styles/controls.css?v=5dfdaa602a53" />
-    <link rel="stylesheet" href="./styles/models.css?v=b585853403f9" />
+    <link rel="stylesheet" href="./styles/models.css?v=f3e67e7b8a68" />
     <script type="importmap" id="pbe-importmap">
       {
         "imports": {
@@ -21,7 +21,7 @@
           "./src/data/era.js": "./src/data/era.js?v=6d3177ee9ca3",
           "./src/data/hardware.js": "./src/data/hardware.js?v=325f61da4558",
           "./src/data/leaf-paths.js": "./src/data/leaf-paths.js?v=8a3786b88939",
-          "./src/data/luminaires.js": "./src/data/luminaires.js?v=a48f5863a859",
+          "./src/data/luminaires.js": "./src/data/luminaires.js?v=3f719c241031",
           "./src/data/minifermer-bulbs.js": "./src/data/minifermer-bulbs.js?v=8848c75d27d7",
           "./src/data/plant-additions.js": "./src/data/plant-additions.js?v=282637e82db5",
           "./src/data/plant-architecture.js": "./src/data/plant-architecture.js?v=bd17194f5798",
@@ -29,14 +29,15 @@
           "./src/data/plant-shapes.js": "./src/data/plant-shapes.js?v=e05cbe44a913",
           "./src/data/plants.js": "./src/data/plants.js?v=506620e95c48",
           "./src/data/profiles.js": "./src/data/profiles.js?v=019ea8de6c5a",
-          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=fb17735f6f77",
-          "./src/models-app.js": "./src/models-app.js?v=deb4753b726f",
+          "./src/data/source-specs.js": "./src/data/source-specs.js?v=f8fc6106ef03",
+          "./src/data/worker-asset.js": "./src/data/worker-asset.js?v=7b2220828bc4",
+          "./src/models-app.js": "./src/models-app.js?v=d8729b8f5fcd",
           "./src/models-light-worker.js": "./src/models-light-worker.js?v=4de0fabe3d44",
           "./src/models/crown-scenario.js": "./src/models/crown-scenario.js?v=c263ad6f9aec",
           "./src/models/crown.js": "./src/models/crown.js?v=ab1589fe8a19",
           "./src/models/daily-light.js": "./src/models/daily-light.js?v=38ed2288cbfc",
           "./src/models/era.js": "./src/models/era.js?v=5cd801a8eeeb",
-          "./src/models/fitting.js": "./src/models/fitting.js?v=4ceb76fb9eec",
+          "./src/models/fitting.js": "./src/models/fitting.js?v=b8b8554457c9",
           "./src/models/hardware.js": "./src/models/hardware.js?v=22c8b92a8f46",
           "./src/models/ies.js": "./src/models/ies.js?v=04368e94299b",
           "./src/models/lamp-placement.js": "./src/models/lamp-placement.js?v=f666261715d8",
@@ -45,7 +46,7 @@
           "./src/models/leaf-collision.js": "./src/models/leaf-collision.js?v=d7e9ed2e991b",
           "./src/models/leaf-geometry.js": "./src/models/leaf-geometry.js?v=4662f1811154",
           "./src/models/light-readout.js": "./src/models/light-readout.js?v=f14cff4d4e93",
-          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=8734305b8887",
+          "./src/models/luminaire-light.js": "./src/models/luminaire-light.js?v=e3bf9e89bbce",
           "./src/models/luminaire-scene.js": "./src/models/luminaire-scene.js?v=8c846d97469a",
           "./src/models/mini36.js": "./src/models/mini36.js?v=93ef1d8ada65",
           "./src/models/minifermer-bulbs.js": "./src/models/minifermer-bulbs.js?v=663c02bb4d09",
@@ -59,6 +60,7 @@
           "./src/models/reflections.js": "./src/models/reflections.js?v=211a2cac075a",
           "./src/models/room.js": "./src/models/room.js?v=302140ecbd94",
           "./src/models/screen-geometry.js": "./src/models/screen-geometry.js?v=cecc4882e837",
+          "./src/models/source-budget.js": "./src/models/source-budget.js?v=c914f75efd31",
           "./src/models/window-geometry.js": "./src/models/window-geometry.js?v=8dc9b4163b5c",
           "./src/models/window-light.js": "./src/models/window-light.js?v=af2252b21ca7",
           "./src/state.js": "./src/state.js?v=bc06fcf3100d",
@@ -71,13 +73,14 @@
           "./src/ui/era-details.js": "./src/ui/era-details.js?v=5ab0ee0124fc",
           "./src/ui/format.js": "./src/ui/format.js?v=e114d2e88b0c",
           "./src/ui/leaf-appearance.js": "./src/ui/leaf-appearance.js?v=997d56926a0f",
-          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=cb66f60bdbb0",
+          "./src/ui/luminaire-view.js": "./src/ui/luminaire-view.js?v=5909f2e74968",
           "./src/ui/olive-view.js": "./src/ui/olive-view.js?v=d7a04319f710",
           "./src/ui/plant-drawing.js": "./src/ui/plant-drawing.js?v=79fa6cfb08cc",
           "./src/ui/ray-view.js": "./src/ui/ray-view.js?v=9891e204cfc9",
           "./src/ui/results.js": "./src/ui/results.js?v=efc24d0a9431",
           "./src/ui/room-view.js": "./src/ui/room-view.js?v=a297b41725fc",
           "./src/ui/screen-comparison.js": "./src/ui/screen-comparison.js?v=4e38a131e0de",
+          "./src/ui/source-budget.js": "./src/ui/source-budget.js?v=bc2eeddb66be",
           "./src/ui/tooltips.js": "./src/ui/tooltips.js?v=d78d66fda803",
           "./src/ui/window-view.js": "./src/ui/window-view.js?v=97ca04dd05a9",
           "./src/vendor/OrbitControls.js": "./src/vendor/OrbitControls.js?v=1a2490388ff2",
@@ -87,7 +90,7 @@
         }
       }
     </script>
-    <script type="module" src="./src/models-app.js?v=deb4753b726f"></script>
+    <script type="module" src="./src/models-app.js?v=d8729b8f5fcd"></script>
   </head>
   <body>
     <main id="luminaire-explorer">
@@ -207,6 +210,12 @@
             ></select
           ></label>
           <p class="model-hint" id="lm-fit"></p>
+          <label for="lm-sourceCurrent" id="lm-source-current-field" hidden
+            >Ток платы при 100%<select id="lm-sourceCurrent" class="form-select"></select
+          ></label>
+          <label class="model-check" for="lm-enabled">
+            <input id="lm-enabled" type="checkbox" checked /> Лампа включена
+          </label>
           <label for="lm-dim" id="lm-dim-field"
             ><span>Яркость <output id="lm-dim-value"></output></span
             ><input
@@ -218,7 +227,7 @@
               step="5"
           /></label>
           <p class="model-hint" id="lm-fixed" hidden>
-            Лампочка работает на 100%: диммирование не подтверждено.
+            При включении лампочка работает на 100%: диммирование не подтверждено.
           </p>
           <label for="lm-install" id="lm-install-field"
             ><span id="lm-install-label">Высота установки</span
@@ -653,6 +662,34 @@
               <p id="lm-reference-note"></p>
             </details>
           </details>
+          <section class="running-costs" aria-labelledby="lm-running-heading">
+            <h2 id="lm-running-heading">Расход и нагрев</h2>
+            <div class="model-metrics">
+              <div><span>Из розетки</span><strong id="lm-budget-power"></strong><small id="lm-budget-power-note"></small></div>
+              <div><span>За месяц</span><strong id="lm-budget-cost"></strong><small id="lm-budget-energy"></small></div>
+              <div><span id="lm-budget-temp-title">Радиатор · сценарий</span><strong id="lm-budget-temp"></strong><small id="lm-budget-temp-note"></small></div>
+            </div>
+            <p class="model-hint" id="lm-budget-context"></p>
+            <details class="light-details">
+              <summary>Настройки расхода и охлаждения</summary>
+              <div class="model-controls running-controls">
+                <label for="lm-tariff">Тариф, ₽/кВт·ч<input class="form-control" id="lm-tariff" type="number" min="0" max="100" step="0.01" value="8.90" /></label>
+                <label for="lm-driverEfficiency" id="lm-efficiency-field"><span>КПД питания · допущение<output id="lm-driverEfficiency-value"></output></span><input class="form-range" id="lm-driverEfficiency" type="range" min="50" max="100" step="1" /></label>
+                <label for="lm-cooling" id="lm-cooling-field">Охлаждение · сценарий<select class="form-select" id="lm-cooling"></select></label>
+                <label for="lm-ambient" id="lm-ambient-field"><span>Воздух в комнате<output id="lm-ambient-value"></output></span><input class="form-range" id="lm-ambient" type="range" min="18" max="35" step="1" /></label>
+              </div>
+              <dl class="running-facts">
+                <dt>За день</dt><dd id="lm-budget-day"></dd>
+                <dt>Диапазон расходов</dt><dd id="lm-budget-cost-range"></dd>
+                <dt>Тепло в светильнике</dt><dd id="lm-budget-heat"></dd>
+                <dt>Диапазон температуры</dt><dd id="lm-budget-temperature-range"></dd>
+              </dl>
+              <p class="model-hint" id="lm-budget-power-evidence"></p>
+              <p class="model-hint" id="lm-budget-electricity"></p>
+              <p class="model-hint" id="lm-budget-thermal"></p>
+              <p class="model-hint">≤45 °C — цель проекта; 45–60 °C — горячий радиатор; выше 60 °C — повод изменить сценарий охлаждения. Это не паспортные пределы LED и не проверка безопасности конструкции. <a href="./SOURCE_CALCULATIONS.md">Формулы и происхождение данных</a>.</p>
+            </details>
+          </section>
         </section>
         <form
           class="model-controls model-plant-controls"
@@ -753,6 +790,8 @@
               <tr>
                 <th>Источник</th>
                 <th>Габариты</th>
+                <th>Мощность при 100%</th>
+                <th>PPF при 100%, мкмоль/с</th>
                 <th>Результат примерки</th>
               </tr>
             </thead>
@@ -762,6 +801,10 @@
         <p class="model-hint">
           Проверяем тип головки и посадочный габарит. Крепёж, охлаждение, масса,
           электрика и полный набор пересечений CAD ещё требуют разработки.
+          В таблице данные одного источника до диммирования. Поток COB и
+          MiniFermer оценочный; отсутствие диапазона не означает измеренной
+          точности. Четыре крупных источника пока доступны только в каталоге:
+          для их установки нужны другие головки или крепления.
         </p>
       </section>
       <details class="model-detail">
@@ -775,8 +818,9 @@
           также учитываются прозрачная грань, матовые вставки, металлические
           панели, рамки, рёбра, торцы и новая кассета. В остальных моделях
           детали CAD показаны для примерки: в оптическом расчёте они заменены
-          непрозрачными плоскостями плат. Стойки, провода, патрон и тепло не
-          моделируются. Стебли, цветки и горшок показаны визуально, но не
+          непрозрачными плоскостями плат. Стойки, провода и патрон не
+          моделируются оптически; нагрев оценивается отдельным сценарием
+          радиатора, без тепловой модели деталей. Стебли, цветки и горшок показаны визуально, но не
           затеняют листья.
         </p>
         <p>

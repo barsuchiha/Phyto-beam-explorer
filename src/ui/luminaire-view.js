@@ -397,7 +397,7 @@ export function createLuminaireView(host, onLeaf = () => {}) {
       );
       face.position.z = -0.001;
       group.add(face);
-      if (!s.disc) {
+      if (!s.disc && geometry.source.technology !== "cob") {
         const cols =
             state.source === "compact21" ? 7 : state.source === "mf36" ? 6 : 7,
           rows =

@@ -1,4 +1,5 @@
 import { minifermerBulbs, bulbScreenNote } from "./minifermer-bulbs.js";
+import { cobSources } from "./source-specs.js";
 
 // The picker follows installation, while family keeps the CAD provenance.
 // Model IDs remain stable for saved settings, links and geometry.
@@ -260,4 +261,37 @@ export const fittingSources = {
       },
     ]),
   ),
+  ...cobSources,
+  linear98: {
+    name: "Samsung Линейка 98 · LT-4015",
+    type: "panel",
+    size: [499.9, 16, 5.4],
+    dimmable: true,
+    url: "https://www.led-tech.de/de/50cm-Alustreifen-mit-98x-Samsung-LM301B-LEDs-3500k-und-Steckerbuchsen",
+    evidence: "Размеры и PPF из сохранённой таблицы LED-Tech. Линейка длиннее окон всех существующих головок; для 3D-примерки нужна новая конструкция.",
+  },
+  mf193: {
+    name: "MiniFermer 1.9.3 · 3500 K",
+    type: "panel",
+    size: [390, 180, null],
+    dimmable: true,
+    url: "https://minifermer.ru/product_2511.html",
+    evidence: "PPF — три сценария проекта по 320 LED, не паспортный поток. Плата не помещается в существующие головки; драйвер и теплоотвод требуют разработки.",
+  },
+  mf194: {
+    name: "MiniFermer 1.9.4 · 4000 K",
+    type: "panel",
+    size: [390, 180, null],
+    dimmable: true,
+    url: "https://minifermer.ru/product_2510.html",
+    evidence: "PPF — три сценария проекта по 320 LED, не паспортный поток. Плата не помещается в существующие головки; драйвер и теплоотвод требуют разработки.",
+  },
+  eraGreen18: {
+    name: "ЭРА GREEN LINE · 18 Вт",
+    type: "fixture",
+    size: [575, 34.5, null],
+    dimmable: false,
+    url: "https://www.eraworld.ru/catalog/3087109",
+    evidence: "Готовый линейный светильник с собственным питанием, PPF 36 мкмоль/с по данным изготовителя. IES сохранена в проекте. Крепление для него в этом каталоге конструкций не разработано.",
+  },
 };

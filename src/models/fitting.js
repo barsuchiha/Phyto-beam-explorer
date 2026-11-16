@@ -1,9 +1,13 @@
 import { luminaires, mounts, fittingSources } from "../data/luminaires.js";
 import { plantShapes } from "../data/plant-shapes.js";
+import { modules } from "../data/hardware.js";
+import { coolingScenarios } from "../data/source-specs.js";
 
 export function sourceFit(mountId, sourceId) {
   const mount = mounts[mountId],
     source = fittingSources[sourceId];
+  if (source?.type === "fixture")
+    return { ok: false, reason: "Нужно отдельное крепление для линейного светильника" };
   if (!mount || !source || mount.type !== source.type)
     return { ok: false, reason: "Другой тип крепления" };
   if (mount.sources && !mount.sources.includes(sourceId))
@@ -49,6 +53,12 @@ export const modelDefaults = {
   chairOffset: 0,
   lampDistance: null,
   dim: 70,
+  enabled: true,
+  sourceCurrent: 350,
+  tariff: 8.9,
+  driverEfficiency: 90,
+  cooling: "shared-05",
+  ambient: 25,
   hours: 12,
   windowWeather: "off",
   windowDistance: null,
@@ -108,6 +118,14 @@ export function normalizeFitting(input = {}) {
   s.lampDistance =
     s.lampDistance == null ? null : clamp(s.lampDistance, 0, 500, 100);
   s.dim = fittingSources[s.source].dimmable ? clamp(s.dim, 0, 100, 70) : 100;
+  s.enabled = s.enabled !== false;
+  const currents = modules[s.source]?.rows.map((row) => row[0]);
+  s.sourceCurrent = currents?.includes(Number(s.sourceCurrent))
+    ? Number(s.sourceCurrent) : 350;
+  s.tariff = clamp(s.tariff, 0, 100, 8.9);
+  s.driverEfficiency = clamp(s.driverEfficiency, 50, 100, 90);
+  s.ambient = clamp(s.ambient, 18, 35, 25);
+  s.cooling = Object.hasOwn(coolingScenarios, s.cooling) ? s.cooling : "shared-05";
   s.hours = clamp(s.hours, 6, 16, 12);
   s.windowWeather = ["off", "cloudy", "sunny"].includes(s.windowWeather)
     ? s.windowWeather

@@ -1,0 +1,1125 @@
+{
+  "origin": "plant-lamp-simple.html",
+  "sha256": "5819b83605adf44524ae3291c3ffa06da05c815bb976924e29c30e8c475f4539",
+  "date": "2026-11-16",
+  "cases": [
+    {
+      "source": "v22d",
+      "input": {
+        "model": "v22d",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 64.08,
+        "ledW": 64.08,
+        "sourcePPF": 171,
+        "fixtureHeatW": 32.103,
+        "ppfd": 119.7,
+        "dli": 5.1710400000000005,
+        "ppfdRange": [
+          113.4,
+          126
+        ],
+        "dliRange": [
+          4.89888,
+          5.4432
+        ],
+        "wallW": 71.2,
+        "dayKWh": 0.8544,
+        "monthKWh": 25.632,
+        "dayRub": 7.604160000000001,
+        "monthRub": 228.12480000000002,
+        "monthRubRange": [
+          228.12480000000002,
+          228.12480000000002
+        ],
+        "dimApplied": 60,
+        "sinkC": 41.051500000000004,
+        "ready": false
+      }
+    },
+    {
+      "source": "v22d",
+      "input": {
+        "model": "v22d",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "x2828",
+      "input": {
+        "model": "x2828",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 54,
+        "ledW": 54,
+        "sourcePPF": 72,
+        "fixtureHeatW": 40.536,
+        "ppfd": 50.4,
+        "dli": 2.1772799999999997,
+        "ppfdRange": [
+          50.4,
+          50.4
+        ],
+        "dliRange": [
+          2.1772799999999997,
+          2.1772799999999997
+        ],
+        "wallW": 60,
+        "dayKWh": 0.72,
+        "monthKWh": 21.599999999999998,
+        "dayRub": 6.408,
+        "monthRub": 192.23999999999998,
+        "monthRubRange": [
+          192.23999999999998,
+          192.23999999999998
+        ],
+        "dimApplied": 60,
+        "sinkC": 45.268,
+        "ready": false
+      }
+    },
+    {
+      "source": "x2828",
+      "input": {
+        "model": "x2828",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "square50",
+      "input": {
+        "model": "square50",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 24.0534,
+        "ledW": 24.0534,
+        "sourcePPF": 66.564,
+        "fixtureHeatW": 11.605932000000001,
+        "ppfd": 46.59479999999999,
+        "dli": 2.0128953599999995,
+        "ppfdRange": [
+          46.59479999999999,
+          46.59479999999999
+        ],
+        "dliRange": [
+          2.0128953599999995,
+          2.0128953599999995
+        ],
+        "wallW": 26.726,
+        "dayKWh": 0.320712,
+        "monthKWh": 9.62136,
+        "dayRub": 2.8543368,
+        "monthRub": 85.630104,
+        "monthRubRange": [
+          85.630104,
+          85.630104
+        ],
+        "dimApplied": 60,
+        "sinkC": 30.802966,
+        "ready": false
+      }
+    },
+    {
+      "source": "square50",
+      "input": {
+        "model": "square50",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "compact21",
+      "input": {
+        "model": "compact21",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 10.344600000000002,
+        "ledW": 10.344600000000002,
+        "sourcePPF": 31.409999999999997,
+        "fixtureHeatW": 4.470930000000002,
+        "ppfd": 21.987,
+        "dli": 0.9498384,
+        "ppfdRange": [
+          21.987,
+          21.987
+        ],
+        "dliRange": [
+          0.9498384,
+          0.9498384
+        ],
+        "wallW": 11.494000000000002,
+        "dayKWh": 0.137928,
+        "monthKWh": 4.13784,
+        "dayRub": 1.2275592,
+        "monthRub": 36.826776,
+        "monthRubRange": [
+          36.826776,
+          36.826776
+        ],
+        "dimApplied": 60,
+        "sinkC": 27.235465,
+        "ready": false
+      }
+    },
+    {
+      "source": "compact21",
+      "input": {
+        "model": "compact21",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "linear98",
+      "input": {
+        "model": "linear98",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 23.927399999999995,
+        "ledW": 23.927399999999995,
+        "sourcePPF": 67.73400000000001,
+        "fixtureHeatW": 11.261141999999994,
+        "ppfd": 47.41380000000001,
+        "dli": 2.0482761600000003,
+        "ppfdRange": [
+          47.41380000000001,
+          47.41380000000001
+        ],
+        "dliRange": [
+          2.0482761600000003,
+          2.0482761600000003
+        ],
+        "wallW": 26.585999999999995,
+        "dayKWh": 0.3190319999999999,
+        "monthKWh": 9.570959999999998,
+        "dayRub": 2.8393847999999995,
+        "monthRub": 85.18154399999999,
+        "monthRubRange": [
+          85.18154399999999,
+          85.18154399999999
+        ],
+        "dimApplied": 60,
+        "sinkC": 30.630570999999996,
+        "ready": false
+      }
+    },
+    {
+      "source": "linear98",
+      "input": {
+        "model": "linear98",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf193",
+      "input": {
+        "model": "mf193",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 102.96000000000001,
+        "ledW": 102.96000000000001,
+        "sourcePPF": 285.71399999999994,
+        "fixtureHeatW": 49.53148200000002,
+        "ppfd": 199.99979999999996,
+        "dli": 8.639991359999998,
+        "ppfdRange": [
+          151.48224,
+          257.04
+        ],
+        "dliRange": [
+          6.544032767999999,
+          11.104128000000001
+        ],
+        "wallW": 114.4,
+        "dayKWh": 1.3728,
+        "monthKWh": 41.184,
+        "dayRub": 12.217920000000001,
+        "monthRub": 366.5376,
+        "monthRubRange": [
+          366.5376,
+          366.5376
+        ],
+        "dimApplied": 60,
+        "sinkC": 49.765741000000006,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf193",
+      "input": {
+        "model": "mf193",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf194",
+      "input": {
+        "model": "mf194",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 102.96000000000001,
+        "ledW": 102.96000000000001,
+        "sourcePPF": 293.706,
+        "fixtureHeatW": 48.036978,
+        "ppfd": 205.59420000000003,
+        "dli": 8.881669440000001,
+        "ppfdRange": [
+          155.93759999999997,
+          263.8944
+        ],
+        "dliRange": [
+          6.736504319999999,
+          11.400238080000001
+        ],
+        "wallW": 114.4,
+        "dayKWh": 1.3728,
+        "monthKWh": 41.184,
+        "dayRub": 12.217920000000001,
+        "monthRub": 366.5376,
+        "monthRubRange": [
+          366.5376,
+          366.5376
+        ],
+        "dimApplied": 60,
+        "sinkC": 49.018489,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf194",
+      "input": {
+        "model": "mf194",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf36",
+      "input": {
+        "model": "mf36",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 20.736,
+        "ledW": 20.736,
+        "sourcePPF": 45.086299199999985,
+        "fixtureHeatW": 12.304862049600004,
+        "ppfd": 31.56040943999999,
+        "dli": 1.3634096878079995,
+        "ppfdRange": [
+          28.498868999999992,
+          34.183674
+        ],
+        "dliRange": [
+          1.2311511407999998,
+          1.4767347168000002
+        ],
+        "wallW": 23.04,
+        "dayKWh": 0.27647999999999995,
+        "monthKWh": 8.294399999999998,
+        "dayRub": 2.4606719999999997,
+        "monthRub": 73.82015999999999,
+        "monthRubRange": [
+          73.82015999999999,
+          73.82015999999999
+        ],
+        "dimApplied": 60,
+        "sinkC": 31.152431024800002,
+        "ready": false
+      }
+    },
+    {
+      "source": "mf36",
+      "input": {
+        "model": "mf36",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": 0,
+        "sourcePPF": 0,
+        "fixtureHeatW": 0,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": 25,
+        "ready": false
+      }
+    },
+    {
+      "source": "eraGreen18",
+      "input": {
+        "model": "eraGreen18",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 54,
+        "ledW": null,
+        "sourcePPF": 108,
+        "fixtureHeatW": null,
+        "ppfd": 75.6,
+        "dli": 3.2659199999999995,
+        "ppfdRange": [
+          75.6,
+          75.6
+        ],
+        "dliRange": [
+          3.2659199999999995,
+          3.2659199999999995
+        ],
+        "wallW": 54,
+        "dayKWh": 0.648,
+        "monthKWh": 19.44,
+        "dayRub": 5.767200000000001,
+        "monthRub": 173.01600000000002,
+        "monthRubRange": [
+          173.01600000000002,
+          173.01600000000002
+        ],
+        "dimApplied": 100,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "eraGreen18",
+      "input": {
+        "model": "eraGreen18",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": null,
+        "sourcePPF": 0,
+        "fixtureHeatW": null,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "eraE27_18",
+      "input": {
+        "model": "eraE27_18",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 54,
+        "ledW": null,
+        "sourcePPF": 108,
+        "fixtureHeatW": null,
+        "ppfd": 75.6,
+        "dli": 3.2659199999999995,
+        "ppfdRange": [
+          75.6,
+          75.6
+        ],
+        "dliRange": [
+          3.2659199999999995,
+          3.2659199999999995
+        ],
+        "wallW": 54,
+        "dayKWh": 0.648,
+        "monthKWh": 19.44,
+        "dayRub": 5.767200000000001,
+        "monthRub": 173.01600000000002,
+        "monthRubRange": [
+          173.01600000000002,
+          173.01600000000002
+        ],
+        "dimApplied": 100,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "eraE27_18",
+      "input": {
+        "model": "eraE27_18",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": null,
+        "sourcePPF": 0,
+        "fixtureHeatW": null,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "eraE27_25",
+      "input": {
+        "model": "eraE27_25",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 75,
+        "ledW": null,
+        "sourcePPF": 135,
+        "fixtureHeatW": null,
+        "ppfd": 94.5,
+        "dli": 4.0824,
+        "ppfdRange": [
+          94.5,
+          94.5
+        ],
+        "dliRange": [
+          4.0824,
+          4.0824
+        ],
+        "wallW": 75,
+        "dayKWh": 0.8999999999999999,
+        "monthKWh": 26.999999999999996,
+        "dayRub": 8.01,
+        "monthRub": 240.29999999999998,
+        "monthRubRange": [
+          240.29999999999998,
+          240.29999999999998
+        ],
+        "dimApplied": 100,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "eraE27_25",
+      "input": {
+        "model": "eraE27_25",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": null,
+        "sourcePPF": 0,
+        "fixtureHeatW": null,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "mfE27_12",
+      "input": {
+        "model": "mfE27_12",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 37.5,
+        "ledW": null,
+        "sourcePPF": 71.25,
+        "fixtureHeatW": null,
+        "ppfd": 49.875,
+        "dli": 2.1546,
+        "ppfdRange": [
+          31.5,
+          72.45
+        ],
+        "dliRange": [
+          1.3608,
+          3.12984
+        ],
+        "wallW": 37.5,
+        "dayKWh": 0.44999999999999996,
+        "monthKWh": 13.499999999999998,
+        "dayRub": 4.005,
+        "monthRub": 120.14999999999999,
+        "monthRubRange": [
+          96.11999999999999,
+          144.18000000000004
+        ],
+        "dimApplied": 100,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "mfE27_12",
+      "input": {
+        "model": "mfE27_12",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": null,
+        "sourcePPF": 0,
+        "fixtureHeatW": null,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "mfE27_25",
+      "input": {
+        "model": "mfE27_25",
+        "count": 3,
+        "dim": 60,
+        "enabled": true,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 67.5,
+        "ledW": null,
+        "sourcePPF": 128.25,
+        "fixtureHeatW": null,
+        "ppfd": 89.775,
+        "dli": 3.8782800000000006,
+        "ppfdRange": [
+          63,
+          120.74999999999999
+        ],
+        "dliRange": [
+          2.7216,
+          5.216399999999999
+        ],
+        "wallW": 67.5,
+        "dayKWh": 0.81,
+        "monthKWh": 24.3,
+        "dayRub": 7.2090000000000005,
+        "monthRub": 216.27,
+        "monthRubRange": [
+          192.23999999999998,
+          240.29999999999998
+        ],
+        "dimApplied": 100,
+        "sinkC": null,
+        "ready": true
+      }
+    },
+    {
+      "source": "mfE27_25",
+      "input": {
+        "model": "mfE27_25",
+        "count": 3,
+        "dim": 60,
+        "enabled": false,
+        "hours": 12,
+        "cooling": "shared-05",
+        "capture": 70,
+        "air": 25,
+        "current": 700,
+        "area": 1
+      },
+      "expected": {
+        "inputW": 0,
+        "ledW": null,
+        "sourcePPF": 0,
+        "fixtureHeatW": null,
+        "ppfd": 0,
+        "dli": 0,
+        "ppfdRange": [
+          0,
+          0
+        ],
+        "dliRange": [
+          0,
+          0
+        ],
+        "wallW": 0,
+        "dayKWh": 0,
+        "monthKWh": 0,
+        "dayRub": 0,
+        "monthRub": 0,
+        "monthRubRange": [
+          0,
+          0
+        ],
+        "dimApplied": 0,
+        "sinkC": null,
+        "ready": true
+      }
+    }
+  ]
+}

@@ -27,11 +27,13 @@ const cad = (id) =>
     readFileSync(new URL("../data/cad/" + cadAssets[id].file, import.meta.url)),
   );
 test("fits enforce dimensions, clearance and mount type on every model switch", () => {
-  assert.deepEqual(compatibleSources("original"), ["square50"]);
+  assert.deepEqual(compatibleSources("original"), ["square50", "v22d", "x2828"]);
   assert.deepEqual(compatibleSources("large"), [
     "square50",
     "compact21",
     "mf36",
+    "v22d",
+    "x2828",
   ]);
   assert.deepEqual(compatibleSources("e27"), [
     "eraE27_18",

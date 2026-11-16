@@ -3,6 +3,7 @@ import { buildLeafBVH, hitLeaves } from "./leaf-bvh.js";
 import { hardware } from "./hardware.js";
 import { mini36Model } from "./mini36.js";
 import { eraModel } from "./era.js";
+import { cobSources } from "../data/source-specs.js";
 import {
   intensity,
   add,
@@ -33,6 +34,18 @@ function noise(i) {
   return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
 }
 export function lightOutput(state, count) {
+  if (state.enabled === false) {
+    const output = lightOutput({ ...state, enabled: true }, count);
+    return { ...output, fluxes: output.fluxes.map(() => 0), note: "Питание лампы выключено. " + output.note };
+  }
+  if (cobSources[state.source]) {
+    const source = cobSources[state.source];
+    return {
+      fluxes: source.ppfLevels.map((ppf) => ppf * count * state.dim / 100),
+      curves: [source.angle, source.angle, source.angle],
+      note: `${source.part}: ${source.current} мА при 100%. ${source.evidence} Яркость условно масштабирует мощность и PPF линейно; совместимый внешний токовый драйвер с PWM требует подбора. Совпадение посадочного габарита не подтверждает охлаждение COB в этой головке.`,
+    };
+  }
   if (bulbModel.modules[state.source]) {
     const p = bulbModel.output(state.source, count),
       m = bulbModel.modules[state.source];
@@ -58,13 +71,16 @@ export function lightOutput(state, count) {
       note: "PPF изготовителя; три предполагаемых пучка 110 / 120 / 130°. Штатное диммирование отсутствует.",
     };
   }
-  const p = hardware.point(state.source, 350),
+  const current = state.sourceCurrent ?? 350,
+    p = hardware.point(state.source, current),
     f = (p.ppf * count * state.dim) / 100;
   return {
     fluxes: [f, f, f],
     curves: ["lm301b", "lm301b", "lm301b"],
     note:
-      state.model === "olive"
+      current !== 350
+        ? `${current} мА на плату: ${p.ppf.toFixed(2)} мкмоль/с и ${(current * p.voltage / 1000).toFixed(2)} Вт при 100%. PWM при постоянном токе — допущение. Прежний LDD-350H для этого тока не подходит; питание, количество каналов и охлаждение требуют отдельного подбора.`
+        : state.model === "olive"
         ? `6 плат COMPACT 21, по две на блок, 350 мА. PPF до панелей: 54,06 мкмоль/с при 100%; электрическая мощность плат 16,8 Вт. Проект питания: три внешних LDD-350H, по две платы последовательно на канал (тип. 16 В), общий БП 24 В; PWM на нашей стороне. Сейчас яркость общая. Нагрев кассеты и размещение питания не проверены.`
         : `350 мА на плату, ${p.ppf.toFixed(2)} мкмоль/с при 100%. Внешний LDD-350H + БП 24 В, отдельный канал на головку; DIM через PWM. Тепловой расчёт корпуса не выполнен.`,
   };
